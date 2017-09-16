@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
+# Copyright (c) 2017 Credits Developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,11 +8,11 @@
 # the blockchain is re-organized.
 #
 
-from test_framework.test_framework import DynamicTestFramework
+from test_framework.test_framework import CreditsTestFramework
 from test_framework.util import *
 
 # Create one-input, one-output, no-fee transaction:
-class MempoolCoinbaseTest(DynamicTestFramework):
+class MempoolCoinbaseTest(CreditsTestFramework):
 
     def setup_network(self):
         # Just need one node for this test

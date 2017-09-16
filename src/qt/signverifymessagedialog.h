@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_SIGNVERIFYMESSAGEDIALOG_H
-#define DYNAMIC_QT_SIGNVERIFYMESSAGEDIALOG_H
+#ifndef CREDITS_QT_SIGNVERIFYMESSAGEDIALOG_H
+#define CREDITS_QT_SIGNVERIFYMESSAGEDIALOG_H
 
 #include <QDialog>
 
@@ -53,4 +53,4 @@ private Q_SLOTS:
     void on_clearButton_VM_clicked();
 };
 
-#endif // DYNAMIC_QT_SIGNVERIFYMESSAGEDIALOG_H
+#endif // CREDITS_QT_SIGNVERIFYMESSAGEDIALOG_H

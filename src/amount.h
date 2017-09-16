@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_AMOUNT_H
-#define DYNAMIC_AMOUNT_H
+#ifndef CREDITS_AMOUNT_H
+#define CREDITS_AMOUNT_H
 
 #include "serialize.h"
 
@@ -22,7 +22,7 @@ static const CAmount MIN_MULTISIG_NAME_FEE = SUBCENT;
 extern const std::string CURRENCY_UNIT;
 
 // No amount larger than this (in satoshi) is valid.
-static const CAmount MAX_MONEY = std::numeric_limits<int64_t>::max();
+static const CAmount MAX_MONEY = 9500000000000000; // 95 Million Creds
 inline bool MoneyRange(const CAmount& nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 
 /**
@@ -63,4 +63,4 @@ public:
     }
 };
 
-#endif //  DYNAMIC_AMOUNT_H
+#endif //  CREDITS_AMOUNT_H

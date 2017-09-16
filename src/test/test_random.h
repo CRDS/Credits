@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_TEST_RANDOM_H
-#define DYNAMIC_TEST_RANDOM_H
+#ifndef CREDITS_TEST_RANDOM_H
+#define CREDITS_TEST_RANDOM_H
 
 #include "random.h"
 
@@ -20,4 +20,4 @@ static inline uint32_t insecure_rand(void)
     return insecure_rand_ctx.rand32();
 }
 
-#endif //DYNAMIC_TEST_RANDOM_H
+#endif //CREDITS_TEST_RANDOM_H

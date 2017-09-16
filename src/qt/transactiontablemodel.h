@@ -1,14 +1,14 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_TRANSACTIONTABLEMODEL_H
-#define DYNAMIC_QT_TRANSACTIONTABLEMODEL_H
+#ifndef CREDITS_QT_TRANSACTIONTABLEMODEL_H
+#define CREDITS_QT_TRANSACTIONTABLEMODEL_H
 
-#include "dynamicunits.h"
+#include "creditsunits.h"
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -99,7 +99,7 @@ private:
     QString formatTxDate(const TransactionRecord *wtx) const;
     QString formatTxType(const TransactionRecord *wtx) const;
     QString formatTxToAddress(const TransactionRecord *wtx, bool tooltip) const;
-    QString formatTxAmount(const TransactionRecord *wtx, bool showUnconfirmed=true, DynamicUnits::SeparatorStyle separators=DynamicUnits::separatorStandard) const;
+    QString formatTxAmount(const TransactionRecord *wtx, bool showUnconfirmed=true, CreditsUnits::SeparatorStyle separators=CreditsUnits::separatorStandard) const;
     QString formatTooltip(const TransactionRecord *rec) const;
     QVariant txStatusDecoration(const TransactionRecord *wtx) const;
     QVariant txWatchonlyDecoration(const TransactionRecord *wtx) const;
@@ -118,4 +118,4 @@ public Q_SLOTS:
     friend class TransactionTablePriv;
 };
 
-#endif // DYNAMIC_QT_TRANSACTIONTABLEMODEL_H
+#endif // CREDITS_QT_TRANSACTIONTABLEMODEL_H

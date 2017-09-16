@@ -1,5 +1,5 @@
 ---
-name: "dynamic-dmg-signer"
+name: "credits-dmg-signer"
 suites:
 - "trusty"
 architectures:
@@ -8,10 +8,10 @@ packages:
 - "faketime"
 reference_datetime: "2017-01-01 00:00:00"
 remotes:
-- "url": "https://github.com/duality-solutions/dynamic-detached-sigs.git"
+- "url": "https://github.com/credits-crds/credits-detached-sigs.git"
   "dir": "signature"
 files:
-- "dynamic-osx-unsigned.tar.gz"
+- "credits-osx-unsigned.tar.gz"
 script: |
   WRAP_DIR=$HOME/wrapped
   mkdir -p ${WRAP_DIR}
@@ -28,10 +28,10 @@ script: |
     chmod +x ${WRAP_DIR}/${prog}
   done
 
-  UNSIGNED=dynamic-osx-unsigned.tar.gz
-  SIGNED=dynamic-osx-signed.dmg
+  UNSIGNED=credits-osx-unsigned.tar.gz
+  SIGNED=credits-osx-signed.dmg
 
   tar -xf ${UNSIGNED}
   ./detached-sig-apply.sh ${UNSIGNED} signature/osx
-  ${WRAP_DIR}/genisoimage -no-cache-inodes -D -l -probe -V "Dynamic" -no-pad -r -dir-mode 0755 -apple -o uncompressed.dmg signed-app
+  ${WRAP_DIR}/genisoimage -no-cache-inodes -D -l -probe -V "Credits" -no-pad -r -dir-mode 0755 -apple -o uncompressed.dmg signed-app
   ${WRAP_DIR}/dmg dmg uncompressed.dmg ${OUTDIR}/${SIGNED}

@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_CRYPTO_SHA256_H
-#define DYNAMIC_CRYPTO_SHA256_H
+#ifndef CREDITS_CRYPTO_SHA256_H
+#define CREDITS_CRYPTO_SHA256_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -25,4 +25,4 @@ public:
     CSHA256& Reset();
 };
 
-#endif // DYNAMIC_CRYPTO_SHA256_H
+#endif // CREDITS_CRYPTO_SHA256_H

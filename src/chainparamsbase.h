@@ -1,19 +1,19 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_CHAINPARAMSBASE_H
-#define DYNAMIC_CHAINPARAMSBASE_H
+#ifndef CREDITS_CHAINPARAMSBASE_H
+#define CREDITS_CHAINPARAMSBASE_H
 
 #include <string>
 #include <vector>
 
 /**
- * CBaseChainParams defines the base parameters (shared between dynamic-cli and dynamicd)
- * of a given instance of the Dynamic system.
+ * CBaseChainParams defines the base parameters (shared between credits-cli and creditsd)
+ * of a given instance of the Credits system.
  */
 class CBaseChainParams
 {
@@ -62,4 +62,4 @@ std::string ChainNameFromCommandLine();
  */
 bool AreBaseParamsConfigured();
 
-#endif // DYNAMIC_CHAINPARAMSBASE_H
+#endif // CREDITS_CHAINPARAMSBASE_H

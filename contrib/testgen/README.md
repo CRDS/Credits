@@ -1,6 +1,6 @@
 ### TestGen ###
 
-Utilities to generate test vectors for the data-driven Dynamic tests.
+Utilities to generate test vectors for the data-driven Credits tests.
 
 Usage: 
 

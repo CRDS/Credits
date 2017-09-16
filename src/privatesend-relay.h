@@ -1,20 +1,20 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_PRIVATESEND_RELAY_H
-#define DYNAMIC_PRIVATESEND_RELAY_H
+#ifndef CREDITS_PRIVATESEND_RELAY_H
+#define CREDITS_PRIVATESEND_RELAY_H
 
 #include "main.h"
 
-#include "activedynode.h"
-#include "dynodeman.h"
+#include "activemasternode.h"
+#include "masternodeman.h"
 
 class CPrivateSendRelay
 {
 public:
-    CTxIn vinDynode;
+    CTxIn vinMasternode;
     std::vector<unsigned char> vchSig;
     std::vector<unsigned char> vchSig2;
     int nBlockHeight;
@@ -23,13 +23,13 @@ public:
     CTxOut out;
 
     CPrivateSendRelay();
-    CPrivateSendRelay(CTxIn& vinDynodeIn, std::vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2);
+    CPrivateSendRelay(CTxIn& vinMasternodeIn, std::vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2);
     
     ADD_SERIALIZE_METHODS;
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
-        READWRITE(vinDynode);
+        READWRITE(vinMasternode);
         READWRITE(vchSig);
         READWRITE(vchSig2);
         READWRITE(nBlockHeight);
@@ -48,4 +48,4 @@ public:
 
 
 
-#endif // DYNAMIC_PRIVATESEND_RELAY_H
+#endif // CREDITS_PRIVATESEND_RELAY_H

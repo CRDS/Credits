@@ -1,11 +1,11 @@
 Sample configuration files for:
 
-SystemD: dynamicd.service
-Upstart: dynamicd.conf
-OpenRC:  dynamicd.openrc
-         dynamicd.openrcconf
-CentOS:  dynamicd.init
-OS X:    org.dynamic.dynamicd.plist
+SystemD: creditsd.service
+Upstart: creditsd.conf
+OpenRC:  creditsd.openrc
+         creditsd.openrcconf
+CentOS:  creditsd.init
+OS X:    org.credits.creditsd.plist
 
 have been made available to assist packagers in creating node packages here.
 

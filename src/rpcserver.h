@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_RPCSERVER_H
-#define DYNAMIC_RPCSERVER_H
+#ifndef CREDITS_RPCSERVER_H
+#define CREDITS_RPCSERVER_H
 
 #include "amount.h"
 #include "rpcprotocol.h"
@@ -126,7 +126,7 @@ public:
 };
 
 /**
- * Dynamic RPC command dispatcher.
+ * Credits RPC command dispatcher.
  */
 class CRPCTable
 {
@@ -200,25 +200,12 @@ extern UniValue dumpwallet(const UniValue& params, bool fHelp);
 extern UniValue dumphdinfo(const UniValue& params, bool fHelp);
 extern UniValue importwallet(const UniValue& params, bool fHelp);
 
-extern UniValue name_scan(const UniValue& params, bool fHelp); // for DDNS
-extern UniValue name_filter(const UniValue& params, bool fHelp);
-extern UniValue name_show(const UniValue& params, bool fHelp);
-extern UniValue name_history(const UniValue& params, bool fHelp);
-extern UniValue name_mempool(const UniValue& params, bool fHelp);
-extern UniValue name_new(const UniValue& params, bool fHelp);
-extern UniValue name_update(const UniValue& params, bool fHelp);
-extern UniValue name_delete(const UniValue& params, bool fHelp);
-extern UniValue name_list(const UniValue& params, bool fHelp);
-extern UniValue name_debug(const UniValue& params, bool fHelp);
-
 extern UniValue getgenerate(const UniValue& params, bool fHelp); // in rpcmining.cpp
 extern UniValue setgenerate(const UniValue& params, bool fHelp);
-extern UniValue getwork(const UniValue& params, bool fHelp);
 extern UniValue generate(const UniValue& params, bool fHelp);
 extern UniValue getnetworkhashps(const UniValue& params, bool fHelp);
 extern UniValue gethashespersec(const UniValue& params, bool fHelp);
 extern UniValue getmininginfo(const UniValue& params, bool fHelp);
-extern UniValue getpowrewardstart(const UniValue& params, bool fHelp);
 extern UniValue prioritisetransaction(const UniValue& params, bool fHelp);
 extern UniValue getblocktemplate(const UniValue& params, bool fHelp);
 extern UniValue submitblock(const UniValue& params, bool fHelp);
@@ -287,15 +274,14 @@ extern UniValue verifytxoutproof(const UniValue& params, bool fHelp);
 extern UniValue privatesend(const UniValue& params, bool fHelp);
 extern UniValue getpoolinfo(const UniValue& params, bool fHelp);
 extern UniValue spork(const UniValue& params, bool fHelp);
-extern UniValue dynode(const UniValue& params, bool fHelp);
-extern UniValue dynodelist(const UniValue& params, bool fHelp);
-extern UniValue dynodebroadcast(const UniValue& params, bool fHelp);
+extern UniValue masternode(const UniValue& params, bool fHelp);
+extern UniValue masternodelist(const UniValue& params, bool fHelp);
+extern UniValue masternodebroadcast(const UniValue& params, bool fHelp);
 extern UniValue gobject(const UniValue& params, bool fHelp);
 extern UniValue getgovernanceinfo(const UniValue& params, bool fHelp);
-extern UniValue getdynoderewardstart(const UniValue& params, bool fHelp);
 extern UniValue getsuperblockbudget(const UniValue& params, bool fHelp);
 extern UniValue voteraw(const UniValue& params, bool fHelp);
-extern UniValue dnsync(const UniValue& params, bool fHelp);
+extern UniValue mnsync(const UniValue& params, bool fHelp);
 
 extern UniValue getblockcount(const UniValue& params, bool fHelp); // in rpcblockchain.cpp
 extern UniValue getbestblockhash(const UniValue& params, bool fHelp);
@@ -321,4 +307,4 @@ void InterruptRPC();
 void StopRPC();
 std::string JSONRPCExecBatch(const UniValue& vReq);
 
-#endif // DYNAMIC_RPCSERVER_H
+#endif // CREDITS_RPCSERVER_H

@@ -1,13 +1,13 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "instantsend.h"
 
-#include "activedynode.h"
-#include "dynode-sync.h"
-#include "dynodeman.h"
+#include "activemasternode.h"
+#include "masternode-sync.h"
+#include "masternodeman.h"
 #include "key.h"
 #include "main.h"
 #include "messagesigner.h"
@@ -33,8 +33,8 @@ CInstantSend instantsend;
 
 // Transaction Locks
 //
-// step 2) Top INSTANTSEND_SIGNATURES_TOTAL Dynodes push "txvote" message
-// step 2) Top COutPointLock::SIGNATURES_TOTAL Dynodes per each spent outpoint push "txvote" message
+// step 2) Top INSTANTSEND_SIGNATURES_TOTAL Masternodes push "txvote" message
+// step 2) Top COutPointLock::SIGNATURES_TOTAL Masternodes per each spent outpoint push "txvote" message
 // step 3) Once there are COutPointLock::SIGNATURES_REQUIRED valid "txvote" messages per each spent outpoint
 //         for a corresponding "txlreg" message, all outpoints from that tx are treated as locked
 
@@ -43,11 +43,11 @@ CInstantSend instantsend;
 //
 void CInstantSend::ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv)
 {
-    if(fLiteMode) return; // disable all Dynamic specific functionality
+    if(fLiteMode) return; // disable all Credits specific functionality
     if(!sporkManager.IsSporkActive(SPORK_2_INSTANTSEND_ENABLED)) return;
 
-    // Ignore any InstantSend messages until Dynode list is synced
-    if(!dynodeSync.IsDynodeListSynced()) return;
+    // Ignore any InstantSend messages until Masternode list is synced
+    if(!masternodeSync.IsMasternodeListSynced()) return;
 
     // NOTE: NetMsgType::TXLOCKREQUEST is handled via ProcessMessage() in main.cpp
     if (strCommand == NetMsgType::TXLOCKVOTE) // InstantSend Transaction Lock Consensus Votes
@@ -118,7 +118,7 @@ bool CInstantSend::ProcessTxLockRequest(const CTxLockRequest& txLockRequest)
 
  ProcessOrphanTxLockVotes();
 
-    // Dynodes will sometimes propagate votes before the transaction is known to the client.
+    // Masternodes will sometimes propagate votes before the transaction is known to the client.
     // If this just happened - lock inputs, resolve conflicting locks, update transaction status
     // forcing external script notification.
     if(IsInstantSendReadyToLock(txHash)) {
@@ -160,7 +160,7 @@ bool CInstantSend::CreateTxLockCandidate(const CTxLockRequest& txLockRequest)
 
 void CInstantSend::Vote(CTxLockCandidate& txLockCandidate)
 {
-    if(!fDyNode) return;
+    if(!fMasterNode) return;
 
     LOCK2(cs_main, cs_instantsend);
 
@@ -178,17 +178,17 @@ void CInstantSend::Vote(CTxLockCandidate& txLockCandidate)
 
         int nLockInputHeight = nPrevoutHeight + 4;
 
-        int n = dnodeman.GetDynodeRank(activeDynode.vin, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
+        int n = mnodeman.GetMasternodeRank(activeMasternode.vin, nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
 
         if(n == -1) {
-            LogPrint("instantsend", "CInstantSend::Vote -- Unknown Dynode %s\n", activeDynode.vin.prevout.ToStringShort());
+            LogPrint("instantsend", "CInstantSend::Vote -- Unknown Masternode %s\n", activeMasternode.vin.prevout.ToStringShort());
             ++itOutpointLock;
             continue;
         }
 
         int nSignaturesTotal = COutPointLock::SIGNATURES_TOTAL;
         if(n > nSignaturesTotal) {
-            LogPrint("instantsend", "CInstantSend::Vote -- Dynode not in the top %d (%d)\n", nSignaturesTotal, n);
+            LogPrint("instantsend", "CInstantSend::Vote -- Masternode not in the top %d (%d)\n", nSignaturesTotal, n);
             ++itOutpointLock;
             continue;
         }
@@ -203,7 +203,7 @@ void CInstantSend::Vote(CTxLockCandidate& txLockCandidate)
         if(itVoted != mapVotedOutpoints.end()) {
             BOOST_FOREACH(const uint256& hash, itVoted->second) {
                 std::map<uint256, CTxLockCandidate>::iterator it2 = mapTxLockCandidates.find(hash);
-                if(it2->second.HasDynodeVoted(itOutpointLock->first, activeDynode.vin.prevout)) {
+                if(it2->second.HasMasternodeVoted(itOutpointLock->first, activeMasternode.vin.prevout)) {
                     // we already voted for this outpoint to be included either in the same tx or in a competing one,
                     // skip it anyway
                     fAlreadyVoted = true;
@@ -219,7 +219,7 @@ void CInstantSend::Vote(CTxLockCandidate& txLockCandidate)
         }
 
         // we haven't voted for this outpoint yet, let's try to do this now
-        CTxLockVote vote(txHash, itOutpointLock->first, activeDynode.vin.prevout);
+        CTxLockVote vote(txHash, itOutpointLock->first, activeMasternode.vin.prevout);
 
         if(!vote.Sign()) {
             LogPrintf("CInstantSend::Vote -- Failed to sign consensus vote\n");
@@ -270,15 +270,15 @@ bool CInstantSend::ProcessTxLockVote(CNode* pfrom, CTxLockVote& vote)
         return false;
     }
 
-    // Dynodes will sometimes propagate votes before the transaction is known to the client,
+    // Masternodes will sometimes propagate votes before the transaction is known to the client,
     // will actually process only after the lock request itself has arrived
 
     std::map<uint256, CTxLockCandidate>::iterator it = mapTxLockCandidates.find(txHash);
     if(it == mapTxLockCandidates.end()) {
         if(!mapTxLockVotesOrphan.count(vote.GetHash())) {
             mapTxLockVotesOrphan[vote.GetHash()] = vote;
-            LogPrint("instantsend", "CInstantSend::ProcessTxLockVote -- Orphan vote: txid=%s  dynode=%s new\n",
-                    txHash.ToString(), vote.GetDynodeOutpoint().ToStringShort());
+            LogPrint("instantsend", "CInstantSend::ProcessTxLockVote -- Orphan vote: txid=%s  masternode=%s new\n",
+                    txHash.ToString(), vote.GetMasternodeOutpoint().ToStringShort());
             bool fReprocess = true;
             std::map<uint256, CTxLockRequest>::iterator itLockRequest = mapLockRequestAccepted.find(txHash);
             if(itLockRequest == mapLockRequestAccepted.end()) {
@@ -296,25 +296,25 @@ bool CInstantSend::ProcessTxLockVote(CNode* pfrom, CTxLockVote& vote)
                 return true;
             }
         } else {
-            LogPrint("instantsend", "CInstantSend::ProcessTxLockVote -- Orphan vote: txid=%s  dynode=%s seen\n",
-                    txHash.ToString(), vote.GetDynodeOutpoint().ToStringShort());
+            LogPrint("instantsend", "CInstantSend::ProcessTxLockVote -- Orphan vote: txid=%s  masternode=%s seen\n",
+                    txHash.ToString(), vote.GetMasternodeOutpoint().ToStringShort());
         }
 
         // This tracks those messages and allows only the same rate as of the rest of the network
         // TODO: make sure this works good enough for multi-quorum
-        int nDynodeOrphanExpireTime = GetTime() + 60*10; // keep time data for 10 minutes
-        if(!mapDynodeOrphanVotes.count(vote.GetDynodeOutpoint())) {
-            mapDynodeOrphanVotes[vote.GetDynodeOutpoint()] = nDynodeOrphanExpireTime;
+        int nMasternodeOrphanExpireTime = GetTime() + 60*10; // keep time data for 10 minutes
+        if(!mapMasternodeOrphanVotes.count(vote.GetMasternodeOutpoint())) {
+            mapMasternodeOrphanVotes[vote.GetMasternodeOutpoint()] = nMasternodeOrphanExpireTime;
         } else {
-            int64_t nPrevOrphanVote = mapDynodeOrphanVotes[vote.GetDynodeOutpoint()];
-            if(nPrevOrphanVote > GetTime() && nPrevOrphanVote > GetAverageDynodeOrphanVoteTime()) {
-                LogPrint("instantsend", "CInstantSend::ProcessTxLockVote -- dynode is spamming orphan Transaction Lock Votes: txid=%s  dynode=%s\n",
-                        txHash.ToString(), vote.GetDynodeOutpoint().ToStringShort());
+            int64_t nPrevOrphanVote = mapMasternodeOrphanVotes[vote.GetMasternodeOutpoint()];
+            if(nPrevOrphanVote > GetTime() && nPrevOrphanVote > GetAverageMasternodeOrphanVoteTime()) {
+                LogPrint("instantsend", "CInstantSend::ProcessTxLockVote -- masternode is spamming orphan Transaction Lock Votes: txid=%s  masternode=%s\n",
+                        txHash.ToString(), vote.GetMasternodeOutpoint().ToStringShort());
                 // Misbehaving(pfrom->id, 1);
                 return false;
             }
             // not spamming, refresh
-            mapDynodeOrphanVotes[vote.GetDynodeOutpoint()] = nDynodeOrphanExpireTime;
+            mapMasternodeOrphanVotes[vote.GetMasternodeOutpoint()] = nMasternodeOrphanExpireTime;
         }
 
         return true;
@@ -328,19 +328,19 @@ bool CInstantSend::ProcessTxLockVote(CNode* pfrom, CTxLockVote& vote)
                 // same outpoint was already voted to be locked by another tx lock request,
                 // find out if the same mn voted on this outpoint before
                 std::map<uint256, CTxLockCandidate>::iterator it2 = mapTxLockCandidates.find(hash);
-                if(it2->second.HasDynodeVoted(vote.GetOutpoint(), vote.GetDynodeOutpoint())) {
+                if(it2->second.HasMasternodeVoted(vote.GetOutpoint(), vote.GetMasternodeOutpoint())) {
                     // yes, it did, refuse to accept a vote to include the same outpoint in another tx
-                    // from the same dynode.
-                    // TODO: apply pose ban score to this dynode?
+                    // from the same masternode.
+                    // TODO: apply pose ban score to this masternode?
                     // NOTE: if we decide to apply pose ban score here, this vote must be relayed further
                     // to let all other nodes know about this node's misbehaviour and let them apply
                     // pose ban score too.
-                    LogPrintf("CInstantSend::ProcessTxLockVote -- dynode sent conflicting votes! %s\n", vote.GetDynodeOutpoint().ToStringShort());
+                    LogPrintf("CInstantSend::ProcessTxLockVote -- masternode sent conflicting votes! %s\n", vote.GetMasternodeOutpoint().ToStringShort());
                     return false;
                 }
             }
         }        
-        // we have votes by other dynodes only (so far), let's continue and see who will win
+        // we have votes by other masternodes only (so far), let's continue and see who will win
     } else {
         std::set<uint256> setHashes;
         setHashes.insert(txHash);
@@ -561,21 +561,21 @@ bool CInstantSend::ResolveConflicts(const CTxLockCandidate& txLockCandidate)
     return true;
 }
 
-int64_t CInstantSend::GetAverageDynodeOrphanVoteTime()
+int64_t CInstantSend::GetAverageMasternodeOrphanVoteTime()
 {
     LOCK(cs_instantsend);
-    // NOTE: should never actually call this function when mapDynodeOrphanVotes is empty
-    if(mapDynodeOrphanVotes.empty()) return 0;
+    // NOTE: should never actually call this function when mapMasternodeOrphanVotes is empty
+    if(mapMasternodeOrphanVotes.empty()) return 0;
 
-    std::map<COutPoint, int64_t>::iterator it = mapDynodeOrphanVotes.begin();
+    std::map<COutPoint, int64_t>::iterator it = mapMasternodeOrphanVotes.begin();
     int64_t total = 0;
 
-    while(it != mapDynodeOrphanVotes.end()) {
+    while(it != mapMasternodeOrphanVotes.end()) {
         total+= it->second;
         ++it;
     }
 
-    return total / mapDynodeOrphanVotes.size();
+    return total / mapMasternodeOrphanVotes.size();
 }
 
 void CInstantSend::CheckAndRemove()
@@ -609,8 +609,8 @@ void CInstantSend::CheckAndRemove()
     std::map<uint256, CTxLockVote>::iterator itVote = mapTxLockVotes.begin();
     while(itVote != mapTxLockVotes.end()) {
         if(itVote->second.IsExpired(pCurrentBlockIndex->nHeight)) {
-            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired vote: txid=%s  dynode=%s\n",
-                    itVote->second.GetTxHash().ToString(), itVote->second.GetDynodeOutpoint().ToStringShort());
+            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired vote: txid=%s  masternode=%s\n",
+                    itVote->second.GetTxHash().ToString(), itVote->second.GetMasternodeOutpoint().ToStringShort());
             mapTxLockVotes.erase(itVote++);        } else {
             ++itVote;
         }
@@ -620,8 +620,8 @@ void CInstantSend::CheckAndRemove()
     std::map<uint256, CTxLockVote>::iterator itOrphanVote = mapTxLockVotesOrphan.begin();
     while(itOrphanVote != mapTxLockVotesOrphan.end()) {
         if(GetTime() - itOrphanVote->second.GetTimeCreated() > ORPHAN_VOTE_SECONDS) {
-            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired orphan vote: txid=%s  dynode=%s\n",
-                    itOrphanVote->second.GetTxHash().ToString(), itOrphanVote->second.GetDynodeOutpoint().ToStringShort());
+            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired orphan vote: txid=%s  masternode=%s\n",
+                    itOrphanVote->second.GetTxHash().ToString(), itOrphanVote->second.GetMasternodeOutpoint().ToStringShort());
             mapTxLockVotes.erase(itOrphanVote->first);
             mapTxLockVotesOrphan.erase(itOrphanVote++);
         } else {
@@ -629,15 +629,15 @@ void CInstantSend::CheckAndRemove()
         }
     }
 
-    // remove expired dynode orphan votes (DOS protection)
-    std::map<COutPoint, int64_t>::iterator itDynodeOrphan = mapDynodeOrphanVotes.begin();
-    while(itDynodeOrphan != mapDynodeOrphanVotes.end()) {
-        if(itDynodeOrphan->second < GetTime()) {
-            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired orphan dynode vote: dynode=%s\n",
-                    itDynodeOrphan->first.ToStringShort());
-            mapDynodeOrphanVotes.erase(itDynodeOrphan++);
+    // remove expired masternode orphan votes (DOS protection)
+    std::map<COutPoint, int64_t>::iterator itMasternodeOrphan = mapMasternodeOrphanVotes.begin();
+    while(itMasternodeOrphan != mapMasternodeOrphanVotes.end()) {
+        if(itMasternodeOrphan->second < GetTime()) {
+            LogPrint("instantsend", "CInstantSend::CheckAndRemove -- Removing expired orphan masternode vote: masternode=%s\n",
+                    itMasternodeOrphan->first.ToStringShort());
+            mapMasternodeOrphanVotes.erase(itMasternodeOrphan++);
         } else {
-            ++itDynodeOrphan;
+            ++itMasternodeOrphan;
         }
     }
 }
@@ -948,9 +948,9 @@ bool CTxLockRequest::IsTimedOut() const
 
 bool CTxLockVote::IsValid(CNode* pnode) const
 {
-    if(!dnodeman.Has(CTxIn(outpointDynode))) {
-        LogPrint("instantsend", "CTxLockVote::IsValid -- Unknown dynode %s\n", outpointDynode.ToStringShort());
-        dnodeman.AskForDN(pnode, CTxIn(outpointDynode));
+    if(!mnodeman.Has(CTxIn(outpointMasternode))) {
+        LogPrint("instantsend", "CTxLockVote::IsValid -- Unknown masternode %s\n", outpointMasternode.ToStringShort());
+        mnodeman.AskForMN(pnode, CTxIn(outpointMasternode));
         return false;
     }
 
@@ -977,19 +977,19 @@ bool CTxLockVote::IsValid(CNode* pnode) const
 
     int nLockInputHeight = nPrevoutHeight + 4;
 
-    int n = dnodeman.GetDynodeRank(CTxIn(outpointDynode), nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
+    int n = mnodeman.GetMasternodeRank(CTxIn(outpointMasternode), nLockInputHeight, MIN_INSTANTSEND_PROTO_VERSION);
 
     if(n == -1) {
         //can be caused by past versions trying to vote with an invalid protocol
-        LogPrint("instantsend", "CTxLockVote::IsValid -- Outdated dynode %s\n", outpointDynode.ToStringShort());
+        LogPrint("instantsend", "CTxLockVote::IsValid -- Outdated masternode %s\n", outpointMasternode.ToStringShort());
         return false;
     }
-    LogPrint("instantsend", "CTxLockVote::IsValid -- Dynode %s, rank=%d\n", outpointDynode.ToStringShort(), n);
+    LogPrint("instantsend", "CTxLockVote::IsValid -- Masternode %s, rank=%d\n", outpointMasternode.ToStringShort(), n);
 
     int nSignaturesTotal = COutPointLock::SIGNATURES_TOTAL;
     if(n > nSignaturesTotal) {
-        LogPrint("instantsend", "CTxLockVote::IsValid -- Dynode %s is not in the top %d (%d), vote hash=%s\n",
-                outpointDynode.ToStringShort(), nSignaturesTotal, n, GetHash().ToString());
+        LogPrint("instantsend", "CTxLockVote::IsValid -- Masternode %s is not in the top %d (%d), vote hash=%s\n",
+                outpointMasternode.ToStringShort(), nSignaturesTotal, n, GetHash().ToString());
         return false;
     }
 
@@ -1006,7 +1006,7 @@ uint256 CTxLockVote::GetHash() const
     CHashWriter ss(SER_GETHASH, PROTOCOL_VERSION);
     ss << txHash;
     ss << outpoint;
-    ss << outpointDynode;
+    ss << outpointMasternode;
     return ss.GetHash();
 }
 
@@ -1015,14 +1015,14 @@ bool CTxLockVote::CheckSignature() const
     std::string strError;
     std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
 
-    dynode_info_t infoSn = dnodeman.GetDynodeInfo(CTxIn(outpointDynode));
+    masternode_info_t infoSn = mnodeman.GetMasternodeInfo(CTxIn(outpointMasternode));
 
     if(!infoSn.fInfoValid) {
-        LogPrintf("CTxLockVote::CheckSignature -- Unknown Dynode: dynode=%s\n", outpointDynode.ToString());
+        LogPrintf("CTxLockVote::CheckSignature -- Unknown Masternode: masternode=%s\n", outpointMasternode.ToString());
         return false;
     }
 
-    if(!CMessageSigner::VerifyMessage(infoSn.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(infoSn.pubKeyMasternode, vchMasternodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -1035,12 +1035,12 @@ bool CTxLockVote::Sign()
     std::string strError;
     std::string strMessage = txHash.ToString() + outpoint.ToStringShort();
 
-    if(!CMessageSigner::SignMessage(strMessage, vchDynodeSignature, activeDynode.keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchMasternodeSignature, activeMasternode.keyMasternode)) {
         LogPrintf("CTxLockVote::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!CMessageSigner::VerifyMessage(activeDynode.pubKeyDynode, vchDynodeSignature, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(activeMasternode.pubKeyMasternode, vchMasternodeSignature, strMessage, strError)) {
         LogPrintf("CTxLockVote::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -1066,33 +1066,33 @@ bool CTxLockVote::IsExpired(int nHeight) const
 
 bool COutPointLock::AddVote(const CTxLockVote& vote)
 {
-    if(mapDynodeVotes.count(vote.GetDynodeOutpoint()))
+    if(mapMasternodeVotes.count(vote.GetMasternodeOutpoint()))
         return false;
 
-mapDynodeVotes.insert(std::make_pair(vote.GetDynodeOutpoint(), vote));
+mapMasternodeVotes.insert(std::make_pair(vote.GetMasternodeOutpoint(), vote));
     return true;
 }
 
 std::vector<CTxLockVote> COutPointLock::GetVotes() const
 {
     std::vector<CTxLockVote> vRet;
-    std::map<COutPoint, CTxLockVote>::const_iterator itVote = mapDynodeVotes.begin();
-    while(itVote != mapDynodeVotes.end()) {
+    std::map<COutPoint, CTxLockVote>::const_iterator itVote = mapMasternodeVotes.begin();
+    while(itVote != mapMasternodeVotes.end()) {
         vRet.push_back(itVote->second);
         ++itVote;
     }
     return vRet;
 }
 
-bool COutPointLock::HasDynodeVoted(const COutPoint& outpointDynodeIn) const
+bool COutPointLock::HasMasternodeVoted(const COutPoint& outpointMasternodeIn) const
 {
-    return mapDynodeVotes.count(outpointDynodeIn);
+    return mapMasternodeVotes.count(outpointMasternodeIn);
 }
 
 void COutPointLock::Relay() const
 {
-    std::map<COutPoint, CTxLockVote>::const_iterator itVote = mapDynodeVotes.begin();
-    while(itVote != mapDynodeVotes.end()) {
+    std::map<COutPoint, CTxLockVote>::const_iterator itVote = mapMasternodeVotes.begin();
+    while(itVote != mapMasternodeVotes.end()) {
         itVote->second.Relay();
         ++itVote;
     }
@@ -1125,10 +1125,10 @@ bool CTxLockCandidate::IsAllOutPointsReady() const
     return true;
 }
 
-bool CTxLockCandidate::HasDynodeVoted(const COutPoint& outpointIn, const COutPoint& outpointDynodeIn)
+bool CTxLockCandidate::HasMasternodeVoted(const COutPoint& outpointIn, const COutPoint& outpointMasternodeIn)
 {
     std::map<COutPoint, COutPointLock>::iterator it = mapOutPointLocks.find(outpointIn);
-    return it !=mapOutPointLocks.end() && it->second.HasDynodeVoted(outpointDynodeIn);
+    return it !=mapOutPointLocks.end() && it->second.HasMasternodeVoted(outpointMasternodeIn);
 }
 
 int CTxLockCandidate::CountVotes() const

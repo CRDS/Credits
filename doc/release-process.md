@@ -2,7 +2,7 @@ Release Process
 ====================
 
 * update translations (ping wumpus, Diapolo or tcatm on IRC)
-* see https://github.com/duality-solutions/dynamic/blob/master/doc/translation_process.md#syncing-with-transifex
+* see https://github.com/credits-crds/credits/blob/master/doc/translation_process.md#syncing-with-transifex
 
 * * *
 
@@ -15,11 +15,11 @@ Release Process
 
 ###tag version in git
 
-	git tag -s v(new version, e.g. 1.3.0.0)
+	git tag -s v(new version, e.g. 1.1.0.0)
 
 ###write release notes. git shortlog helps a lot, for example:
 
-	git shortlog --no-merges v(current version, e.g. 1.3.0.0)..v(new version, e.g. 1.4.0.0)
+	git shortlog --no-merges v(current version, e.g. 1.0.0.0)..v(new version, e.g. 1.1.0.0)
 
 * * *
 
@@ -29,11 +29,11 @@ Release Process
 
 ###perform gitian builds
 
- From a directory containing the dynamic source, gitian-builder and gitian.sigs
+ From a directory containing the credits source, gitian-builder and gitian.sigs
 
 	export SIGNER=(your gitian key, ie bluematt, sipa, etc)
-	export VERSION=(new version, e.g. 1.3.0.0)
-	pushd ./dynamic
+	export VERSION=(new version, e.g. 1.1.0.0)
+	pushd ./credits
 	git checkout v${VERSION}
 	popd
 	pushd ./gitian-builder
@@ -54,29 +54,29 @@ Release Process
 
   By default, gitian will fetch source files as needed. For offline builds, they can be fetched ahead of time:
 
-	make -C ../dynamic/depends download SOURCES_PATH=`pwd`/cache/common
+	make -C ../credits/depends download SOURCES_PATH=`pwd`/cache/common
 
   Only missing files will be fetched, so this is safe to re-run for each build.
 
-###Build Dynamic for Linux, Windows, and OS X:
+###Build Credits for Linux, Windows, and OS X:
 
-	./bin/gbuild --commit dynamic=v${VERSION} ../dynamic/contrib/gitian-descriptors/gitian-linux.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs/ ../dynamic/contrib/gitian-descriptors/gitian-linux.yml
-	mv build/out/dynamic-*.tar.gz build/out/src/dynamic-*.tar.gz ../
-	./bin/gbuild --commit dynamic=v${VERSION} ../dynamic/contrib/gitian-descriptors/gitian-win.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-win --destination ../gitian.sigs/ ../dynamic/contrib/gitian-descriptors/gitian-win.yml
-	mv build/out/dynamic-*.zip build/out/dynamic-*.exe ../
-	./bin/gbuild --commit dynamic=v${VERSION} ../dynamic/contrib/gitian-descriptors/gitian-osx.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../dynamic/contrib/gitian-descriptors/gitian-osx.yml
-	mv build/out/dynamic-*-unsigned.tar.gz inputs/dynamic-osx-unsigned.tar.gz
-	mv build/out/dynamic-*.tar.gz build/out/dynamic-*.dmg ../
+	./bin/gbuild --commit credits=v${VERSION} ../credits/contrib/gitian-descriptors/gitian-linux.yml
+	./bin/gsign --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs/ ../credits/contrib/gitian-descriptors/gitian-linux.yml
+	mv build/out/credits-*.tar.gz build/out/src/credits-*.tar.gz ../
+	./bin/gbuild --commit credits=v${VERSION} ../credits/contrib/gitian-descriptors/gitian-win.yml
+	./bin/gsign --signer $SIGNER --release ${VERSION}-win --destination ../gitian.sigs/ ../credits/contrib/gitian-descriptors/gitian-win.yml
+	mv build/out/credits-*.zip build/out/credits-*.exe ../
+	./bin/gbuild --commit credits=v${VERSION} ../credits/contrib/gitian-descriptors/gitian-osx.yml
+	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs/ ../credits/contrib/gitian-descriptors/gitian-osx.yml
+	mv build/out/credits-*-unsigned.tar.gz inputs/credits-osx-unsigned.tar.gz
+	mv build/out/credits-*.tar.gz build/out/credits-*.dmg ../
 	popd
   Build output expected:
 
-  1. source tarball (dynamic-${VERSION}.tar.gz)
-  2. linux 32-bit and 64-bit binaries dist tarballs (dynamic-${VERSION}-linux[32|64].tar.gz)
-  3. windows 32-bit and 64-bit installers and dist zips (dynamic-${VERSION}-win[32|64]-setup.exe, dynamic-${VERSION}-win[32|64].zip)
-  4. OSX unsigned installer (dynamic-${VERSION}-osx-unsigned.dmg)
+  1. source tarball (credits-${VERSION}.tar.gz)
+  2. linux 32-bit and 64-bit binaries dist tarballs (credits-${VERSION}-linux[32|64].tar.gz)
+  3. windows 32-bit and 64-bit installers and dist zips (credits-${VERSION}-win[32|64]-setup.exe, credits-${VERSION}-win[32|64].zip)
+  4. OSX unsigned installer (credits-${VERSION}-osx-unsigned.dmg)
   5. Gitian signatures (in gitian.sigs/${VERSION}-<linux|win|osx-unsigned>/(your gitian key)/
 
 ###Next steps:
@@ -100,9 +100,9 @@ Commit your signature to gitian.sigs:
 	pushd ./gitian-builder
 	# Fetch the signature as instructed by Evan
 	cp signature.tar.gz inputs/
-	./bin/gbuild -i ../dynamic/contrib/gitian-descriptors/gitian-osx-signer.yml
-	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../dynamic/contrib/gitian-descriptors/gitian-osx-signer.yml
-	mv build/out/dynamic-osx-signed.dmg ../dynamic-${VERSION}-osx.dmg
+	./bin/gbuild -i ../credits/contrib/gitian-descriptors/gitian-osx-signer.yml
+	./bin/gsign --signer $SIGNER --release ${VERSION}-osx-signed --destination ../gitian.sigs/ ../credits/contrib/gitian-descriptors/gitian-osx-signer.yml
+	mv build/out/credits-osx-signed.dmg ../credits-${VERSION}-osx.dmg
 	popd
 
 Commit your signature for the signed OSX binary:
@@ -131,20 +131,20 @@ rm SHA256SUMS
 ```
 (the digest algorithm is forced to sha256 to avoid confusion of the `Hash:` header that GPG adds with the SHA256 used for the files)
 
-- Upload zips and installers, as well as `SHA256SUMS.asc` from last step, to the dynamic.org server
-  into `/var/www/bin/dynamic-${VERSION}`
+- Upload zips and installers, as well as `SHA256SUMS.asc` from last step, to the credits.org server
+  into `/var/www/bin/credits-${VERSION}`
 
-- Update dynamicpay.io version ***TODO***
+- Update creditspay.io version ***TODO***
 
-  - First, check to see if the dynamicpay.io maintainers have prepared a
-    release: https://github.com/duality-solutions/dynamic/labels/Releases
+  - First, check to see if the creditspay.io maintainers have prepared a
+    release: https://github.com/credits-crds/credits/labels/Releases
 
       - If they have, it will have previously failed their Travis CI
         checks because the final release files weren't uploaded.
         Trigger a Travis CI rebuild---if it passes, merge.
 
-  - If they have not prepared a release, follow the Dynamic.org release
-    instructions: https://github.com/duality-solutions/dynamic#release-notes
+  - If they have not prepared a release, follow the Credits.org release
+    instructions: https://github.com/credits-crds/credits#release-notes
 
   - After the pull request is merged, the website will automatically show the newest version within 15 minutes, as well
     as update the OS download links. Ping @saivann/@harding (saivann/harding on Freenode) in case anything goes wrong

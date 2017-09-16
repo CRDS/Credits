@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_COINS_H
-#define DYNAMIC_COINS_H
+#ifndef CREDITS_COINS_H
+#define CREDITS_COINS_H
 
 #include "compressor.h"
 #include "core_memusage.h"
@@ -257,10 +257,10 @@ public:
         return true;
     }
 
-    size_t DynamicMemoryUsage() const {
-        size_t ret = memusage::DynamicUsage(vout);
+    size_t CreditsMemoryUsage() const {
+        size_t ret = memusage::CreditsUsage(vout);
         BOOST_FOREACH(const CTxOut &out, vout) {
-            ret += RecursiveDynamicUsage(out.scriptPubKey);
+            ret += RecursiveCreditsUsage(out.scriptPubKey);
         }
         return ret;
     }
@@ -393,7 +393,7 @@ protected:
     mutable uint256 hashBlock;
     mutable CCoinsMap cacheCoins;
 
-    /* Cached dynamic memory usage for the inner CCoins objects. */
+    /* Cached credits memory usage for the inner CCoins objects. */
     mutable size_t cachedCoinsUsage;
 
 public:
@@ -456,10 +456,10 @@ public:
     unsigned int GetCacheSize() const;
 
     //! Calculate the size of the cache (in bytes)
-    size_t DynamicMemoryUsage() const;
+    size_t CreditsMemoryUsage() const;
 
     /** 
-     * Amount of dynamic coming in to a transaction
+     * Amount of credits coming in to a transaction
      * Note that lightweight clients may not know anything besides the hash of previous transactions,
      * so may not be able to calculate this.
      *
@@ -492,4 +492,4 @@ private:
     CCoinsViewCache(const CCoinsViewCache &);
 };
 
-#endif // DYNAMIC_COINS_H
+#endif // CREDITS_COINS_H

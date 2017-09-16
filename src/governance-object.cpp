@@ -5,7 +5,7 @@
 #include "governance-object.h"
 
 #include "core_io.h"
-#include "dynodeman.h"
+#include "masternodeman.h"
 #include "governance.h"
 #include "governance-classes.h"
 #include "governance-vote.h"
@@ -23,7 +23,7 @@ CGovernanceObject::CGovernanceObject()
   nDeletionTime(0),
   nCollateralHash(),
   strData(),
-  vinDynode(),
+  vinMasternode(),
   vchSig(),
   fCachedLocalValidity(false),
   strLocalValidityError(),
@@ -34,7 +34,7 @@ CGovernanceObject::CGovernanceObject()
   fDirtyCache(true),
   fExpired(false),
   fUnparsable(false),
-  mapCurrentDNVotes(),
+  mapCurrentMNVotes(),
   mapOrphanVotes(),
   fileVotes()
 {
@@ -51,7 +51,7 @@ CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int
   nDeletionTime(0),
   nCollateralHash(nCollateralHashIn),
   strData(strDataIn),
-  vinDynode(),
+  vinMasternode(),
   vchSig(),
   fCachedLocalValidity(false),
   strLocalValidityError(),
@@ -62,7 +62,7 @@ CGovernanceObject::CGovernanceObject(uint256 nHashParentIn, int nRevisionIn, int
   fDirtyCache(true),
   fExpired(false),
   fUnparsable(false),
-  mapCurrentDNVotes(),
+  mapCurrentMNVotes(),
   mapOrphanVotes(),
   fileVotes()
 {
@@ -79,7 +79,7 @@ CGovernanceObject::CGovernanceObject(const CGovernanceObject& other)
   nDeletionTime(other.nDeletionTime),
   nCollateralHash(other.nCollateralHash),
   strData(other.strData),
-  vinDynode(other.vinDynode),
+  vinMasternode(other.vinMasternode),
   vchSig(other.vchSig),
   fCachedLocalValidity(other.fCachedLocalValidity),
   strLocalValidityError(other.strLocalValidityError),
@@ -90,7 +90,7 @@ CGovernanceObject::CGovernanceObject(const CGovernanceObject& other)
   fDirtyCache(other.fDirtyCache),
   fExpired(other.fExpired),
   fUnparsable(other.fUnparsable),
-  mapCurrentDNVotes(other.mapCurrentDNVotes),
+  mapCurrentMNVotes(other.mapCurrentMNVotes),
   mapOrphanVotes(other.mapOrphanVotes),
   fileVotes(other.fileVotes)
 {}
@@ -99,14 +99,14 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
                                     const CGovernanceVote& vote,
                                     CGovernanceException& exception)
 {
-    int nDNIndex = governance.GetDynodeIndex(vote.GetVinDynode());
-    if(nDNIndex < 0) {
+    int nMNIndex = governance.GetMasternodeIndex(vote.GetVinMasternode());
+    if(nMNIndex < 0) {
         std::ostringstream ostr;
-        ostr << "CGovernanceObject::ProcessVote -- Dynode index not found\n";
+        ostr << "CGovernanceObject::ProcessVote -- Masternode index not found\n";
         exception = CGovernanceException(ostr.str(), GOVERNANCE_EXCEPTION_WARNING);
-        if(mapOrphanVotes.Insert(vote.GetVinDynode(), vote_time_pair_t(vote, GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME))) {
+        if(mapOrphanVotes.Insert(vote.GetVinMasternode(), vote_time_pair_t(vote, GetAdjustedTime() + GOVERNANCE_ORPHAN_EXPIRATION_TIME))) {
             if(pfrom) {
-                dnodeman.AskForDN(pfrom, vote.GetVinDynode());
+                mnodeman.AskForMN(pfrom, vote.GetVinMasternode());
             }
             LogPrintf(ostr.str().c_str());
         }
@@ -116,9 +116,9 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
         return false;
     }
 
-    vote_m_it it = mapCurrentDNVotes.find(nDNIndex);
-    if(it == mapCurrentDNVotes.end()) {
-        it = mapCurrentDNVotes.insert(vote_m_t::value_type(nDNIndex,vote_rec_t())).first;
+    vote_m_it it = mapCurrentMNVotes.find(nMNIndex);
+    if(it == mapCurrentMNVotes.end()) {
+        it = mapCurrentMNVotes.insert(vote_m_t::value_type(nMNIndex,vote_rec_t())).first;
     }
     vote_rec_t& recVote = it->second;
     vote_signal_enum_t eSignal = vote.GetSignal();
@@ -157,8 +157,8 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
         int64_t nTimeDelta = nNow - voteInstance.nTime;
         if(nTimeDelta < GOVERNANCE_UPDATE_MIN) {
             std::ostringstream ostr;
-            ostr << "CGovernanceObject::ProcessVote -- Dynode voting too often "
-                 << ", DN outpoint = " << vote.GetVinDynode().prevout.ToStringShort()
+            ostr << "CGovernanceObject::ProcessVote -- Masternode voting too often "
+                 << ", MN outpoint = " << vote.GetVinMasternode().prevout.ToStringShort()
                  << ", governance object hash = " << GetHash().ToString()
                  << ", time delta = " << nTimeDelta << "\n";
             LogPrint("gobject", ostr.str().c_str());
@@ -171,7 +171,7 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     if(!vote.IsValid(true)) {
         std::ostringstream ostr;
         ostr << "CGovernanceObject::ProcessVote -- Invalid vote "
-                << ", DN outpoint = " << vote.GetVinDynode().prevout.ToStringShort()
+                << ", MN outpoint = " << vote.GetVinMasternode().prevout.ToStringShort()
                 << ", governance object hash = " << GetHash().ToString()
                 << ", vote hash = " << vote.GetHash().ToString() << "\n";
         LogPrintf(ostr.str().c_str());
@@ -181,44 +181,44 @@ bool CGovernanceObject::ProcessVote(CNode* pfrom,
     }
     voteInstance = vote_instance_t(vote.GetOutcome(), nVoteTimeUpdate, vote.GetTimestamp());
     fileVotes.AddVote(vote);
-    dnodeman.AddGovernanceVote(vote.GetVinDynode(), vote.GetParentHash());
+    mnodeman.AddGovernanceVote(vote.GetVinMasternode(), vote.GetParentHash());
     fDirtyCache = true;
     return true;
 }
 
 void CGovernanceObject::RebuildVoteMap()
 {
-    vote_m_t mapDNVotesNew;
-    for(vote_m_it it = mapCurrentDNVotes.begin(); it != mapCurrentDNVotes.end(); ++it) {
-        CTxIn vinDynode;
-        if(dnodeman.GetDynodeVinForIndexOld(it->first, vinDynode)) {
-            int nNewIndex = dnodeman.GetDynodeIndex(vinDynode);
+    vote_m_t mapMNVotesNew;
+    for(vote_m_it it = mapCurrentMNVotes.begin(); it != mapCurrentMNVotes.end(); ++it) {
+        CTxIn vinMasternode;
+        if(mnodeman.GetMasternodeVinForIndexOld(it->first, vinMasternode)) {
+            int nNewIndex = mnodeman.GetMasternodeIndex(vinMasternode);
             if((nNewIndex >= 0)) {
-                mapDNVotesNew[nNewIndex] = it->second;
+                mapMNVotesNew[nNewIndex] = it->second;
             }
         }
     }
-    mapCurrentDNVotes = mapDNVotesNew;
+    mapCurrentMNVotes = mapMNVotesNew;
 }
 
-void CGovernanceObject::ClearDynodeVotes()
+void CGovernanceObject::ClearMasternodeVotes()
 {
-    vote_m_it it = mapCurrentDNVotes.begin();
-    while(it != mapCurrentDNVotes.end()) {
+    vote_m_it it = mapCurrentMNVotes.begin();
+    while(it != mapCurrentMNVotes.end()) {
         bool fIndexRebuilt = false;
-        CTxIn vinDynode;
+        CTxIn vinMasternode;
         bool fRemove = true;
-        if(dnodeman.Get(it->first, vinDynode, fIndexRebuilt)) {
-            if(dnodeman.Has(vinDynode)) {
+        if(mnodeman.Get(it->first, vinMasternode, fIndexRebuilt)) {
+            if(mnodeman.Has(vinMasternode)) {
                 fRemove = false;
             }
             else {
-                fileVotes.RemoveVotesFromDynode(vinDynode);
+                fileVotes.RemoveVotesFromMasternode(vinMasternode);
             }
         }
 
         if(fRemove) {
-            mapCurrentDNVotes.erase(it++);
+            mapCurrentMNVotes.erase(it++);
         }
         else {
             ++it;
@@ -233,49 +233,49 @@ std::string CGovernanceObject::GetSignatureMessage() const
         boost::lexical_cast<std::string>(nRevision) + "|" +
         boost::lexical_cast<std::string>(nTime) + "|" +
         strData + "|" +
-        vinDynode.prevout.ToStringShort() + "|" +
+        vinMasternode.prevout.ToStringShort() + "|" +
         nCollateralHash.ToString();
 
     return strMessage;
 }
 
-void CGovernanceObject::SetDynodeInfo(const CTxIn& vin)
+void CGovernanceObject::SetMasternodeInfo(const CTxIn& vin)
 {
-    vinDynode = vin;
+    vinMasternode = vin;
 }
 
-bool CGovernanceObject::Sign(CKey& keyDynode, CPubKey& pubKeyDynode)
+bool CGovernanceObject::Sign(CKey& keyMasternode, CPubKey& pubKeyMasternode)
 {
     std::string strError;
     std::string strMessage = GetSignatureMessage();
 
     LOCK(cs);
 
-    if(!CMessageSigner::SignMessage(strMessage, vchSig, keyDynode)) {
+    if(!CMessageSigner::SignMessage(strMessage, vchSig, keyMasternode)) {
         LogPrintf("CGovernanceObject::Sign -- SignMessage() failed\n");
         return false;
     }
 
-    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyMasternode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernanceObject::Sign -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
 
     LogPrint("gobject", "CGovernanceObject::Sign -- pubkey id = %s, vin = %s\n",
-             pubKeyDynode.GetID().ToString(), vinDynode.prevout.ToStringShort());
+             pubKeyMasternode.GetID().ToString(), vinMasternode.prevout.ToStringShort());
 
 
     return true;
 }
 
-bool CGovernanceObject::CheckSignature(CPubKey& pubKeyDynode)
+bool CGovernanceObject::CheckSignature(CPubKey& pubKeyMasternode)
 {
     std::string strError;
 
     std::string strMessage = GetSignatureMessage();
 
     LOCK(cs);
-    if(!CMessageSigner::VerifyMessage(pubKeyDynode, vchSig, strMessage, strError)) {
+    if(!CMessageSigner::VerifyMessage(pubKeyMasternode, vchSig, strMessage, strError)) {
         LogPrintf("CGovernance::CheckSignature -- VerifyMessage() failed, error: %s\n", strError);
         return false;
     }
@@ -417,14 +417,14 @@ void CGovernanceObject::UpdateLocalValidity()
 
 bool CGovernanceObject::IsValidLocally(std::string& strError, bool fCheckCollateral)
 {
-    bool fMissingDynode = false;
+    bool fMissingMasternode = false;
 
-    return IsValidLocally(strError, fMissingDynode, fCheckCollateral);
+    return IsValidLocally(strError, fMissingMasternode, fCheckCollateral);
 }
 
-bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDynode, bool fCheckCollateral)
+bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingMasternode, bool fCheckCollateral)
 {
-    fMissingDynode = false;
+    fMissingMasternode = false;
 
     if(fUnparsable) {
         strError = "Object data unparseable";
@@ -441,23 +441,23 @@ bool CGovernanceObject::IsValidLocally(std::string& strError, bool& fMissingDyno
             return false;
     }
 
-    // IF ABSOLUTE NO COUNT (NO-YES VALID VOTES) IS MORE THAN 10% OF THE NETWORK DYNODES, OBJ IS INVALID
+    // IF ABSOLUTE NO COUNT (NO-YES VALID VOTES) IS MORE THAN 10% OF THE NETWORK MASTERNODES, OBJ IS INVALID
 
     // CHECK COLLATERAL IF REQUIRED (HIGH CPU USAGE)
 
     if(fCheckCollateral) { 
         if((nObjectType == GOVERNANCE_OBJECT_TRIGGER) || (nObjectType == GOVERNANCE_OBJECT_WATCHDOG)) {
-            std::string strOutpoint = vinDynode.prevout.ToStringShort();
-            dynode_info_t infoDn = dnodeman.GetDynodeInfo(vinDynode);
-            if(!infoDn.fInfoValid) {
-                fMissingDynode = true;
-                strError = "Dynode not found: " + strOutpoint;
+            std::string strOutpoint = vinMasternode.prevout.ToStringShort();
+            masternode_info_t infoMn = mnodeman.GetMasternodeInfo(vinMasternode);
+            if(!infoMn.fInfoValid) {
+                fMissingMasternode = true;
+                strError = "Masternode not found: " + strOutpoint;
                 return false;
             }
 
-            // Check that we have a valid DN signature
-            if(!CheckSignature(infoDn.pubKeyDynode)) {
-                strError = "Invalid dynode signature for: " + strOutpoint + ", pubkey id = " + infoDn.pubKeyDynode.GetID().ToString();
+            // Check that we have a valid MN signature
+            if(!CheckSignature(infoMn.pubKeyMasternode)) {
+                strError = "Invalid masternode signature for: " + strOutpoint + ", pubkey id = " + infoMn.pubKeyMasternode.GetID().ToString();
                 return false;
             }
             return true;
@@ -574,7 +574,7 @@ bool CGovernanceObject::IsCollateralValid(std::string& strError)
 int CGovernanceObject::CountMatchingVotes(vote_signal_enum_t eVoteSignalIn, vote_outcome_enum_t eVoteOutcomeIn) const
 {
     int nCount = 0;
-    for(vote_m_cit it = mapCurrentDNVotes.begin(); it != mapCurrentDNVotes.end(); ++it) {
+    for(vote_m_cit it = mapCurrentMNVotes.begin(); it != mapCurrentMNVotes.end(); ++it) {
         const vote_rec_t& recVote = it->second;
         vote_instance_m_cit it2 = recVote.mapInstances.find(eVoteSignalIn);
         if(it2 == recVote.mapInstances.end()) {
@@ -617,11 +617,11 @@ int CGovernanceObject::GetAbstainCount(vote_signal_enum_t eVoteSignalIn) const
     return CountMatchingVotes(eVoteSignalIn, VOTE_OUTCOME_ABSTAIN);
 }
 
-bool CGovernanceObject::GetCurrentDNVotes(const CTxIn& dnCollateralOutpoint, vote_rec_t& voteRecord)
+bool CGovernanceObject::GetCurrentMNVotes(const CTxIn& mnCollateralOutpoint, vote_rec_t& voteRecord)
 {
-    int nDNIndex = governance.GetDynodeIndex(dnCollateralOutpoint);
-    vote_m_it it = mapCurrentDNVotes.find(nDNIndex);
-    if (it == mapCurrentDNVotes.end()) {
+    int nMNIndex = governance.GetMasternodeIndex(mnCollateralOutpoint);
+    vote_m_it it = mapCurrentMNVotes.find(nMNIndex);
+    if (it == mapCurrentMNVotes.end()) {
         return false;
     }
     voteRecord = it->second;
@@ -638,13 +638,13 @@ void CGovernanceObject::UpdateSentinelVariables()
 {
     // CALCULATE MINIMUM SUPPORT LEVELS REQUIRED
 
-    int nDnCount = dnodeman.CountEnabled();
-    if(nDnCount == 0) return;
+    int nMnCount = mnodeman.CountEnabled();
+    if(nMnCount == 0) return;
 
     // CALCULATE THE MINUMUM VOTE COUNT REQUIRED FOR FULL SIGNAL
 
-    int nAbsVoteReq = std::max(Params().GetConsensus().nGovernanceMinQuorum, nDnCount / 10);
-    int nAbsDeleteReq = std::max(Params().GetConsensus().nGovernanceMinQuorum, (2 * nDnCount) / 3);
+    int nAbsVoteReq = std::max(Params().GetConsensus().nGovernanceMinQuorum, nMnCount / 10);
+    int nAbsDeleteReq = std::max(Params().GetConsensus().nGovernanceMinQuorum, (2 * nMnCount) / 3);
 
     // SET SENTINEL FLAGS TO FALSE
 
@@ -706,7 +706,7 @@ void CGovernanceObject::CheckOrphanVotes()
         if(pairVote.second < nNow) {
             fRemove = true;
         }
-        else if(!dnodeman.Has(vote.GetVinDynode())) {
+        else if(!mnodeman.Has(vote.GetVinMasternode())) {
             ++it;
             continue;
         }

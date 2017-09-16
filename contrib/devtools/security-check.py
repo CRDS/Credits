@@ -75,13 +75,13 @@ def check_ELF_RELRO(executable):
     '''
     Check for read-only relocations.
     GNU_RELRO program header must exist
-    Dynamic section must have BIND_NOW flag
+    Credits section must have BIND_NOW flag
     '''
     have_gnu_relro = False
     for (typ, flags) in get_ELF_program_headers(executable):
         # Note: not checking flags == 'R': here as linkers set the permission differently
         # This does not affect security: the permission flags of the GNU_RELRO program header are ignored, the PT_LOAD header determines the effective permissions.
-        # However, the dynamic linker need to write to this area so these are RW.
+        # However, the credits linker need to write to this area so these are RW.
         # Glibc itself takes care of mprotecting this area R after relocations are finished.
         # See also http://permalink.gmane.org/gmane.comp.gnu.binutils/71347
         if typ == 'GNU_RELRO':
@@ -128,7 +128,7 @@ def get_PE_dll_characteristics(executable):
 
 
 def check_PE_PIE(executable):
-    '''PIE: DllCharacteristics bit 0x40 signifies dynamicbase (ASLR)'''
+    '''PIE: DllCharacteristics bit 0x40 signifies creditsbase (ASLR)'''
     return bool(get_PE_dll_characteristics(executable) & 0x40)
 
 def check_PE_NX(executable):

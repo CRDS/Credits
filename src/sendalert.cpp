@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -19,8 +19,8 @@ If you need to broadcast an alert, here's what to do:
 1. Modify alert parameters below, see alert.* and comments in the code
    for what does what.
 
-2. run dynamicd with -printalert or -sendalert like this:
-   /path/to/dynamicd -printalert
+2. run creditsd with -printalert or -sendalert like this:
+   /path/to/creditsd -printalert
 
 One minute after starting up the alert will be broadcast. It is then
 flooded through the network until the nRelayUntil time, and will be
@@ -55,8 +55,8 @@ void ThreadSendAlert()
     alert.nCancel       = 0;   // cancels previous messages up to this ID number
 
     // These versions are protocol versions
-    alert.nMinVer       = 60800;
-    alert.nMaxVer       = 60800;
+    alert.nMinVer       = 70000;
+    alert.nMaxVer       = 70000;
 
     //
     //  1000 for Misc warnings like out of disk space and clock is wrong
@@ -64,10 +64,10 @@ void ThreadSendAlert()
     //  Higher numbers mean higher priority
     alert.nPriority     = 5000;
     alert.strComment    = "";
-    alert.strStatusBar  = "URGENT: Upgrade required: see https://www.duality.solutions";
+    alert.strStatusBar  = "URGENT: Upgrade required: see https://www.github.com/credits-crds/credits";
 
     // Set specific client version/versions here. If setSubVer is empty, no filtering on subver is done:
-    // alert.setSubVer.insert(std::string("/Dynamic:1.3.0.0/"));
+    // alert.setSubVer.insert(std::string("/Credits:1.0.0.0/"));
 
     // Sign
     if(!alert.Sign())

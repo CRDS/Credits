@@ -52,7 +52,7 @@ class TestSecurityChecks(unittest.TestCase):
                 (1, executable+': failed PIE NX'))
         self.assertEqual(call_security_check(cc, source, executable, ['-Wl,--nxcompat']), 
                 (1, executable+': failed PIE'))
-        self.assertEqual(call_security_check(cc, source, executable, ['-Wl,--nxcompat','-Wl,--dynamicbase']), 
+        self.assertEqual(call_security_check(cc, source, executable, ['-Wl,--nxcompat','-Wl,--creditsbase']), 
                 (0, ''))
 
 if __name__ == '__main__':

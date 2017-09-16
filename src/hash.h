@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_HASH_H
-#define DYNAMIC_HASH_H
+#ifndef CREDITS_HASH_H
+#define CREDITS_HASH_H
 
 #include "crypto/argon2d/argon2.h"
 #include "crypto/blake2/blake2.h"
@@ -235,7 +235,7 @@ unsigned int MurmurHash3(unsigned int nHashSeed, const std::vector<unsigned char
 void BIP32Hash(const ChainCode &chainCode, unsigned int nChild, unsigned char header, const unsigned char data[32], unsigned char output[64]);
 
 
-    /* ----------- Dynamic Hash ------------------------------------------------ */
+    /* ----------- Credits Hash ------------------------------------------------ */
     /// Argon2i, Argon2d, and Argon2id are parametrized by:
     /// A time cost, which defines the amount of computation realized and therefore the execution time, given in number of iterations
     /// A memory cost, which defines the memory usage, given in kibibytes (1 kibibytes = kilobytes 1.024)
@@ -371,4 +371,4 @@ inline uint256 hash_Argon2d_ctx(const void* input, void *Matrix, const unsigned 
 
 #endif
 
-#endif // DYNAMIC_HASH_H
+#endif // CREDITS_HASH_H

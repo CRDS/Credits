@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_SCRIPT_SCRIPT_H
-#define DYNAMIC_SCRIPT_SCRIPT_H
+#ifndef CREDITS_SCRIPT_SCRIPT_H
+#define CREDITS_SCRIPT_SCRIPT_H
 
 #include "crypto/common.h"
 
@@ -658,4 +658,4 @@ public:
     virtual ~CReserveScript() {}
 };
 
-#endif // DYNAMIC_SCRIPT_SCRIPT_H
+#endif // CREDITS_SCRIPT_SCRIPT_H

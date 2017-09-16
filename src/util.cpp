@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/dynamic-config.h"
+#include "config/credits-config.h"
 #endif
 
 #include "util.h"
@@ -92,8 +92,8 @@
 #include <boost/algorithm/string/predicate.hpp> // for startswith() and endswith()
 #include <boost/thread.hpp>
 
-//Dynamic only features
-bool fDyNode = false;
+//Credits only features
+bool fMasterNode = false;
 bool fLiteMode = false;
 /**
     nWalletBackups:
@@ -104,8 +104,8 @@ bool fLiteMode = false;
 */
 int nWalletBackups = 10;
 
-const char * const DYNAMIC_CONF_FILENAME = "dynamic.conf";
-const char * const DYNAMIC_PID_FILENAME = "dynamicd.pid";
+const char * const CREDITS_CONF_FILENAME = "credits.conf";
+const char * const CREDITS_PID_FILENAME = "creditsd.pid";
 
 std::map<std::string, std::string> mapArgs;
 std::map<std::string, std::vector<std::string> > mapMultiArgs;
@@ -259,14 +259,14 @@ bool LogAcceptCategory(const char* category)
             const std::vector<std::string>& categories = mapMultiArgs["-debug"];
             ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
             // thread_specific_ptr automatically deletes the set when the thread ends.
-            // "dynamic" is a composite category enabling all Dynamic-related debug output
-            if(ptrCategory->count(std::string("dynamic"))) {
+            // "credits" is a composite category enabling all Credits-related debug output
+            if(ptrCategory->count(std::string("credits"))) {
                 ptrCategory->insert(std::string("privatesend"));
                 ptrCategory->insert(std::string("instantsend"));
-                ptrCategory->insert(std::string("dynode"));
+                ptrCategory->insert(std::string("masternode"));
                 ptrCategory->insert(std::string("spork"));
                 ptrCategory->insert(std::string("keepass"));
-                ptrCategory->insert(std::string("dnpayments"));
+                ptrCategory->insert(std::string("mnpayments"));
                 ptrCategory->insert(std::string("gobject"));
             }
         }
@@ -484,7 +484,7 @@ static std::string FormatException(const std::exception* pex, const char* pszThr
     char pszModule[MAX_PATH] = "";
     GetModuleFileNameA(NULL, pszModule, sizeof(pszModule));
 #else
-    const char* pszModule = "dynamic";
+    const char* pszModule = "credits";
 #endif
     if (pex)
         return strprintf(
@@ -504,13 +504,13 @@ void PrintExceptionContinue(const std::exception* pex, const char* pszThread)
 boost::filesystem::path GetDefaultDataDir()
 {
     namespace fs = boost::filesystem;
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\Dynamic
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\Dynamic
-    // Mac: ~/Library/Application Support/Dynamic
-    // Unix: ~/.dynamic
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\Credits
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\Credits
+    // Mac: ~/Library/Application Support/Credits
+    // Unix: ~/.credits
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "Dynamic";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "Credits";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -520,10 +520,10 @@ boost::filesystem::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/Dynamic";
+    return pathRet / "Library/Application Support/Credits";
 #else
     // Unix
-    return pathRet / ".dynamic";
+    return pathRet / ".credits";
 #endif
 #endif
 }
@@ -564,8 +564,8 @@ static void WriteConfigFile(FILE* configFile)
     std::string sUserID = "rpcuser=" + GenerateRandomString(RandomIntegerRange(7, 11)) + "\n";
     fputs (sUserID.c_str(), configFile);
     fputs (sRPCpassword.c_str(), configFile);
-    fputs ("rpcport=31350\n", configFile);
-    fputs ("port=31300\n",configFile);
+    fputs ("rpcport=31050\n", configFile);
+    fputs ("port=31000\n",configFile);
     fclose(configFile);
     ReadConfigFile(mapArgs, mapMultiArgs);
 }
@@ -636,16 +636,16 @@ void ClearDatadirCache()
 
 boost::filesystem::path GetConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-conf", DYNAMIC_CONF_FILENAME));
+    boost::filesystem::path pathConfigFile(GetArg("-conf", CREDITS_CONF_FILENAME));
     if (!pathConfigFile.is_complete())
         pathConfigFile = GetDataDir(false) / pathConfigFile;
 
     return pathConfigFile;
 }
 
-boost::filesystem::path GetDynodeConfigFile()
+boost::filesystem::path GetMasternodeConfigFile()
 {
-    boost::filesystem::path pathConfigFile(GetArg("-dnconf", "dynode.conf"));
+    boost::filesystem::path pathConfigFile(GetArg("-dnconf", "masternode.conf"));
     if (!pathConfigFile.is_complete()) pathConfigFile = GetDataDir() / pathConfigFile;
     return pathConfigFile;
 }
@@ -656,12 +656,12 @@ void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet,
     boost::filesystem::ifstream streamConfig(GetConfigFile());
 
     if (!streamConfig.good()){
-        // Create dynamic.conf if it does not exist
+        // Create credits.conf if it does not exist
         FILE* configFile = fopen(GetConfigFile().string().c_str(), "a");
         if (configFile != NULL) {
-            // Write dynamic.conf file with random username and password.
+            // Write credits.conf file with random username and password.
             WriteConfigFile(configFile);
-            // New dynamic.conf file written, now read it.
+            // New credits.conf file written, now read it.
         }
     }
 
@@ -670,7 +670,7 @@ void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet,
 
     for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
     {
-        // Don't overwrite existing settings so command line settings override dynamic.conf
+        // Don't overwrite existing settings so command line settings override credits.conf
         std::string strKey = std::string("-") + it->string_key;
         std::string strValue = it->value[0];
         InterpretNegativeSetting(strKey, strValue);
@@ -685,7 +685,7 @@ void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet,
 #ifndef WIN32
 boost::filesystem::path GetPidFile()
 {
-    boost::filesystem::path pathPidFile(GetArg("-pid", DYNAMIC_PID_FILENAME));
+    boost::filesystem::path pathPidFile(GetArg("-pid", CREDITS_PID_FILENAME));
     if (!pathPidFile.is_complete()) pathPidFile = GetDataDir() / pathPidFile;
     return pathPidFile;
 }

@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_WALLET_CRYPTER_H
-#define DYNAMIC_WALLET_CRYPTER_H
+#ifndef CREDITS_WALLET_CRYPTER_H
+#define CREDITS_WALLET_CRYPTER_H
 
 #include "keystore.h"
 #include "support/allocators/secure.h"
@@ -223,4 +223,4 @@ public:
     boost::signals2::signal<void (CCryptoKeyStore* wallet)> NotifyStatusChanged;
 };
 
-#endif // DYNAMIC_WALLET_CRYPTER_H
+#endif // CREDITS_WALLET_CRYPTER_H

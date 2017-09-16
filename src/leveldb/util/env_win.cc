@@ -543,7 +543,7 @@ void Win32Logger::Logv( const char* format, va_list ap )
     uint64_t thread_id = ::GetCurrentThreadId();
 
     // We try twice: the first time with a fixed-size stack allocated buffer,
-    // and the second time with a much larger dynamically allocated buffer.
+    // and the second time with a much larger creditsally allocated buffer.
     char buffer[500];
     for (int iter = 0; iter < 2; iter++) {
         char* base;

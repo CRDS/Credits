@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -64,9 +64,9 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 sub.involvesWatchAddress = mine & ISMINE_WATCH_ONLY;
                 if (ExtractDestination(txout.scriptPubKey, address) && IsMine(*wallet, address))
                 {
-                    // Received by Dynamic Address
+                    // Received by Credits Address
                     sub.type = TransactionRecord::RecvWithAddress;
-                    sub.address = CDynamicAddress(address).ToString();
+                    sub.address = CCreditsAddress(address).ToString();
                 }
                 else
                 {
@@ -135,8 +135,8 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 CTxDestination address;
                 if (ExtractDestination(wtx.vout[0].scriptPubKey, address))
                 {
-                    // Sent to Dynamic Address
-                    sub.address = CDynamicAddress(address).ToString();
+                    // Sent to Credits Address
+                    sub.address = CCreditsAddress(address).ToString();
                 }
                 else
                 {
@@ -188,9 +188,9 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 CTxDestination address;
                 if (ExtractDestination(txout.scriptPubKey, address))
                 {
-                    // Sent to Dynamic Address
+                    // Sent to Credits Address
                     sub.type = TransactionRecord::SendToAddress;
-                    sub.address = CDynamicAddress(address).ToString();
+                    sub.address = CCreditsAddress(address).ToString();
                 }
                 else
                 {

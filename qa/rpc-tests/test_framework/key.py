@@ -2,7 +2,7 @@
 #
 # key.py - OpenSSL wrapper
 #
-# This file is modified from python-dynamiclib.
+# This file is modified from python-creditslib.
 #
 
 """ECC secp256k1 crypto routines

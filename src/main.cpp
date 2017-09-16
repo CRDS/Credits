@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -14,10 +14,9 @@
 #include "checkpoints.h"
 #include "checkqueue.h"
 #include "consensus/consensus.h"
-#include "dns/dns.h"
-#include "dynode-payments.h"
-#include "dynode-sync.h"
-#include "dynodeman.h"
+#include "masternode-payments.h"
+#include "masternode-sync.h"
+#include "masternodeman.h"
 #include "governance.h"
 #include "hash.h"
 #include "init.h"
@@ -46,7 +45,6 @@
 #include "consensus/validation.h"
 #include "validationinterface.h"
 #include "versionbits.h"
-#include "checkforks.h"
 
 #include <atomic>
 #include <sstream>
@@ -60,7 +58,7 @@
 #include <boost/thread.hpp>
 
 #if defined(NDEBUG)
-# error "Dynamic cannot be compiled without assertions."
+# error "Credits cannot be compiled without assertions."
 #endif
 
 /**
@@ -125,12 +123,10 @@ void EraseOrphansFor(NodeId peer) EXCLUSIVE_LOCKS_REQUIRED(cs_main);
 static bool IsSuperMajority(int minVersion, const CBlockIndex* pstart, unsigned nRequired, const Consensus::Params& consensusParams);
 static void CheckBlockIndex(const Consensus::Params& consensusParams);
 
-CHooks* hooks = InitHook(); //this adds ddns hooks which allow splicing of code inside standard dynamic functions.
-
 /** Constant stuff for coinbase transactions we create: */
 CScript COINBASE_FLAGS;
 
-const std::string strMessageMagic = "Dynamic Signed Message:\n";
+const std::string strMessageMagic = "Credits Signed Message:\n";
 
 // Internal stuff
 namespace {
@@ -1100,36 +1096,6 @@ std::string FormatStateMessage(const CValidationState &state)
         state.GetRejectCode());
 }
 
-// Added for DDNS
-static CAmount GetMinRelayFee(const CTransaction& tx, unsigned int nBytes, bool fAllowFree)
-{
-    {
-        LOCK(mempool.cs);
-        uint256 hash = tx.GetHash();
-        double dPriorityDelta = 0;
-        CAmount nFeeDelta = 0;
-        mempool.ApplyDeltas(hash, dPriorityDelta, nFeeDelta);
-        if (dPriorityDelta > 0 || nFeeDelta > 0)
-            return 0;
-    }
-
-    CAmount nMinFee = ::minRelayTxFee.GetFee(nBytes);
-
-    if (fAllowFree)
-    {
-        // There is a free transaction area in blocks created by most miners,
-        // * If we are relaying we allow transactions up to DEFAULT_BLOCK_PRIORITY_SIZE - 1000
-        //   to be considered to fall into this category. We don't want to encourage sending
-        //   multiple transactions instead of one big transaction to avoid fees.
-        if (nBytes < (DEFAULT_BLOCK_PRIORITY_SIZE - 1000))
-            nMinFee = 0;
-    }
-
-    if (!MoneyRange(nMinFee))
-        nMinFee = MAX_MONEY;
-    return nMinFee;
-}
-
 bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const CTransaction &tx, bool fLimitFree,
                               bool* pfMissingInputs, bool fOverrideMempoolLimit, bool fRejectAbsurdFee,
                               std::vector<uint256>& vHashTxnToUncache, bool fDryRun)
@@ -1153,12 +1119,9 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
         return state.DoS(0, false, REJECT_NONSTANDARD, "premature-version2-tx");
     }
 
-    // Added for DDNS
-    bool isNameTx = tx.nVersion == NAMECOIN_TX_VERSION;
-
     // Rather not work on nonstandard transactions (unless -testnet/-regtest)
     std::string reason;
-    if (fRequireStandard && !IsStandardTx(tx, reason) && !isNameTx)
+    if (fRequireStandard && !IsStandardTx(tx, reason))
         return state.DoS(0, false, REJECT_NONSTANDARD, reason);
 
     // Only accept nLockTime-using transactions that can be mined in the next
@@ -1298,7 +1261,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
         }
 
         // Check for non-standard pay-to-script-hash in inputs
-        if (fRequireStandard && !AreInputsStandard(tx, view) && !isNameTx)
+        if (fRequireStandard && !AreInputsStandard(tx, view))
             return state.Invalid(false, REJECT_NONSTANDARD, "bad-txns-nonstandard-inputs");
 
         unsigned int nSigOps = GetLegacySigOpCount(tx);
@@ -1327,13 +1290,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
 
         CTxMemPoolEntry entry(tx, nFees, GetTime(), dPriority, chainActive.Height(), pool.HasNoInputsOf(tx), inChainInputValue, fSpendsCoinbase, nSigOps, lp);
         unsigned int nSize = entry.GetTxSize();
-        // Added for DDNS
-        // Don't accept it if it can't get into a block
-        CAmount txMinFee = GetMinRelayFee(tx, nSize, true);
-        if ((fLimitFree && nFees < txMinFee) || (isNameTx && !hooks->IsNameFeeEnough(tx, nFees)))
-            return state.DoS(0, error("AcceptToMemoryPool : not enough fees %s, %d < %d",
-                                      hash.ToString(), nFees, txMinFee),
-                             REJECT_INSUFFICIENTFEE, "insufficient fee");
 
         // Check that the transaction doesn't have an excessive number of
         // sigops, making it impossible to mine. Since the coinbase transaction
@@ -1374,11 +1330,6 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState &state, const C
             LogPrint("mempool", "Rate limit dFreeCount: %g => %g\n", dFreeCount, dFreeCount+nSize);
             dFreeCount += nSize;
         }
-        // Added for DDNS
-        if (!isNameTx && nFees > ::minRelayTxFee.GetFee(nSize) * 10000)
-                        return error("AcceptToMemoryPool: : insane fees %s, %d > %d",
-                                 hash.ToString(),
-                                 nFees, ::minRelayTxFee.GetFee(nSize) * 10000);
 
         if (fRejectAbsurdFee && nFees > ::minRelayTxFee.GetFee(nSize) * 10000)
             return state.Invalid(false,
@@ -1806,38 +1757,298 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 {
     if (chainActive.Height() == 0) {
-        CAmount nSubsidy = 4000000 * COIN;
+        CAmount nSubsidy = 475000 * COIN;
         LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nRewardsStart) {
-        LogPrint("zero-reward block creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
-        return BLOCKCHAIN_INIT_REWARD + nFees;
+    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nYr1TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_1_POW_REWARD), YEAR_1_POW_REWARD);
+        return YEAR_1_POW_REWARD + nFees;
     }
-    else if (chainActive.Height() > Params().GetConsensus().nRewardsStart) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(PHASE_1_POW_REWARD), PHASE_1_POW_REWARD);
-        return PHASE_1_POW_REWARD + nFees; // 1 DYN
+    else if (chainActive.Height() > Params().GetConsensus().nYr1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr2TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_2_POW_REWARD), YEAR_2_POW_REWARD);
+        return YEAR_2_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr2TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr3TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_3_POW_REWARD), YEAR_3_POW_REWARD);
+        return YEAR_3_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr4TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_4_POW_REWARD), YEAR_4_POW_REWARD);
+        return YEAR_4_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr4TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr5TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_5_POW_REWARD), YEAR_5_POW_REWARD);
+        return YEAR_5_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr5TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr6TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_6_POW_REWARD), YEAR_6_POW_REWARD);
+        return YEAR_6_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr6TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr7TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_7_POW_REWARD), YEAR_7_POW_REWARD);
+        return YEAR_7_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr7TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr8TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_8_POW_REWARD), YEAR_8_POW_REWARD);
+        return YEAR_8_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr8TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr9TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_9_POW_REWARD), YEAR_9_POW_REWARD);
+        return YEAR_9_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr9TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr10TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_10_POW_REWARD), YEAR_10_POW_REWARD);
+        return YEAR_10_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr10TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr11TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_11_POW_REWARD), YEAR_11_POW_REWARD);
+        return YEAR_11_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr11TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr12TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_12_POW_REWARD), YEAR_12_POW_REWARD);
+        return YEAR_12_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr12TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr13TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_13_POW_REWARD), YEAR_13_POW_REWARD);
+        return YEAR_13_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr13TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr14TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_14_POW_REWARD), YEAR_14_POW_REWARD);
+        return YEAR_14_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr14TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr15TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_15_POW_REWARD), YEAR_15_POW_REWARD);
+        return YEAR_15_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr15TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr16TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_16_POW_REWARD), YEAR_16_POW_REWARD);
+        return YEAR_16_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr16TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr17TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_17_POW_REWARD), YEAR_17_POW_REWARD);
+        return YEAR_17_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr17TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr18TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_18_POW_REWARD), YEAR_18_POW_REWARD);
+        return YEAR_18_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr18TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr19TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_19_POW_REWARD), YEAR_19_POW_REWARD);
+        return YEAR_19_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr19TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr20TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_20_POW_REWARD), YEAR_20_POW_REWARD);
+        return YEAR_20_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr20TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr21TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_21_POW_REWARD), YEAR_21_POW_REWARD);
+        return YEAR_21_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr21TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr22TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_22_POW_REWARD), YEAR_22_POW_REWARD);
+        return YEAR_22_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr22TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr23TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_23_POW_REWARD), YEAR_23_POW_REWARD);
+        return YEAR_23_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr23TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr24TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_24_POW_REWARD), YEAR_24_POW_REWARD);
+        return YEAR_24_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr24TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr25TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_25_POW_REWARD), YEAR_25_POW_REWARD);
+        return YEAR_25_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr25TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr26TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_26_POW_REWARD), YEAR_26_POW_REWARD);
+        return YEAR_26_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr26TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr27TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_27_POW_REWARD), YEAR_27_POW_REWARD);
+        return YEAR_27_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr27TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr28TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_28_POW_REWARD), YEAR_28_POW_REWARD);
+        return YEAR_28_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr28TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr29TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_29_POW_REWARD), YEAR_29_POW_REWARD);
+        return YEAR_29_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr29TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr30TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_30_POW_REWARD), YEAR_30_POW_REWARD);
+        return YEAR_30_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr30TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr31TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_31_POW_REWARD), YEAR_31_POW_REWARD);
+        return YEAR_31_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr31TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr32TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_32_POW_REWARD), YEAR_32_POW_REWARD);
+        return YEAR_32_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr32TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr33TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_33_POW_REWARD), YEAR_33_POW_REWARD);
+        return YEAR_33_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr33TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr34TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_34_POW_REWARD), YEAR_34_POW_REWARD);
+        return YEAR_34_POW_REWARD + nFees;
+    }
+    else if (chainActive.Height() > Params().GetConsensus().nYr34TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr35TotalBlocks) {
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_35_POW_REWARD), YEAR_35_POW_REWARD);
+        return YEAR_35_POW_REWARD + nFees;
     }
     else 
-        return BLOCKCHAIN_INIT_REWARD + nFees;
+        return YEAR_1_POW_REWARD + nFees;
 }
 
-CAmount GetDynodePayment(bool fDynode)
+CAmount GetMasternodePayment(bool fMasternode)
 {   
-    if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() < Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_1_DYNODE_PAYMENT), PHASE_1_DYNODE_PAYMENT);
-        return PHASE_1_DYNODE_PAYMENT; // 0.382 DYN
+    if (fMasternode && chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock && chainActive.Height() <= Params().GetConsensus().nYr1TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_1_MASTERNODE_PAYMENT), YEAR_1_MASTERNODE_PAYMENT);
+        return YEAR_1_MASTERNODE_PAYMENT;
     }
-    else if (fDynode && chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock && chainActive.Height() >= Params().GetConsensus().nUpdateDiffAlgoHeight) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(PHASE_2_DYNODE_PAYMENT), PHASE_2_DYNODE_PAYMENT);
-        return PHASE_2_DYNODE_PAYMENT; // 0.618 DYN
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr2TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_2_MASTERNODE_PAYMENT), YEAR_2_MASTERNODE_PAYMENT);
+        return YEAR_2_MASTERNODE_PAYMENT;
     }
-    else if ((fDynode && !fDynode) && chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
-        LogPrint("creation", "GetDynodePayment() : create=%s DN Payment=%d\n", FormatMoney(BLOCKCHAIN_INIT_REWARD), BLOCKCHAIN_INIT_REWARD);
-        return BLOCKCHAIN_INIT_REWARD;
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr2TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr3TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_3_MASTERNODE_PAYMENT), YEAR_3_MASTERNODE_PAYMENT);
+        return YEAR_3_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr4TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_4_MASTERNODE_PAYMENT), YEAR_4_MASTERNODE_PAYMENT);
+        return YEAR_4_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr4TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr5TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_5_MASTERNODE_PAYMENT), YEAR_5_MASTERNODE_PAYMENT);
+        return YEAR_5_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr5TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr6TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_6_MASTERNODE_PAYMENT), YEAR_6_MASTERNODE_PAYMENT);
+        return YEAR_6_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr6TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr7TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_7_MASTERNODE_PAYMENT), YEAR_7_MASTERNODE_PAYMENT);
+        return YEAR_7_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr7TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr8TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_8_MASTERNODE_PAYMENT), YEAR_8_MASTERNODE_PAYMENT);
+        return YEAR_8_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr8TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr9TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_9_MASTERNODE_PAYMENT), YEAR_9_MASTERNODE_PAYMENT);
+        return YEAR_9_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr9TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr10TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_10_MASTERNODE_PAYMENT), YEAR_10_MASTERNODE_PAYMENT);
+        return YEAR_10_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr10TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr11TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_11_MASTERNODE_PAYMENT), YEAR_11_MASTERNODE_PAYMENT);
+        return YEAR_11_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr11TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr12TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_12_MASTERNODE_PAYMENT), YEAR_12_MASTERNODE_PAYMENT);
+        return YEAR_12_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr12TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr13TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_13_MASTERNODE_PAYMENT), YEAR_13_MASTERNODE_PAYMENT);
+        return YEAR_13_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr13TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr14TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_14_MASTERNODE_PAYMENT), YEAR_14_MASTERNODE_PAYMENT);
+        return YEAR_14_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr14TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr15TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_15_MASTERNODE_PAYMENT), YEAR_15_MASTERNODE_PAYMENT);
+        return YEAR_15_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr15TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr16TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_16_MASTERNODE_PAYMENT), YEAR_16_MASTERNODE_PAYMENT);
+        return YEAR_16_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr16TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr17TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_17_MASTERNODE_PAYMENT), YEAR_17_MASTERNODE_PAYMENT);
+        return YEAR_17_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr17TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr18TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_18_MASTERNODE_PAYMENT), YEAR_18_MASTERNODE_PAYMENT);
+        return YEAR_18_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr18TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr19TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_19_MASTERNODE_PAYMENT), YEAR_19_MASTERNODE_PAYMENT);
+        return YEAR_19_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr19TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr20TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_20_MASTERNODE_PAYMENT), YEAR_20_MASTERNODE_PAYMENT);
+        return YEAR_20_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr20TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr21TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_21_MASTERNODE_PAYMENT), YEAR_21_MASTERNODE_PAYMENT);
+        return YEAR_21_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr21TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr22TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_22_MASTERNODE_PAYMENT), YEAR_22_MASTERNODE_PAYMENT);
+        return YEAR_22_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr22TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr23TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_23_MASTERNODE_PAYMENT), YEAR_23_MASTERNODE_PAYMENT);
+        return YEAR_23_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr23TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr24TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_24_MASTERNODE_PAYMENT), YEAR_24_MASTERNODE_PAYMENT);
+        return YEAR_24_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr24TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr25TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_25_MASTERNODE_PAYMENT), YEAR_25_MASTERNODE_PAYMENT);
+        return YEAR_25_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr25TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr26TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_26_MASTERNODE_PAYMENT), YEAR_26_MASTERNODE_PAYMENT);
+        return YEAR_26_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr26TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr27TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_27_MASTERNODE_PAYMENT), YEAR_27_MASTERNODE_PAYMENT);
+        return YEAR_27_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr27TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr28TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_28_MASTERNODE_PAYMENT), YEAR_28_MASTERNODE_PAYMENT);
+        return YEAR_28_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr28TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr29TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_29_MASTERNODE_PAYMENT), YEAR_29_MASTERNODE_PAYMENT);
+        return YEAR_29_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr29TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr30TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_30_MASTERNODE_PAYMENT), YEAR_30_MASTERNODE_PAYMENT);
+        return YEAR_30_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr30TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr31TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_31_MASTERNODE_PAYMENT), YEAR_31_MASTERNODE_PAYMENT);
+        return YEAR_31_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr31TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr32TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_32_MASTERNODE_PAYMENT), YEAR_32_MASTERNODE_PAYMENT);
+        return YEAR_32_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr32TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr33TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_33_MASTERNODE_PAYMENT), YEAR_33_MASTERNODE_PAYMENT);
+        return YEAR_33_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr33TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr34TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_34_MASTERNODE_PAYMENT), YEAR_34_MASTERNODE_PAYMENT);
+        return YEAR_34_MASTERNODE_PAYMENT;
+    }
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr34TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr35TotalBlocks) {
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_35_MASTERNODE_PAYMENT), YEAR_35_MASTERNODE_PAYMENT);
+        return YEAR_35_MASTERNODE_PAYMENT;
     }
     else
-        return BLOCKCHAIN_INIT_REWARD;
+        return YEAR_1_MASTERNODE_PAYMENT;
 }
 
 bool IsInitialBlockDownload()
@@ -2042,7 +2253,7 @@ void UpdateCoins(const CTransaction& tx, CValidationState &state, CCoinsViewCach
 
 bool CScriptCheck::operator()() {
     const CScript &scriptSig = ptxTo->vin[nIn].scriptSig;
-    if (!VerifyScript(scriptSig, scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, cacheStore), &error, ptxTo->nVersion == NAMECOIN_TX_VERSION)) {
+    if (!VerifyScript(scriptSig, scriptPubKey, nFlags, CachingTransactionSignatureChecker(ptxTo, nIn, cacheStore), &error)) {
         return false;
     }
     return true;
@@ -2390,12 +2601,6 @@ bool DisconnectBlock(const CBlock& block, CValidationState& state, const CBlockI
                 }
 
             }
-
-            // Dynamic: undo name transactions in reverse order
-            if (fWriteNames)
-                for (int i = block.vtx.size() - 1; i >= 0; i--)
-                    hooks->DisconnectInputs(block.vtx[i]);
-
         }
     }
 
@@ -2448,7 +2653,7 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck() {
-    RenameThread("dynamic-scriptch");
+    RenameThread("credits-scriptch");
     scriptcheckqueue.Thread();
 }
 
@@ -2819,7 +3024,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint("bench", "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs]\n", (unsigned)block.vtx.size(), 0.001 * (nTime3 - nTime2), 0.001 * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : 0.001 * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * 0.000001);
 
-    // DYN : MODIFIED TO CHECK DYNODE PAYMENTS AND SUPERBLOCKS
+    // CRDS : MODIFIED TO CHECK MASTERNODE PAYMENTS AND SUPERBLOCKS
 
     // It's possible that we simply don't have enough data and this could fail
     // (i.e. block itself could be a correct one and we need to store it),
@@ -2827,28 +3032,28 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     // the peer who sent us this block is missing some data and wasn't able
     // to recognize that block is actually invalid.
     // TODO: resync data (both ways?) and try to reprocess this block later.
-    bool fDynodePaid = false;
+    bool fMasternodePaid = false;
 
-    if(chainActive.Height() > Params().GetConsensus().nDynodePaymentsStartBlock) {
-        fDynodePaid = true;
+    if(chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock) {
+        fMasternodePaid = true;
     }
-    else if (chainActive.Height() <= Params().GetConsensus().nDynodePaymentsStartBlock) {
-        fDynodePaid = false;
+    else if (chainActive.Height() <= Params().GetConsensus().nMasternodePaymentsStartBlock) {
+        fMasternodePaid = false;
     }
 
-    CAmount nExpectedBlockValue = GetDynodePayment(fDynodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees);
+    CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees);
     std::string strError = "";
 
     if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)){
-        return state.DoS(0, error("ConnectBlock(DYN): %s", strError), REJECT_INVALID, "bad-cb-amount");
+        return state.DoS(0, error("ConnectBlock(CRDS): %s", strError), REJECT_INVALID, "bad-cb-amount");
     }
 
     if (!IsBlockPayeeValid(block.vtx[0], pindex->nHeight, nExpectedBlockValue)) {
         mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
-        return state.DoS(0, error("ConnectBlock(DYN): couldn't find Dynode or Superblock payments"),
+        return state.DoS(0, error("ConnectBlock(CRDS): couldn't find Masternode or Superblock payments"),
                                 REJECT_INVALID, "bad-cb-payee");
     }
-    // END DYNAMIC
+    // END CREDITS
 
     if (!control.Wait())
         return state.DoS(100, false);
@@ -2857,19 +3062,6 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     if (fJustCheck)
         return true;
-
-    // Added for DDNS
-    // Dynamic: collect valid name tx
-    // NOTE: tx.UpdateCoins should not affect this loop, probably...
-    std::vector<CAmount> vFees (block.vtx.size(), 0);
-    std::vector<nameTempProxy> vName;
-    if (fWriteNames)
-        for (unsigned int i=0; i<block.vtx.size(); i++)
-        {
-            const CTransaction &tx = block.vtx[i];
-            if (!tx.IsCoinBase())
-                hooks->CheckInputs(tx, pindex, vName, vPos[i].second, vFees[i]); // collect valid name tx to vName
-        }
 
     // Write undo information to disk
     if (pindex->GetUndoPos().IsNull() || !pindex->IsValid(BLOCK_VALID_SCRIPTS))
@@ -2935,10 +3127,6 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int64_t nTime6 = GetTimeMicros(); nTimeCallbacks += nTime6 - nTime5;
     LogPrint("bench", "    - Callbacks: %.2fms [%.2fs]\n", 0.001 * (nTime6 - nTime5), nTimeCallbacks * 0.000001);
 
-    // Dynamic DDNS: add names to ddns.dat
-    if (fWriteNames)
-        hooks->ConnectBlock(pindex, vName);
-
     return true;
 }
 
@@ -2986,7 +3174,7 @@ bool static FlushStateToDisk(CValidationState &state, FlushStateMode mode) {
     if (nLastSetChain == 0) {
         nLastSetChain = nNow;
     }
-    size_t cacheSize = pcoinsTip->DynamicMemoryUsage();
+    size_t cacheSize = pcoinsTip->CreditsMemoryUsage();
     // The cache is large and close to the limit, but we have time now (not in the middle of a block processing).
     bool fCacheLarge = mode == FLUSH_STATE_PERIODIC && cacheSize * (10.0/9) > nCoinCacheUsage;
     // The cache is over the limit, we have to write now.
@@ -3118,7 +3306,7 @@ void static UpdateTip(CBlockIndex *pindexNew) {
     LogPrintf("%s: new best=%s  height=%d  log2_work=%.8g  tx=%lu  date=%s progress=%f  cache=%.1fMiB(%utx)\n", __func__,
       chainActive.Tip()->GetBlockHash().ToString(), chainActive.Height(), log(chainActive.Tip()->nChainWork.getdouble())/log(2.0), (unsigned long)chainActive.Tip()->nChainTx,
       DateTimeStrFormat("%Y-%m-%d %H:%M:%S", chainActive.Tip()->GetBlockTime()),
-      Checkpoints::GuessVerificationProgress(chainParams.Checkpoints(), chainActive.Tip()), pcoinsTip->DynamicMemoryUsage() * (1.0 / (1<<20)), pcoinsTip->GetCacheSize());
+      Checkpoints::GuessVerificationProgress(chainParams.Checkpoints(), chainActive.Tip()), pcoinsTip->CreditsMemoryUsage() * (1.0 / (1<<20)), pcoinsTip->GetCacheSize());
     if (!warningMessages.empty())
         LogPrintf(" warning='%s'", boost::algorithm::join(warningMessages, ", "));
     LogPrintf("\n");
@@ -3847,7 +4035,7 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                              REJECT_INVALID, "bad-cb-multiple");
 
 
-    // DYNAMIC : CHECK TRANSACTIONS FOR INSTANTSEND
+    // CREDITS : CHECK TRANSACTIONS FOR INSTANTSEND
 
     if(sporkManager.IsSporkActive(SPORK_3_INSTANTSEND_BLOCK_FILTERING)) {
         // We should never accept block which conflicts with completed transaction lock,
@@ -3867,17 +4055,17 @@ bool CheckBlock(const CBlock& block, CValidationState& state, bool fCheckPOW, bo
                     instantsend.Relay(hashLocked);
                     LOCK(cs_main);
                     mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
-                    return state.DoS(0, error("CheckBlock(DYN): transaction %s conflicts with transaction lock %s",
+                    return state.DoS(0, error("CheckBlock(CRDS): transaction %s conflicts with transaction lock %s",
                                                 tx.GetHash().ToString(), hashLocked.ToString()),
                                      REJECT_INVALID, "conflict-tx-lock");
                 }
             }
         }
     } else {
-        LogPrintf("CheckBlock(DYN): spork is off, skipping transaction locking checks\n");
+        LogPrintf("CheckBlock(CRDS): spork is off, skipping transaction locking checks\n");
     }
 
-    // END DYNAMIC
+    // END CREDITS
 
     // Check transactions
     BOOST_FOREACH(const CTransaction& tx, block.vtx)
@@ -3917,19 +4105,18 @@ static bool CheckIndexAgainstCheckpoint(const CBlockIndex* pindexPrev, CValidati
 
 bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationState& state, CBlockIndex * const pindexPrev)
 { 
-    int nHeight = (pindexPrev->nHeight + 1);
+    int nHeight = pindexPrev->nHeight + 1;
+
     uint256 hash = block.GetHash();
     
     if (hash == Params().GetConsensus().hashGenesisBlock)
         return true;
 
     const Consensus::Params& consensusParams = Params().GetConsensus();
-
-    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams)) {
-        if (block.nBits != LegacyRetargetBlock(pindexPrev, &block, consensusParams))
+    
+    if (block.nBits != GetNextWorkRequired(pindexPrev, &block, consensusParams))
             return state.DoS(100, error("%s : incorrect proof of work at %d", __func__, nHeight),
                          REJECT_INVALID, "bad-diffbits");
-    }
 
     // Check timestamp against prev
     if (block.GetBlockTime() <= pindexPrev->GetMedianTimePast())
@@ -4130,7 +4317,7 @@ bool ProcessNewBlock(CValidationState& state, const CChainParams& chainparams, c
     if (!ActivateBestChain(state, chainparams, pblock))
         return error("%s: ActivateBestChain failed", __func__);
 
-    dynodeSync.IsBlockchainSynced(true);
+    masternodeSync.IsBlockchainSynced(true);
 
     LogPrintf("%s : ACCEPTED\n", __func__);
     return true;
@@ -4512,7 +4699,7 @@ bool CVerifyDB::VerifyDB(const CChainParams& chainparams, CCoinsView *coinsview,
             }
         }
         // check level 3: check for inconsistencies during memory-only disconnect of tip blocks
-        if (nCheckLevel >= 3 && pindex == pindexState && (coins.DynamicMemoryUsage() + pcoinsTip->DynamicMemoryUsage()) <= nCoinCacheUsage) {
+        if (nCheckLevel >= 3 && pindex == pindexState && (coins.CreditsMemoryUsage() + pcoinsTip->CreditsMemoryUsage()) <= nCoinCacheUsage) {
             bool fClean = true;
             if (!DisconnectBlock(block, state, pindex, coins, &fClean))
                 return error("VerifyDB(): *** irrecoverable inconsistency in block data at %d, hash=%s", pindex->nHeight, pindex->GetBlockHash().ToString());
@@ -5046,7 +5233,7 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
         return mapBlockIndex.count(inv.hash);
 
     /* 
-        Dynamic Related Inventory Messages
+        Credits Related Inventory Messages
 
         --
 
@@ -5063,20 +5250,20 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_SPORK:
         return mapSporks.count(inv.hash);
 
-    case MSG_DYNODE_PAYMENT_VOTE:
-        return dnpayments.mapDynodePaymentVotes.count(inv.hash);
+    case MSG_MASTERNODE_PAYMENT_VOTE:
+        return mnpayments.mapMasternodePaymentVotes.count(inv.hash);
 
-    case MSG_DYNODE_PAYMENT_BLOCK:
+    case MSG_MASTERNODE_PAYMENT_BLOCK:
         {
             BlockMap::iterator mi = mapBlockIndex.find(inv.hash);
-            return mi != mapBlockIndex.end() && dnpayments.mapDynodeBlocks.find(mi->second->nHeight) != dnpayments.mapDynodeBlocks.end();
+            return mi != mapBlockIndex.end() && mnpayments.mapMasternodeBlocks.find(mi->second->nHeight) != mnpayments.mapMasternodeBlocks.end();
         }
 
-    case MSG_DYNODE_ANNOUNCE:
-        return dnodeman.mapSeenDynodeBroadcast.count(inv.hash) && !dnodeman.IsDnbRecoveryRequested(inv.hash);      
+    case MSG_MASTERNODE_ANNOUNCE:
+        return mnodeman.mapSeenMasternodeBroadcast.count(inv.hash) && !mnodeman.IsMnbRecoveryRequested(inv.hash);      
 
-    case MSG_DYNODE_PING:
-        return dnodeman.mapSeenDynodePing.count(inv.hash);
+    case MSG_MASTERNODE_PING:
+        return mnodeman.mapSeenMasternodePing.count(inv.hash);
 
     case MSG_PSTX:
         return mapPrivatesendBroadcastTxes.count(inv.hash);
@@ -5085,8 +5272,8 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_GOVERNANCE_OBJECT_VOTE:
         return ! governance.ConfirmInventoryRequest(inv);
 
-    case MSG_DYNODE_VERIFY:
-        return dnodeman.mapSeenDynodeVerification.count(inv.hash);
+    case MSG_MASTERNODE_VERIFY:
+        return mnodeman.mapSeenMasternodeVerification.count(inv.hash);
     }
 
     // Don't know what it is, just say we already got one
@@ -5255,28 +5442,28 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     }
                 }
 
-                if (!pushed && inv.type == MSG_DYNODE_PAYMENT_VOTE) {
-                    if(dnpayments.HasVerifiedPaymentVote(inv.hash)) {
+                if (!pushed && inv.type == MSG_MASTERNODE_PAYMENT_VOTE) {
+                    if(mnpayments.HasVerifiedPaymentVote(inv.hash)) {
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
-                        ss << dnpayments.mapDynodePaymentVotes[inv.hash];
-                        pfrom->PushMessage(NetMsgType::DYNODEPAYMENTVOTE, ss);
+                        ss << mnpayments.mapMasternodePaymentVotes[inv.hash];
+                        pfrom->PushMessage(NetMsgType::MASTERNODEPAYMENTVOTE, ss);
                         pushed = true;
                     }
                 }
 
-                if (!pushed && inv.type == MSG_DYNODE_PAYMENT_BLOCK) {
+                if (!pushed && inv.type == MSG_MASTERNODE_PAYMENT_BLOCK) {
                     BlockMap::iterator mi = mapBlockIndex.find(inv.hash);
-                    LOCK(cs_mapDynodeBlocks);
-                    if (mi != mapBlockIndex.end() && dnpayments.mapDynodeBlocks.count(mi->second->nHeight)) {
-                        BOOST_FOREACH(CDynodePayee& payee, dnpayments.mapDynodeBlocks[mi->second->nHeight].vecPayees) {
+                    LOCK(cs_mapMasternodeBlocks);
+                    if (mi != mapBlockIndex.end() && mnpayments.mapMasternodeBlocks.count(mi->second->nHeight)) {
+                        BOOST_FOREACH(CMasternodePayee& payee, mnpayments.mapMasternodeBlocks[mi->second->nHeight].vecPayees) {
                             std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
                             BOOST_FOREACH(uint256& hash, vecVoteHashes) {
-                                if(dnpayments.HasVerifiedPaymentVote(hash)) {
+                                if(mnpayments.HasVerifiedPaymentVote(hash)) {
                                     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                                     ss.reserve(1000);
-                                    ss << dnpayments.mapDynodePaymentVotes[hash];
-                                    pfrom->PushMessage(NetMsgType::DYNODEPAYMENTVOTE, ss);
+                                    ss << mnpayments.mapMasternodePaymentVotes[hash];
+                                    pfrom->PushMessage(NetMsgType::MASTERNODEPAYMENTVOTE, ss);
                                 }
                             }
                         }
@@ -5284,23 +5471,23 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     }
                 }
 
-                if (!pushed && inv.type == MSG_DYNODE_ANNOUNCE) {
-                    if(dnodeman.mapSeenDynodeBroadcast.count(inv.hash)){
+                if (!pushed && inv.type == MSG_MASTERNODE_ANNOUNCE) {
+                    if(mnodeman.mapSeenMasternodeBroadcast.count(inv.hash)){
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
-                        ss << dnodeman.mapSeenDynodeBroadcast[inv.hash].second;
-                        ss << dnodeman.mapSeenDynodeBroadcast[inv.hash];
-                        pfrom->PushMessage(NetMsgType::DNANNOUNCE, ss);
+                        ss << mnodeman.mapSeenMasternodeBroadcast[inv.hash].second;
+                        ss << mnodeman.mapSeenMasternodeBroadcast[inv.hash];
+                        pfrom->PushMessage(NetMsgType::MNANNOUNCE, ss);
                         pushed = true;
                     }
                 }
 
-                if (!pushed && inv.type == MSG_DYNODE_PING) {
-                    if(dnodeman.mapSeenDynodePing.count(inv.hash)) {
+                if (!pushed && inv.type == MSG_MASTERNODE_PING) {
+                    if(mnodeman.mapSeenMasternodePing.count(inv.hash)) {
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
-                        ss << dnodeman.mapSeenDynodePing[inv.hash];
-                        pfrom->PushMessage(NetMsgType::DNPING, ss);
+                        ss << mnodeman.mapSeenMasternodePing[inv.hash];
+                        pfrom->PushMessage(NetMsgType::MNPING, ss);
                         pushed = true;
                     }
                 }
@@ -5329,7 +5516,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     }
                     LogPrint("net", "ProcessGetData -- MSG_GOVERNANCE_OBJECT: topush = %d, inv = %s\n", topush, inv.ToString());
                     if(topush) {
-                        pfrom->PushMessage(NetMsgType::DNGOVERNANCEOBJECT, ss);
+                        pfrom->PushMessage(NetMsgType::MNGOVERNANCEOBJECT, ss);
                         pushed = true;
                     }
                 }
@@ -5347,17 +5534,17 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     }
                     if(topush) {
                         LogPrint("net", "ProcessGetData -- pushing: inv = %s\n", inv.ToString());
-                        pfrom->PushMessage(NetMsgType::DNGOVERNANCEOBJECTVOTE, ss);
+                        pfrom->PushMessage(NetMsgType::MNGOVERNANCEOBJECTVOTE, ss);
                         pushed = true;
                     }
                 }
 
-                if (!pushed && inv.type == MSG_DYNODE_VERIFY) {
-                    if(dnodeman.mapSeenDynodeVerification.count(inv.hash)) {
+                if (!pushed && inv.type == MSG_MASTERNODE_VERIFY) {
+                    if(mnodeman.mapSeenMasternodeVerification.count(inv.hash)) {
                         CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
                         ss.reserve(1000);
-                        ss << dnodeman.mapSeenDynodeVerification[inv.hash];
-                        pfrom->PushMessage(NetMsgType::DNVERIFY, ss);
+                        ss << mnodeman.mapSeenMasternodeVerification[inv.hash];
+                        pfrom->PushMessage(NetMsgType::MNVERIFY, ss);
                         pushed = true;
                     }
                 }
@@ -5895,27 +6082,27 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
                 return true; // not an error
             }
 
-            CDynode* pdn = dnodeman.Find(pstx.vin);
-            if(pdn == NULL) {
-                LogPrint("privatesend", "PSTX -- Can't find Dynode %s to verify %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
+            CMasternode* pmn = mnodeman.Find(pstx.vin);
+            if(pmn == NULL) {
+                LogPrint("privatesend", "PSTX -- Can't find Masternode %s to verify %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
                 return false;
             }
 
-            if(!pdn->fAllowMixingTx) {
-                LogPrint("privatesend", "PSTX -- Dynode %s is sending too many transactions %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
+            if(!pmn->fAllowMixingTx) {
+                LogPrint("privatesend", "PSTX -- Masternode %s is sending too many transactions %s\n", pstx.vin.prevout.ToStringShort(), hashTx.ToString());
                 return true;
                 // TODO: Not an error? Could it be that someone is relaying old PSTXes
                 // we have no idea about (e.g we were offline)? How to handle them?
             }
 
-            if(!pstx.CheckSignature(pdn->pubKeyDynode)) {
+            if(!pstx.CheckSignature(pmn->pubKeyMasternode)) {
                 LogPrint("privatesend", "PSTX -- CheckSignature() failed for %s\n", hashTx.ToString());
                 return false;
             }
 
-            LogPrintf("PSTX -- Got Dynode transaction %s\n", hashTx.ToString());
+            LogPrintf("PSTX -- Got Masternode transaction %s\n", hashTx.ToString());
             mempool.PrioritiseTransaction(hashTx, hashTx.ToString(), 1000, 0.1*COIN);
-            pdn->fAllowMixingTx = false;
+            pmn->fAllowMixingTx = false;
         }
 
         LOCK(cs_main);
@@ -5929,7 +6116,7 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
         {
             // Process custom txes, this changes AlreadyHave to "true"
             if (strCommand == NetMsgType::PSTX) {
-                LogPrintf("PSTX -- Dynode transaction accepted, txid=%s, peer=%d\n",
+                LogPrintf("PSTX -- Masternode transaction accepted, txid=%s, peer=%d\n",
                         tx.GetHash().ToString(), pfrom->id);
                 mapPrivatesendBroadcastTxes.insert(std::make_pair(tx.GetHash(), pstx));
             } else if (strCommand == NetMsgType::TXLOCKREQUEST) {
@@ -5947,7 +6134,7 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
             LogPrint("mempool", "AcceptToMemoryPool: peer=%d: accepted %s (poolsz %u txn, %u kB)\n",
                 pfrom->id,
                 tx.GetHash().ToString(),
-                mempool.size(), mempool.DynamicMemoryUsage() / 1000);
+                mempool.size(), mempool.CreditsMemoryUsage() / 1000);
 
             // Recursively process any orphan transactions that depended on this one
             std::set<NodeId> setMisbehaving;
@@ -6520,11 +6707,11 @@ bool static ProcessMessage(CNode* pfrom, std::string strCommand, CDataStream& vR
         {
             //probably one the extensions
             privateSendPool.ProcessMessage(pfrom, strCommand, vRecv);
-            dnodeman.ProcessMessage(pfrom, strCommand, vRecv);
-            dnpayments.ProcessMessage(pfrom, strCommand, vRecv);
+            mnodeman.ProcessMessage(pfrom, strCommand, vRecv);
+            mnpayments.ProcessMessage(pfrom, strCommand, vRecv);
             instantsend.ProcessMessage(pfrom, strCommand, vRecv);
             sporkManager.ProcessSpork(pfrom, strCommand, vRecv);
-            dynodeSync.ProcessMessage(pfrom, strCommand, vRecv);
+            masternodeSync.ProcessMessage(pfrom, strCommand, vRecv);
             governance.ProcessMessage(pfrom, strCommand, vRecv);
         }
         else

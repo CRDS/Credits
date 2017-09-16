@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
+# Copyright (c) 2017 Credits Developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -7,10 +7,10 @@
 # Test -alertnotify 
 #
 
-from test_framework.test_framework import DynamicTestFramework
+from test_framework.test_framework import CreditsTestFramework
 from test_framework.util import *
 
-class ForkNotifyTest(DynamicTestFramework):
+class ForkNotifyTest(CreditsTestFramework):
 
     alert_filename = None  # Set by setup_network
 

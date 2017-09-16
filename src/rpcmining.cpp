@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,7 +12,7 @@
 #include "consensus/consensus.h"
 #include "core_io.h"
 #ifdef ENABLE_WALLET
-#include "dynode-sync.h"
+#include "masternode-sync.h"
 #endif
 #include "init.h"
 #include "main.h"
@@ -64,26 +64,6 @@ void ShutdownRPCMining()
         return;
 
     delete pMiningKey; pMiningKey = NULL;
-}
-
-UniValue getpowrewardstart(const UniValue& params, bool fHelp)
-{
-    if (fHelp || params.size() > 1)
-        throw std::runtime_error(
-            "getpowrewardstart [nHeight]\n"
-            "Returns block when PoW rewards begin.");
-
-    return Params().GetConsensus().nRewardsStart +1;
-}
-
-UniValue getdynoderewardstart(const UniValue& params, bool fHelp)
-{
-    if (fHelp || params.size() > 1)
-        throw std::runtime_error(
-            "getdynoderewardstart [nHeight]\n"
-            "Returns block when Dynode rewards begin.");
-
-    return Params().GetConsensus().nDynodePaymentsStartBlock +1;
 }
 
 /**
@@ -156,7 +136,7 @@ UniValue getgenerate(const UniValue& params, bool fHelp)
         throw std::runtime_error(
             "getgenerate\n"
             "\nReturn if the server is set to generate coins or not. The default is false.\n"
-            "It is set with the command line argument -gen (or " + std::string(DYNAMIC_CONF_FILENAME) + " setting gen)\n"
+            "It is set with the command line argument -gen (or " + std::string(CREDITS_CONF_FILENAME) + " setting gen)\n"
             "It can also be set with the setgenerate call.\n"
             "\nResult\n"
             "true|false      (boolean) If the server is set to generate coins or not\n"
@@ -282,7 +262,7 @@ UniValue setgenerate(const UniValue& params, bool fHelp)
 
     mapArgs["-gen"] = (fGenerate ? "1" : "0");
     mapArgs ["-genproclimit"] = itostr(nGenProcLimit);
-    GenerateDynamics(fGenerate, nGenProcLimit, Params());
+    GenerateCreditss(fGenerate, nGenProcLimit, Params());
 
     return NullUniValue;
 }
@@ -410,140 +390,6 @@ std::string gbt_vb_name(const Consensus::DeploymentPos pos)
     return s;
 }
 
-UniValue getwork(const UniValue& params, bool fHelp)
-{
-    if (fHelp || params.size() > 1)
-        throw std::runtime_error(
-            "getwork ( \"data\" )\n"
-            "\nIf 'data' is not specified, it returns the formatted hash data to work on.\n"
-            "If 'data' is specified, tries to solve the block and returns true if it was successful.\n"
-            "\nArguments:\n"
-            "1. \"data\"       (string, optional) The hex encoded data to solve\n"
-            "\nResult (when 'data' is not specified):\n"
-            "{\n"
-            "  \"midstate\" : \"xxxx\",   (string) The precomputed hash state after hashing the first half of the data (DEPRECATED)\n" // deprecated
-            "  \"data\" : \"xxxxx\",      (string) The block data\n"
-            "  \"hash1\" : \"xxxxx\",     (string) The formatted hash buffer for second hash (DEPRECATED)\n" // deprecated
-            "  \"target\" : \"xxxx\"      (string) The little endian hash target\n"
-            "}\n"
-            "\nResult (when 'data' is specified):\n"
-            "true|false       (boolean) If solving the block specified in the 'data' was successfull\n"
-            "\nExamples:\n"
-            + HelpExampleCli("getwork", "")
-            + HelpExampleRpc("getwork", "")
-        );
-
-    if (vNodes.empty())
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Dynamic is not connected!");
-
-    if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
-
-    if (!dynodeSync.IsSynced())     
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is syncing with network...");
-
-    typedef std::map<uint256, std::pair<CBlock*, CScript> > mapNewBlock_t;
-    static mapNewBlock_t mapNewBlock;    // FIXME: thread safety
-    static std::vector<CBlockTemplate*> vNewBlockTemplate;
-
-    if (params.size() == 0)
-    {
-        // Update block
-        static unsigned int nTransactionsUpdatedLast;
-		static CBlockIndex* pindexPrev;
-		static int64_t nStart;
-        static std::unique_ptr<CBlockTemplate> pblocktemplate;
-		
-        if (pindexPrev != chainActive.Tip() ||
-            (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 5))
-        {
-            if (pindexPrev != chainActive.Tip())
-            {
-                // Deallocate old blocks since they're obsolete now
-                mapNewBlock.clear();
-                BOOST_FOREACH(CBlockTemplate* pblocktemplate, vNewBlockTemplate)
-                    delete pblocktemplate;
-                vNewBlockTemplate.clear();
-            }
-
-            // Clear pindexPrev so future calls make a new block, despite any failures from here on
-            pindexPrev = nullptr;
-
-            // Store the chainActive.Tip() used before CreateNewBlock, to avoid races
-            nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
-            CBlockIndex* pindexPrevNew = chainActive.Tip();
-            nStart = GetTime();
-
-            // Create new block
-            CScript scriptDummy = CScript() << OP_TRUE;
-            pblocktemplate = CreateNewBlock(Params(), scriptDummy);
-            if (!pblocktemplate)
-                throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
-
-            // Need to update only after we know CreateNewBlock succeeded
-            pindexPrev = pindexPrevNew;
-        }
-    
-		CBlock* pblock = &pblocktemplate->block; // pointer for convenience
-		const Consensus::Params& consensusParams = Params().GetConsensus();
-
-		// Update nTime
-		UpdateTime(pblock, consensusParams, pindexPrev);
-		pblock->nNonce = 0;
-    
-        // Update nExtraNonce
-        static unsigned int nExtraNonce = 0;
-        IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
-
-        // Save
-        mapNewBlock[pblock->hashMerkleRoot] = std::make_pair(pblock, pblock->vtx[0].vin[0].scriptSig);
-
-        // Pre-build hash buffers
-        char pmidstate[32];
-        char pdata[128];
-        char phash1[64];
-        FormatHashBuffers(pblock, pmidstate, pdata, phash1);
-
-        arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits);
-
-        UniValue result(UniValue::VOBJ);
-        result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate)))); // deprecated
-        result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
-        result.push_back(Pair("hash1",    HexStr(BEGIN(phash1), END(phash1)))); // deprecated
-        result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
-        return result;
-    }
-    else
-    {
-        // Parse parameters
-        std::vector<unsigned char> vchData = ParseHex(params[0].get_str());
-        if (vchData.size() != 128)
-            throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
-        CBlock* pdata = (CBlock*)&vchData[0];
-
-        // Byte reverse
-        for (int i = 0; i < 128/4; i++)
-            ((unsigned int*)pdata)[i] = ByteReverse(((unsigned int*)pdata)[i]);
-
-        // Get saved block
-        if (!mapNewBlock.count(pdata->hashMerkleRoot))
-            return false;
-        CBlock* pblock = mapNewBlock[pdata->hashMerkleRoot].first;
-
-        pblock->nTime = pdata->nTime;
-        pblock->nNonce = pdata->nNonce;
-        CMutableTransaction newTx;
-        // Use CMutableTransaction when creating a new transaction instead of CTransaction.  CTransaction public variables are all const now.
-        newTx.vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second; // Oh, why? because vin is const in CTransaction now.  
-        pblock->vtx[0] = newTx;
-        pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
-
-        assert(pwalletMain != NULL);
-        const CChainParams& chainParams = Params();
-        return CheckWork(chainParams, pblock, *pwalletMain, *pMiningKey);
-    }
-}
-
 UniValue getblocktemplate(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
@@ -607,13 +453,13 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
             "  \"curtime\" : ttt,                  (numeric) current timestamp in seconds since epoch (Jan 1 1970 GMT)\n"
             "  \"bits\" : \"xxx\",                 (string) compressed target of next block\n"
             "  \"height\" : n                      (numeric) The height of the next block\n"
-            "  \"dynode\" : {                   (json object) required Dynode payee that must be included in the next block\n"
+            "  \"masternode\" : {                   (json object) required Masternode payee that must be included in the next block\n"
             "      \"payee\" : \"xxxx\",             (string) payee address\n"
             "      \"script\" : \"xxxx\",            (string) payee scriptPubKey\n"
             "      \"amount\": n                   (numeric) required amount to pay\n"
             "  },\n"
-            "  \"dynode_payments_started\" :  true|false, (boolean) true, if Dynode payments started\n"
-            "  \"dynode_payments_enforced\" : true|false, (boolean) true, if Dynode payments are enforced\n"
+            "  \"masternode_payments_started\" :  true|false, (boolean) true, if Masternode payments started\n"
+            "  \"masternode_payments_enforced\" : true|false, (boolean) true, if Masternode payments are enforced\n"
             "  \"superblock\" : [                  (array) required superblock payees that must be included in the next block\n"
             "      {\n"
             "         \"payee\" : \"xxxx\",          (string) payee address\n"
@@ -700,10 +546,10 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid mode");
 
     if (vNodes.empty())
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Dynamic is not connected!");
+        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Credits is not connected!");
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Dynamic is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Credits is downloading blocks...");
 
     static unsigned int nTransactionsUpdatedLast;
 
@@ -910,18 +756,18 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     result.push_back(Pair("bits", strprintf("%08x", pblock->nBits)));
     result.push_back(Pair("height", (int64_t)(pindexPrev->nHeight+1)));
 
-    UniValue dynodeObj(UniValue::VOBJ);
-    if(pblock->txoutDynode != CTxOut()) {
+    UniValue masternodeObj(UniValue::VOBJ);
+    if(pblock->txoutMasternode != CTxOut()) {
         CTxDestination address1;
-        ExtractDestination(pblock->txoutDynode.scriptPubKey, address1);
-        CDynamicAddress address2(address1);
-        dynodeObj.push_back(Pair("payee", address2.ToString().c_str()));
-        dynodeObj.push_back(Pair("script", HexStr(pblock->txoutDynode.scriptPubKey.begin(), pblock->txoutDynode.scriptPubKey.end())));
-        dynodeObj.push_back(Pair("amount", pblock->txoutDynode.nValue));
+        ExtractDestination(pblock->txoutMasternode.scriptPubKey, address1);
+        CCreditsAddress address2(address1);
+        masternodeObj.push_back(Pair("payee", address2.ToString().c_str()));
+        masternodeObj.push_back(Pair("script", HexStr(pblock->txoutMasternode.scriptPubKey.begin(), pblock->txoutMasternode.scriptPubKey.end())));
+        masternodeObj.push_back(Pair("amount", pblock->txoutMasternode.nValue));
     }
-    result.push_back(Pair("dynode", dynodeObj));
-    result.push_back(Pair("dynode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nDynodePaymentsStartBlock));
-    result.push_back(Pair("dynode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_DYNODE_PAYMENT_ENFORCEMENT)));
+    result.push_back(Pair("masternode", masternodeObj));
+    result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nMasternodePaymentsStartBlock));
+    result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
 
     UniValue superblockObjArray(UniValue::VARR);
     if(pblock->voutSuperblock.size()) {
@@ -929,7 +775,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
             UniValue entry(UniValue::VOBJ);
             CTxDestination address1;
             ExtractDestination(txout.scriptPubKey, address1);
-            CDynamicAddress address2(address1);
+            CCreditsAddress address2(address1);
             entry.push_back(Pair("payee", address2.ToString().c_str()));
             entry.push_back(Pair("script", HexStr(txout.scriptPubKey.begin(), txout.scriptPubKey.end())));
             entry.push_back(Pair("amount", txout.nValue));

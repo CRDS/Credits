@@ -100,20 +100,20 @@ struct Options {
   // Approximate size of user data packed per block.  Note that the
   // block size specified here corresponds to uncompressed data.  The
   // actual size of the unit read from disk may be smaller if
-  // compression is enabled.  This parameter can be changed dynamically.
+  // compression is enabled.  This parameter can be changed creditsally.
   //
   // Default: 4K
   size_t block_size;
 
   // Number of keys between restart points for delta encoding of keys.
-  // This parameter can be changed dynamically.  Most clients should
+  // This parameter can be changed creditsally.  Most clients should
   // leave this parameter alone.
   //
   // Default: 16
   int block_restart_interval;
 
   // Compress blocks using the specified compression algorithm.  This
-  // parameter can be changed dynamically.
+  // parameter can be changed creditsally.
   //
   // Default: kSnappyCompression, which gives lightweight but fast
   // compression.

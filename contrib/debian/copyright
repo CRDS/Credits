@@ -1,13 +1,13 @@
 Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?rev=174
-Upstream-Name: Dynamic
+Upstream-Name: Bitcoin
 Upstream-Contact: Satoshi Nakamoto <satoshin@gmx.com>
- irc://#dynamic@freenode.net
-Source: https://github.com/duality-solutions/dynamic
+ irc://#credits@freenode.net
+Source: https://github.com/bitcoin/bitcoin
 
 Files: *
-Copyright: 2015-2017, Duality Blockchain Solutions
+Copyright: 2009-2017, The Bitcoin Core Developers
 License: Expat
-Comment: The Duality Blockchain Solution Developers encompasses the current developers listed on https://duality.solutions, as well as the numerous contributors to the project.
+Comment: The Bitcoin Core Developers encompasses the current developers listed on https://github.com/bitcoin, as well as the numerous contributors to the project.
 
 Files: src/json/*
 Copyright: 2007-2009, John W. Wilkinson
@@ -64,7 +64,7 @@ Copyright: http://www.everaldo.com
 License: LGPL
 Comment: Icon Pack: Crystal SVG
 
-Files: src/qt/res/icons/dynamic.png, src/qt/res/icons/toolbar.png
+Files: src/qt/res/icons/credits.png, src/qt/res/icons/toolbar.png
 Copyright: Bitboy (optimized for 16x16 by Wladimir van der Laan)
 License: PUB-DOM
 Comment: Site: https://bitcointalk.org/?topic=1756.0

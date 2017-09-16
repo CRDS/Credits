@@ -1,13 +1,13 @@
-TESTS += test/test_dynamic
-bin_PROGRAMS += test/test_dynamic
+TESTS += test/test_credits
+bin_PROGRAMS += test/test_credits
 TEST_SRCDIR = test
-TEST_BINARY=test/test_dynamic$(EXEEXT)
+TEST_BINARY=test/test_credits$(EXEEXT)
 
 
 EXTRA_DIST += \
 	test/bctest.py \
-	test/dynamic-util-test.py \
-	test/data/dynamic-util-test.json \
+	test/credits-util-test.py \
+	test/data/credits-util-test.json \
 	test/data/blanktx.hex \
 	test/data/tt-delin1-out.hex \
 	test/data/tt-delout1-out.hex \
@@ -33,7 +33,7 @@ RAW_TEST_FILES = test/data/alertTests.raw
 
 GENERATED_TEST_FILES = $(JSON_TEST_FILES:.json=.json.h) $(RAW_TEST_FILES:.raw=.raw.h)
 
-DYNAMIC_TESTS =\
+CREDITS_TESTS =\
   test/arith_uint256_tests.cpp \
   test/scriptnum10.h \
   test/addrman_tests.cpp \
@@ -83,8 +83,8 @@ DYNAMIC_TESTS =\
   test/sigopcount_tests.cpp \
   test/skiplist_tests.cpp \
   test/streams_tests.cpp \
-  test/test_dynamic.cpp \
-  test/test_dynamic.h \
+  test/test_credits.cpp \
+  test/test_credits.h \
   test/test_random.h \
   test/timedata_tests.cpp \
   test/transaction_tests.cpp \
@@ -95,47 +95,47 @@ DYNAMIC_TESTS =\
   test/util_tests.cpp
 
 if ENABLE_WALLET
-DYNAMIC_TESTS += \
+CREDITS_TESTS += \
   test/accounting_tests.cpp \
   wallet/test/wallet_tests.cpp \
   test/rpc_wallet_tests.cpp
 endif
 
-test_test_dynamic_SOURCES = $(DYNAMIC_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
-test_test_dynamic_CPPFLAGS = $(AM_CPPFLAGS) $(DYNAMIC_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
-test_test_dynamic_LDADD = $(LIBDYNAMIC_SERVER) $(LIBDYNAMIC_CLI) $(LIBDYNAMIC_COMMON) $(LIBDYNAMIC_UTIL) $(LIBDYNAMIC_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) \
+test_test_credits_SOURCES = $(CREDITS_TESTS) $(JSON_TEST_FILES) $(RAW_TEST_FILES)
+test_test_credits_CPPFLAGS = $(AM_CPPFLAGS) $(CREDITS_INCLUDES) -I$(builddir)/test/ $(TESTDEFS) $(EVENT_CFLAGS)
+test_test_credits_LDADD = $(LIBCREDITS_SERVER) $(LIBCREDITS_CLI) $(LIBCREDITS_COMMON) $(LIBCREDITS_UTIL) $(LIBCREDITS_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) \
   $(BOOST_LIBS) $(BOOST_UNIT_TEST_FRAMEWORK_LIB) $(LIBSECP256K1)
-test_test_dynamic_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+test_test_credits_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 if ENABLE_WALLET
-test_test_dynamic_LDADD += $(LIBDYNAMIC_WALLET)
+test_test_credits_LDADD += $(LIBCREDITS_WALLET)
 endif
 
-test_test_dynamic_LDADD += $(LIBDYNAMIC_CONSENSUS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
-test_test_dynamic_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
+test_test_credits_LDADD += $(LIBCREDITS_CONSENSUS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS)
+test_test_credits_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS) -static
 
 if ENABLE_ZMQ
-test_test_dynamic_LDADD += $(ZMQ_LIBS)
+test_test_credits_LDADD += $(ZMQ_LIBS)
 endif
 
-nodist_test_test_dynamic_SOURCES = $(GENERATED_TEST_FILES)
+nodist_test_test_credits_SOURCES = $(GENERATED_TEST_FILES)
 
-$(DYNAMIC_TESTS): $(GENERATED_TEST_FILES)
+$(CREDITS_TESTS): $(GENERATED_TEST_FILES)
 
-CLEAN_DYNAMIC_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES)
+CLEAN_CREDITS_TEST = test/*.gcda test/*.gcno $(GENERATED_TEST_FILES)
 
-CLEANFILES += $(CLEAN_DYNAMIC_TEST)
+CLEANFILES += $(CLEAN_CREDITS_TEST)
 
-dynamic_test: $(TEST_BINARY)
+credits_test: $(TEST_BINARY)
 
-dynamic_test_check: $(TEST_BINARY) FORCE
+credits_test_check: $(TEST_BINARY) FORCE
 	$(MAKE) check-TESTS TESTS=$^
 
-dynamic_test_clean : FORCE
-	rm -f $(CLEAN_DYNAMIC_TEST) $(test_test_dynamic_OBJECTS) $(TEST_BINARY)
+credits_test_clean : FORCE
+	rm -f $(CLEAN_CREDITS_TEST) $(test_test_credits_OBJECTS) $(TEST_BINARY)
 
 check-local:
-	@echo "Running test/dynamic-util-test.py..."
-	$(AM_V_at)srcdir=$(srcdir) PYTHONPATH=$(builddir)/test $(srcdir)/test/dynamic-util-test.py
+	@echo "Running test/credits-util-test.py..."
+	$(AM_V_at)srcdir=$(srcdir) PYTHONPATH=$(builddir)/test $(srcdir)/test/credits-util-test.py
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C secp256k1 check
 	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C univalue check
 

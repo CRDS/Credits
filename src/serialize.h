@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_SERIALIZE_H
-#define DYNAMIC_SERIALIZE_H
+#ifndef CREDITS_SERIALIZE_H
+#define CREDITS_SERIALIZE_H
 
 #include "compat/endian.h"
 #include "prevector.h"
@@ -955,4 +955,4 @@ public:
     }
 };
 
-#endif // DYNAMIC_SERIALIZE_H
+#endif // CREDITS_SERIALIZE_H

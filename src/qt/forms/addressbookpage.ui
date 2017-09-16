@@ -137,7 +137,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../dynamic.qrc"/>
+  <include location="../credits.qrc"/>
  </resources>
  <connections/>
 </ui>

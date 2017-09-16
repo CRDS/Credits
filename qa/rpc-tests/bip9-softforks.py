@@ -1,5 +1,5 @@
 #!/usr/bin/env python2
-# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
+# Copyright (c) 2017 Credits Developers
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #
@@ -197,7 +197,7 @@ class BIP9SoftForksTest(ComparisonTestFramework):
 
         # Restart all
         stop_nodes(self.nodes)
-        wait_dynamicds()
+        wait_creditsds()
         shutil.rmtree(self.options.tmpdir)
         self.setup_chain()
         self.setup_network()

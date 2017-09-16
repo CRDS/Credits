@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_GUICONSTANTS_H
-#define DYNAMIC_QT_GUICONSTANTS_H
+#ifndef CREDITS_QT_GUICONSTANTS_H
+#define CREDITS_QT_GUICONSTANTS_H
 
 /* Milliseconds between model updates */
 static const int MODEL_UPDATE_DELAY = 250;
@@ -14,7 +14,7 @@ static const int MODEL_UPDATE_DELAY = 250;
 /* AskPassphraseDialog -- Maximum passphrase length */
 static const int MAX_PASSPHRASE_SIZE = 1024;
 
-/* DynamicGUI -- Size of icons in status bar */
+/* CreditsGUI -- Size of icons in status bar */
 static const int STATUSBAR_ICONSIZE = 16;
 
 static const bool DEFAULT_SPLASHSCREEN = true;
@@ -49,9 +49,9 @@ static const int MAX_URI_LENGTH = 255;
 /* Number of frames in spinner animation */
 #define SPINNER_FRAMES 36
 
-#define QAPP_ORG_NAME "Duality Solutions"
-#define QAPP_ORG_DOMAIN "duality.solutions"
-#define QAPP_APP_NAME_DEFAULT "Dynamic-Qt"
-#define QAPP_APP_NAME_TESTNET "Dynamic-Qt-testnet"
+#define QAPP_ORG_NAME "Credits"
+#define QAPP_ORG_DOMAIN "github.com/credits-crds/credits"
+#define QAPP_APP_NAME_DEFAULT "Credits-Qt"
+#define QAPP_APP_NAME_TESTNET "Credits-Qt-testnet"
 
-#endif // DYNAMIC_QT_GUICONSTANTS_H
+#endif // CREDITS_QT_GUICONSTANTS_H

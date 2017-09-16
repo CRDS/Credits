@@ -1,16 +1,16 @@
 #!/usr/bin/env python2
-# Copyright (c) 2016-2017 The Duality Blockchain Solutions developers
+# Copyright (c) 2017 Credits Developers
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #
 # Test -reindex and -reindex-chainstate with CheckBlockIndex
 #
-from test_framework.test_framework import DynamicTestFramework
+from test_framework.test_framework import CreditsTestFramework
 from test_framework.util import *
 import time
 
-class ReindexTest(DynamicTestFramework):
+class ReindexTest(CreditsTestFramework):
 
     def setup_chain(self):
         print("Initializing test directory "+self.options.tmpdir)
@@ -25,7 +25,7 @@ class ReindexTest(DynamicTestFramework):
         self.nodes[0].generate(3)
         blockcount = self.nodes[0].getblockcount()
         stop_node(self.nodes[0], 0)
-        wait_dynamicds()
+        wait_creditsds()
         self.nodes[0]=start_node(0, self.options.tmpdir, ["-debug", "-reindex-chainstate" if justchainstate else "-reindex", "-checkblockindex=1"])
         while self.nodes[0].getblockcount() < blockcount:
             time.sleep(0.1)

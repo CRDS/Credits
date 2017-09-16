@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -240,11 +240,11 @@ UniValue stop(const UniValue& params, bool fHelp)
     if (fHelp || params.size() > 1)
         throw std::runtime_error(
             "stop\n"
-            "\nStop Dynamic server.");
+            "\nStop Credits server.");
     // Event loop will exit after current HTTP requests have been handled, so
     // this reply will get back to the client.
     StartShutdown();
-    return "Dynamic server stopping";
+    return "Credits server stopping";
 }
 
 /**
@@ -295,10 +295,8 @@ static const CRPCCommand vRPCCommands[] =
 
     /* Mining */
     { "Mining",             "getblocktemplate",       &getblocktemplate,       true  },
-    { "Mining",             "getwork",				  &getwork,       		   true  },
     { "Mining",             "getmininginfo",          &getmininginfo,          true  },
     { "Mining",             "getnetworkhashps",       &getnetworkhashps,       true  },
-    { "Mining",             "getpowrewardstart",      &getpowrewardstart,      true  },
     { "Mining",             "prioritisetransaction",  &prioritisetransaction,  true  },
     { "Mining",             "submitblock",            &submitblock,            true  },
 
@@ -343,20 +341,19 @@ static const CRPCCommand vRPCCommands[] =
     { "Hidden",                 "resendwallettransactions", &resendwallettransactions, true},
 #endif
 
-    /* Dynamic features */
-    { "Dynamic",                "dynode",                 &dynode,                 true  },
-    { "Dynamic",                "dynodelist",             &dynodelist,             true  },
-    { "Dynamic",                "dynodebroadcast",        &dynodebroadcast,        true  },
-    { "Dynamic",                "gobject",                &gobject,                true  },
-    { "Dynamic",                "getgovernanceinfo",      &getgovernanceinfo,      true  },
-    { "Dynamic",                "getdynoderewardstart",   &getdynoderewardstart,   true  },
-    { "Dynamic",                "getsuperblockbudget",    &getsuperblockbudget,    true  },
-    { "Dynamic",                "voteraw",                &voteraw,                true  },
-    { "Dynamic",                "dnsync",                 &dnsync,                 true  },
-    { "Dynamic",                "spork",                  &spork,                  true  },
-    { "Dynamic",                "getpoolinfo",            &getpoolinfo,            true  },
+    /* Credits features */
+    { "Credits",                "masternode",                 &masternode,                 true  },
+    { "Credits",                "masternodelist",             &masternodelist,             true  },
+    { "Credits",                "masternodebroadcast",        &masternodebroadcast,        true  },
+    { "Credits",                "gobject",                &gobject,                true  },
+    { "Credits",                "getgovernanceinfo",      &getgovernanceinfo,      true  },
+    { "Credits",                "getsuperblockbudget",    &getsuperblockbudget,    true  },
+    { "Credits",                "voteraw",                &voteraw,                true  },
+    { "Credits",                "mnsync",                 &mnsync,                 true  },
+    { "Credits",                "spork",                  &spork,                  true  },
+    { "Credits",                "getpoolinfo",            &getpoolinfo,            true  },
 #ifdef ENABLE_WALLET
-    { "Dynamic",                "privatesend",            &privatesend,            false },
+    { "Credits",                "privatesend",            &privatesend,            false },
 
     /* Wallet */
     { "Wallet",             "keepass",                &keepass,                true },
@@ -404,19 +401,7 @@ static const CRPCCommand vRPCCommands[] =
     { "Wallet",             "walletlock",             &walletlock,             true  },
     { "Wallet",             "walletpassphrasechange", &walletpassphrasechange, true  },
     { "Wallet",             "walletpassphrase",       &walletpassphrase,       true  },
-     /* Decentralised DNS */
-    { "DDNS",               "name_scan",              &name_scan,              true  },
-    { "DDNS",               "name_filter",            &name_filter,            true  },
-    { "DDNS",               "name_show",              &name_show,              true  },
-    { "DDNS",               "name_history",           &name_history,           true  },
-    { "DDNS",               "name_mempool",           &name_mempool,           true  },
-    { "DDNS",               "name_new",               &name_new,               true  },
-    { "DDNS",               "name_update",            &name_update,            true  },
-    { "DDNS",               "name_delete",            &name_delete,            true  },
-    { "DDNS",               "name_list",              &name_list,              true  },
 #endif // ENABLE_WALLET
-    /* Not shown in help */
-    { "Hidden", "name_debug", &name_debug, false },
 };
 
 CRPCTable::CRPCTable()
@@ -592,13 +577,13 @@ std::vector<std::string> CRPCTable::listCommands() const
 
 std::string HelpExampleCli(const std::string& methodname, const std::string& args)
 {
-    return "> dynamic-cli " + methodname + " " + args + "\n";
+    return "> credits-cli " + methodname + " " + args + "\n";
 }
 
 std::string HelpExampleRpc(const std::string& methodname, const std::string& args)
 {
     return "> curl --user myusername --data-binary '{\"jsonrpc\": \"1.0\", \"id\":\"curltest\", "
-        "\"method\": \"" + methodname + "\", \"params\": [" + args + "] }' -H 'content-type: text/plain;' http://127.0.0.1:31350/\n";
+        "\"method\": \"" + methodname + "\", \"params\": [" + args + "] }' -H 'content-type: text/plain;' http://127.0.0.1:31050/\n";
 }
 
 void RPCSetTimerInterfaceIfUnset(RPCTimerInterface *iface)

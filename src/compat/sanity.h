@@ -2,10 +2,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_COMPAT_SANITY_H
-#define DYNAMIC_COMPAT_SANITY_H
+#ifndef CREDITS_COMPAT_SANITY_H
+#define CREDITS_COMPAT_SANITY_H
 
 bool glibc_sanity_test();
 bool glibcxx_sanity_test();
 
-#endif // DYNAMIC_COMPAT_SANITY_H
+#endif // CREDITS_COMPAT_SANITY_H

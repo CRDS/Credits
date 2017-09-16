@@ -1,12 +1,12 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_GOVERNANCE_OBJECT_H
-#define DYNAMIC_GOVERNANCE_OBJECT_H
+#ifndef CREDITS_GOVERNANCE_OBJECT_H
+#define CREDITS_GOVERNANCE_OBJECT_H
 
-//#define ENABLE_DYNAMIC_DEBUG
+//#define ENABLE_CREDITS_DEBUG
 
 #include "cachemultimap.h"
 #include "governance-exceptions.h"
@@ -25,9 +25,9 @@ class CGovernanceTriggerManager;
 class CGovernanceVote;
 
 static const int MAX_GOVERNANCE_OBJECT_DATA_SIZE = 16 * 1024;
-static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70300;
+static const int MIN_GOVERNANCE_PEER_PROTO_VERSION = 70000;
 
-static const int GOVERNANCE_FILTER_PROTO_VERSION = 70400;
+static const int GOVERNANCE_FILTER_PROTO_VERSION = 70000;
 static const double GOVERNANCE_FILTER_FP_RATE = 0.001;
 
 static const int GOVERNANCE_OBJECT_UNKNOWN = 0;
@@ -35,7 +35,7 @@ static const int GOVERNANCE_OBJECT_PROPOSAL = 1;
 static const int GOVERNANCE_OBJECT_TRIGGER = 2;
 static const int GOVERNANCE_OBJECT_WATCHDOG = 3;
 
-static const CAmount GOVERNANCE_PROPOSAL_FEE_TX = (20*COIN);
+static const CAmount GOVERNANCE_PROPOSAL_FEE_TX = (96000000*COIN); //Impossible as this is above Max Coins
 
 static const int64_t GOVERNANCE_FEE_CONFIRMATIONS = 10;
 static const int64_t GOVERNANCE_UPDATE_MIN = 60*60;
@@ -148,15 +148,15 @@ private:
     /// Data field - can be used for anything
     std::string strData;
 
-    /// Dynode info for signed objects
-    CTxIn vinDynode;
+    /// Masternode info for signed objects
+    CTxIn vinMasternode;
     std::vector<unsigned char> vchSig;
 
     /// is valid by blockchain
     bool fCachedLocalValidity;
     std::string strLocalValidityError;
 
-    // VARIOUS FLAGS FOR OBJECT / SET VIA DYNODE VOTING
+    // VARIOUS FLAGS FOR OBJECT / SET VIA MASTERNODE VOTING
 
     /// true == minimum network support has been reached for this object to be funded (doesn't mean it will for sure though)
     bool fCachedFunding;
@@ -181,9 +181,9 @@ private:
     /// Failed to parse object data
     bool fUnparsable;
 
-    vote_m_t mapCurrentDNVotes;
+    vote_m_t mapCurrentMNVotes;
 
-    /// Limited map of votes orphaned by DN
+    /// Limited map of votes orphaned by MN
     vote_mcache_t mapOrphanVotes;
 
     CGovernanceObjectVoteFile fileVotes;
@@ -215,8 +215,8 @@ public:
         return nCollateralHash;
     }
 
-    const CTxIn& GetDynodeVin() const {
-        return vinDynode;
+    const CTxIn& GetMasternodeVin() const {
+        return vinMasternode;
     }
 
     bool IsSetCachedFunding() const {
@@ -253,9 +253,9 @@ public:
 
     // Signature related functions
 
-    void SetDynodeInfo(const CTxIn& vin);
-    bool Sign(CKey& keyDynode, CPubKey& pubKeyDynode);
-    bool CheckSignature(CPubKey& pubKeyDynode);
+    void SetMasternodeInfo(const CTxIn& vin);
+    bool Sign(CKey& keyMasternode, CPubKey& pubKeyMasternode);
+    bool CheckSignature(CPubKey& pubKeyMasternode);
 
     std::string GetSignatureMessage() const;
 
@@ -263,7 +263,7 @@ public:
 
     bool IsValidLocally(std::string& strError, bool fCheckCollateral);
 
-    bool IsValidLocally(std::string& strError, bool& fMissingDynode, bool fCheckCollateral);
+    bool IsValidLocally(std::string& strError, bool& fMissingMasternode, bool fCheckCollateral);
 
     /// Check the collateral transaction for the budget proposal/finalized budget
     bool IsCollateralValid(std::string& strError);
@@ -292,7 +292,7 @@ public:
     int GetNoCount(vote_signal_enum_t eVoteSignalIn) const;
     int GetAbstainCount(vote_signal_enum_t eVoteSignalIn) const;
 
-    bool GetCurrentDNVotes(const CTxIn& dnCollateralOutpoint, vote_rec_t& voteRecord);
+    bool GetCurrentMNVotes(const CTxIn& mnCollateralOutpoint, vote_rec_t& voteRecord);
 
     // FUNCTIONS FOR DEALING WITH DATA STRING
 
@@ -314,14 +314,14 @@ public:
         READWRITE(nCollateralHash);
         READWRITE(LIMITED_STRING(strData, MAX_GOVERNANCE_OBJECT_DATA_SIZE));
         READWRITE(nObjectType);
-        READWRITE(vinDynode);
+        READWRITE(vinMasternode);
         READWRITE(vchSig);
         if(nType & SER_DISK) {
             // Only include these for the disk file format
             LogPrint("gobject", "CGovernanceObject::SerializationOp Reading/writing votes from/to disk\n");
             READWRITE(nDeletionTime);
             READWRITE(fExpired);
-            READWRITE(mapCurrentDNVotes);
+            READWRITE(mapCurrentMNVotes);
             READWRITE(fileVotes);
             LogPrint("gobject", "CGovernanceObject::SerializationOp hash = %s, vote count = %d\n", GetHash().ToString(), fileVotes.GetVoteCount());
         }
@@ -346,12 +346,12 @@ private:
 
     void RebuildVoteMap();
 
-    /// Called when DN's which have voted on this object have been removed
-    void ClearDynodeVotes();
+    /// Called when MN's which have voted on this object have been removed
+    void ClearMasternodeVotes();
 
     void CheckOrphanVotes();
 
 };
 
 
-#endif // DYNAMIC_GOVERNANCE_OBJECT_H
+#endif // CREDITS_GOVERNANCE_OBJECT_H

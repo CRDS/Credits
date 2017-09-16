@@ -5,7 +5,7 @@
 #include "coins.h"
 #include "test_random.h"
 #include "uint256.h"
-#include "test/test_dynamic.h"
+#include "test/test_credits.h"
 #include "main.h"
 #include "consensus/validation.h"
 
@@ -72,12 +72,12 @@ public:
 
     void SelfTest() const
     {
-        // Manually recompute the dynamic usage of the whole data, and compare it.
-        size_t ret = memusage::DynamicUsage(cacheCoins);
+        // Manually recompute the credits usage of the whole data, and compare it.
+        size_t ret = memusage::CreditsUsage(cacheCoins);
         for (CCoinsMap::iterator it = cacheCoins.begin(); it != cacheCoins.end(); it++) {
-            ret += it->second.coins.DynamicMemoryUsage();
+            ret += it->second.coins.CreditsMemoryUsage();
         }
-        BOOST_CHECK_EQUAL(DynamicMemoryUsage(), ret);
+        BOOST_CHECK_EQUAL(CreditsMemoryUsage(), ret);
     }
 
 };

@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_NET_H
-#define DYNAMIC_NET_H
+#ifndef CREDITS_NET_H
+#define CREDITS_NET_H
 
 #include "bloom.h"
 #include "compat.h"
@@ -88,9 +88,9 @@ CNode* FindNode(const CNetAddr& ip);
 CNode* FindNode(const CSubNet& subNet);
 CNode* FindNode(const std::string& addrName);
 CNode* FindNode(const CService& ip);
-// fConnectToDynode should be 'true' only if you want this node to allow to connect to itself
-// and/or you want it to be disconnected on CDynodeMan::ProcessDynodeConnections()
-CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fConnectToDynode = false);
+// fConnectToMasternode should be 'true' only if you want this node to allow to connect to itself
+// and/or you want it to be disconnected on CMasternodeMan::ProcessMasternodeConnections()
+CNode* ConnectNode(CAddress addrConnect, const char *pszDest = NULL, bool fConnectToMasternode = false);
 bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOutbound = NULL, const char *strDest = NULL, bool fOneShot = false);
 void MapPort(bool fUseUPnP);
 unsigned short GetListenPort();
@@ -365,9 +365,9 @@ public:
     //    unless it loads a bloom filter.
     bool fRelayTxes;
     bool fSentAddr;
-    bool fDynode; // If 'true' this node will be disconnected on CDynodeMan::ProcessDynodeConnections()
+    bool fMasternode; // If 'true' this node will be disconnected on CMasternodeMan::ProcessMasternodeConnections()
     CSemaphoreGrant grantOutbound;
-    CSemaphoreGrant grantDynodeOutbound;
+    CSemaphoreGrant grantMasternodeOutbound;
     CCriticalSection cs_filter;
     CBloomFilter* pfilter;
     int nRefCount;
@@ -870,4 +870,4 @@ std::vector<CNode*> CopyNodeVector();
 
 void ReleaseNodeVector(const std::vector<CNode*>& vecNodes);
 
-#endif // DYNAMIC_NET_H
+#endif // CREDITS_NET_H

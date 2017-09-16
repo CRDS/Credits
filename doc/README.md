@@ -1,77 +1,110 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-[![Build Status](https://travis-ci.org/Duality-Solutions/Dynamic.png?branch=master)](https://travis-ci.org/Duality-Solutions/Dynamic)
-[![Stories in Ready](https://badge.waffle.io/Duality-Solutions/Dynamic.png?label=ready&title=Ready)](https://waffle.io/Duality-Solutions/Dynamic)
+[![Build Status](https://travis-ci.org/Credits-CRDS/Credits.png?branch=master)](https://travis-ci.org/Credits-CRDS/Credits)
+[![Stories in Ready](https://badge.waffle.io/Credits-CRDS/Credits.png?label=ready&title=Ready)](https://waffle.io/Credits-CRDS/Credits)
 
 Graph on Pull Request History
 ====================================
 
-[![Throughput Graph](https://graphs.waffle.io/Duality-Solutions/Dynamic/throughput.svg)](https://waffle.io/Duality-Solutions/Dynamic/metrics/throughput)  
+[![Throughput Graph](https://graphs.waffle.io/Credits-CRDS/Credits/throughput.svg)](https://waffle.io/Credits-CRDS/Credits/metrics/throughput)  
 
-# **Dynamic (DYN) v1.4.0.0**
+# **Credits (CRDS) v1.0.0.0**
 
-![DYN logo](https://github.com/Duality-Solutions/Dynamic/blob/master/src/qt/res/icons/drk/about.png)
+![CRDS logo](https://github.com/Credits-CRDS/Credits/blob/master/src/qt/res/icons/light/about.png)
 
-**Copyright (c) 2016-2017 Duality Blockchain Solutions**
+**Copyright (c) 2017 Credits Developers**
 
-What is Dynamic?
+What is Credits?
 ----------------
-* Coin Suffix: DYN
-* PoW Algorithm: Argon2d
-* PoW Period: Unlimited
+* Coin Suffix: CRDS
+* PoW Mining Algorithm: Argon2d
+* PoW Difficulty Algorithm: DELTA
+* PoW Period: ~36 years
 * PoW Target Spacing: 128 Seconds
-* PoW Reward per Block: 1 DYN
-* PoW Reward Start Height: Block 20,546
+* PoW Reward per Block: 1 CRDS
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
-* Dynode Collateral Amount: 1000 DYN
-* Dynode Min Confirmation: 10 Blocks
-* Dynode Reward: 0.382 DYN Static Reward (38.2% of a PoW reward)
-* Dynode Reward Start Height: Block 20,546
-* Budget Reward: 10,000 DYN Static Reward Every 20,545 blocks (~30 days)
-* Budget Proposal Fee: 100 DYN, 20 confirmations (~30 minutes)
-* Total Coins: 2<sup>63</sup> - 1
-* Min TX Fee: 0.0001 DYN
+* Masternode Collateral Amount: 500 CRDS
+* Masternode Min Confirmation: 10 Blocks
+* Masternode Reward: See Below
+* Total Coins: 95,000,000 (~36 Years)
+* Min TX Fee: 0.0001 CRDS
+
+Credits uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (CRDS) are carried out collectively by the Credits network. Credits is the name of open source software which enables the use of the currency CRDS.
+
+Credits utilises Masternodes, Privatesend and InstantSend to provide anonymous and near instant transaction confirmations.
+
+Credits implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
 
 
-The Dynamic(DYN) blockchain exists in the Duality binary architecture as a DAO, whilst [Sequence(SEQ)](https://github.com/duality-solutions/sequence) is its real world interface. Dynamic uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (DYN) are carried out collectively by the Dynamic network. Dynamic is the name of open source software which enables the use of the currency DYN.
-
-Dynamic utilises Dynodes, Privatesend and InstantSend to provide anonymous and near instant transaction confirmations.
-
-Dynamic implements Gavin Andresens signature cache optimisation from Bitcoin for significantly faster transaction validation.
-
-
-**Dynode/Privatesend Network Information**
-Ported Masternodes from Dash, rebranded as Dynodes.
-Darksend ported and rebranded as Privatesend.
-Utilisation of InstantSend for near-instant transactions.
+**Masternode/Privatesend Network Information**
+Utilisation of InstantSend for near-instant transactions and PrivateSend for anonymous transactions.
 
 **MainNet Parameters**
-P2P Port = 31300
-RPC Port = 31350
-Dynodes = 31300
-Magic Bytes: 0x3f 0x42 0x55 0x61
+P2P Port = 31000
+RPC Port = 31050
+Masternodes = 31000
+Magic Bytes: 0x2f 0x32 0x45 0x51
 
 **TestNet Parameters**
 P2P Port = 31400
 RPC Port = 31450
-Dynodes = 31400
-Magic Bytes: 0x2f 0x32 0x15 0x40
+Masternodes = 31400
+Magic Bytes: 0x1f 0x22 0x05 0x30
 
 **RegTest Parameters**
 P2P Port = 31500
 RPC Port = 31550
-Dynodes = 31500
-Magic Bytes = 0x2f 0x32 0x15 0x3f
+Masternodes = 31500
+Magic Bytes = 0x1f 0x22 0x05 0x2f
 
+**Rewards Structure**
+
+ Years|      Blocks        |   PoW  | Masternodes |
+------|--------------------|--------|-------------|
+ 0-1  |       0 -  246544  | 10CRDS |    1CRDS    |
+ 1-2  |  246545 -  493088  | 10CRDS |    1CRDS    |
+ 2-3  |  493089 -  739631  |  9CRDS |    2CRDS    |
+ 3-4  |  739632 -  986175  |  9CRDS |    2CRDS    |
+ 4-5  |  986176 - 1232719  |  8CRDS |    3CRDS    |
+ 5-6  | 1232720 - 1479263  |  8CRDS |    3CRDS    |
+ 6-7  | 1479264 - 1725806  |  7CRDS |    4CRDS    |
+ 7-8  | 1725807 - 1972350  |  7CRDS |    4CRDS    |
+ 8-9  | 1972351 - 2218894  |  6CRDS |    5CRDS    |
+ 9-10 | 2218895 - 2465438  |  6CRDS |    5CRDS    |
+10-11 | 2465439 - 2711981  |  5CRDS |    6CRDS    |
+11-12 | 2711982 - 2958525  |  5CRDS |    6CRDS    |
+12-13 | 2958526 - 3205069  |  4CRDS |    7CRDS    |
+13-14 | 3205070 - 3451613  |  3CRDS |    7CRDS    |
+14-15 | 3451614 - 3698156  |  3CRDS |    8CRDS    |
+15-16 | 3698156 - 3944700  |  2CRDS |    8CRDS    |
+16-17 | 3944701 - 4191244  |  2CRDS |    9CRDS    |
+17-18 | 4191245 - 4437788  |  1CRDS |    9CRDS    |
+18-19 | 4437789 - 4684331  |  1CRDS |   10CRDS    |
+19-20 | 4684332 - 4930875  |  1CRDS |   10CRDS    |
+20-21 | 4930876 - 5177419  |  1CRDS |   10CRDS    |
+21-22 | 5177420 - 5423963  |  1CRDS |   10CRDS    |
+22-23 | 5423964 - 5670506  |  1CRDS |   10CRDS    |
+23-24 | 5670507 - 5917050  |  1CRDS |   10CRDS    |
+24-25 | 5917051 - 6163594  |  1CRDS |   10CRDS    |
+25-26 | 6163595 - 6410138  |  1CRDS |   10CRDS    |
+26-27 | 6410139 - 6656681  |  1CRDS |   10CRDS    |
+27-28 | 6656682 - 6903225  |  1CRDS |   10CRDS    |
+28-30 | 6903226 - 7149769  |  1CRDS |   10CRDS    |   
+30-31 | 7149770 - 7396313  |  1CRDS |   10CRDS    |
+31-32 | 7396314 - 7642856  |  1CRDS |   10CRDS    |
+32-33 | 7642857 - 7889400  |  1CRDS |   10CRDS    |
+33-34 | 7889401 - 8135944  |  1CRDS |   10CRDS    |
+34-35 | 8135945 - 8382488  |  1CRDS |   10CRDS    |
+35-36 | 8382489 - 8629031  |  1CRDS |   10CRDS    |
 
 UNIX BUILD NOTES
 ====================
-Some notes on how to build Dynamic in Unix. 
+Some notes on how to build Credits in Unix. 
 
 Note
 ---------------------
-Always use absolute paths to configure and compile Dynamic and the dependencies,
+Always use absolute paths to configure and compile Credits and the dependencies,
 for example, when specifying the the path of the dependency:
 
     ../dist/configure --enable-cxx --disable-shared --with-pic --prefix=$BDB_PREFIX
@@ -89,7 +122,7 @@ make
 make install # optional
 ```
 
-This will build dynamic-qt as well if the dependencies are met.
+This will build credits-qt as well if the dependencies are met.
 
 Dependencies
 ---------------------
@@ -100,7 +133,8 @@ These dependencies are required:
  ------------|------------------|----------------------
  libssl      | SSL Support      | Secure communications
  libboost    | Boost            | C++ Library
- libevent    | Networking   | OS independent asynchronous networking
+ libevent    | Networking       | OS independent asynchronous networking
+ 
 Optional dependencies:
 
  Library     | Purpose          | Description
@@ -118,13 +152,13 @@ System requirements
 --------------------
 
 C++ compilers are memory-hungry. It is recommended to have at least 3 GB of
-memory available when compiling Dynamic.
+memory available when compiling Credits.
 
 Dependency Build Instructions: Ubuntu & Debian
 ----------------------------------------------
 Build requirements:
 
-    sudo apt-get install build-essential libtool autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git
+    sudo apt-get install build-essential libtool automake autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git
     
 for Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
 
@@ -165,7 +199,7 @@ ZMQ dependencies (provides ZMQ API 4.x):
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
 
-If you want to build Dynamic-Qt, make sure that the required packages for Qt development
+If you want to build Credits-Qt, make sure that the required packages for Qt development
 are installed. Qt 5 is necessary to build the GUI.
 If both Qt 4 and Qt 5 are installed, Qt 5 will be used. Pass `--with-gui=qt5` to configure to choose Qt5.
 To build without GUI pass `--without-gui`.
@@ -178,12 +212,12 @@ libqrencode (optional) can be installed with:
 
     sudo apt-get install libqrencode-dev
     
-Once these are installed, they will be found by configure and a dynamic-qt executable will be
+Once these are installed, they will be found by configure and a credits-qt executable will be
 built by default.
 
 Notes
 -----
-The release is built with GCC and then "strip dynamicd" to strip the debug
+The release is built with GCC and then "strip creditsd" to strip the debug
 symbols, which reduces the executable size by about 90%.
 
 miniupnpc
@@ -210,10 +244,10 @@ Berkeley DB
 It is recommended to use Berkeley DB 4.8. If you have to build it yourself:
 
 ```bash
-DYNAMIC_ROOT=$(pwd)
+CREDITS_ROOT=$(pwd)
 
-# Pick some path to install BDB to, here we create a directory within the dynamic directory
-BDB_PREFIX="${DYNAMIC_ROOT}/db4"
+# Pick some path to install BDB to, here we create a directory within the credits directory
+BDB_PREFIX="${CREDITS_ROOT}/db4"
 mkdir -p $BDB_PREFIX
 
 # Fetch the source and verify that it is not tampered with
@@ -229,8 +263,8 @@ cd db-4.8.30.NC/build_unix/
 make 
 sudo make install
 
-# Configure Dynamic to use our own-built instance of BDB
-cd $DYNAMIC_ROOT
+# Configure Credits to use our own-built instance of BDB
+cd $CREDITS_ROOT
 ./configure (other args...) LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/"
 ```
 
@@ -247,7 +281,7 @@ If you need to build Boost yourself:
 
 Security
 --------
-To help make your Dynamic installation more secure by making certain attacks impossible to
+To help make your Credits installation more secure by making certain attacks impossible to
 exploit even if a vulnerability is found, binaries are hardened by default.
 This can be disabled with:
 
@@ -271,7 +305,7 @@ Hardening enables the following features:
 
     To test that you have built PIE executable, install scanelf, part of paxutils, and use:
 
-        scanelf -e ./dynamicd
+        scanelf -e ./creditsd
 
     The output should contain:
      TYPE
@@ -279,13 +313,13 @@ Hardening enables the following features:
 
 * Non-executable Stack
     If the stack is executable then trivial stack based buffer overflow exploits are possible if
-    vulnerable buffers are found. By default, dynamic should be built with a non-executable stack
+    vulnerable buffers are found. By default, credits should be built with a non-executable stack
     but if one of the libraries it uses asks for an executable stack or someone makes a mistake
     and uses a compiler extension which requires an executable stack, it will silently build an
     executable without the non-executable stack protection.
 
     To verify that the stack is non-executable after compiling use:
-    `scanelf -e ./dynamicd`
+    `scanelf -e ./creditsd`
 
     the output should contain:
     STK/REL/PTL
@@ -295,15 +329,37 @@ Hardening enables the following features:
 
 Disable-wallet mode
 --------------------
-When the intention is to run only a P2P node without a wallet, dynamic may be compiled in
+When the intention is to run only a P2P node without a wallet, credits may be compiled in
 disable-wallet mode with:
 
     ./configure --disable-wallet
 
 In this case there is no dependency on Berkeley DB 4.8.
 
-Mining is also possible in disable-wallet mode, but only using the `getblocktemplate` RPC
-call not `getwork`.
+Mining is also possible in disable-wallet mode, but only using the `getblocktemplate` RPC call.
+
+AVX2 Mining Optimisations
+-------------------------
+For increased performance when mining, AVX2 optimisations can be enabled. 
+
+Prior to running the build commands:
+
+    CPPFLAGS=-march=native
+    
+CPU's with AVX2 support:
+
+    Intel
+        Haswell processor, Q2 2013
+        Haswell E processor, Q3 2014
+        Broadwell processor, Q4 2014
+        Broadwell E processor, Q3 2016
+        Skylake processor, Q3 2015
+        Kaby Lake processor, Q3 2016(ULV mobile)/Q1 2017(desktop/mobile)
+        Coffee Lake processor, expected in 2017
+        Cannonlake processor, expected in 2017
+    AMD
+        Carrizo processor, Q2 2015
+        Ryzen processor, Q1 2017
 
 Example Build Command
 --------------------

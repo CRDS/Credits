@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_SCRIPT_STANDARD_H
-#define DYNAMIC_SCRIPT_STANDARD_H
+#ifndef CREDITS_SCRIPT_STANDARD_H
+#define CREDITS_SCRIPT_STANDARD_H
 
 #include "script/interpreter.h"
 #include "uint256.h"
@@ -51,7 +51,6 @@ enum txnouttype
     TX_SCRIPTHASH,
     TX_MULTISIG,
     TX_NULL_DATA,
-    TX_NAME, //DDNS
 };
 
 class CNoDestination {
@@ -65,7 +64,7 @@ public:
  *  * CNoDestination: no destination set
  *  * CKeyID: TX_PUBKEYHASH destination
  *  * CScriptID: TX_SCRIPTHASH destination
- *  A CTxDestination is the internal data type encoded in a CDynamicAddress
+ *  A CTxDestination is the internal data type encoded in a CCreditsAddress
  */
 typedef boost::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
 
@@ -80,4 +79,4 @@ CScript GetScriptForRawPubKey(const CPubKey& pubkey);
 CScript GetScriptForMultisig(int nRequired, const std::vector<CPubKey>& keys);
 CScriptID GetScriptID(const CScript& script);
 
-#endif // DYNAMIC_SCRIPT_STANDARD_H
+#endif // CREDITS_SCRIPT_STANDARD_H

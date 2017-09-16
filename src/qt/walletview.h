@@ -1,20 +1,20 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_WALLETVIEW_H
-#define DYNAMIC_QT_WALLETVIEW_H
+#ifndef CREDITS_QT_WALLETVIEW_H
+#define CREDITS_QT_WALLETVIEW_H
 
 #include "amount.h"
 
-#include "dynodelist.h"
+#include "masternodelist.h"
 
 #include <QStackedWidget>
 
-class DynamicGUI;
+class CreditsGUI;
 class ClientModel;
 class OverviewPage;
 class PlatformStyle;
@@ -23,8 +23,6 @@ class SendCoinsRecipient;
 class ReceiveCoinsDialog;
 class AddressBookPage;
 class TransactionView;
-class MultisigDialog;
-class DNSPage;
 class WalletModel;
 
 QT_BEGIN_NAMESPACE
@@ -47,13 +45,13 @@ public:
     explicit WalletView(const PlatformStyle *platformStyle, QWidget *parent);
     ~WalletView();
 
-    void setDynamicGUI(DynamicGUI *gui);
+    void setCreditsGUI(CreditsGUI *gui);
     /** Set the client model.
         The client model represents the part of the core that communicates with the P2P network, and is wallet-agnostic.
     */
     void setClientModel(ClientModel *clientModel);
     /** Set the wallet model.
-        The wallet model represents a dynamic wallet, and offers access to the list of transactions, address book and sending
+        The wallet model represents a credits wallet, and offers access to the list of transactions, address book and sending
         functionality.
     */
     void setWalletModel(WalletModel *walletModel);
@@ -73,9 +71,7 @@ private:
     AddressBookPage *usedReceivingAddressesPage;
     QWidget *transactionsPage;
     TransactionView *transactionView;
-    MultisigDialog *multiSigPage;
-    DynodeList *dynodeListPage;
-    DNSPage *dnsPage;
+    MasternodeList *masternodeListPage;
 
     QProgressDialog *progressDialog;
     QLabel *transactionSum;
@@ -90,12 +86,8 @@ public Q_SLOTS:
     void gotoReceiveCoinsPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
-    /** Switch to MultiSig page */
-    void gotoMultiSigPage();
-    /** Switch to Dynode page */
-    void gotoDynodePage();
-    /** Switch to DNS page */
-    void gotoDNSPage();
+    /** Switch to Masternode page */
+    void gotoMasternodePage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
@@ -135,7 +127,7 @@ public Q_SLOTS:
     /** User has requested more information about the out of sync state */
     void requestedSyncWarningInfo();
 
-    /** Update selected DYN amount from transactionview */
+    /** Update selected CRDS amount from transactionview */
     void trxAmount(QString amount);
 
 Q_SIGNALS:
@@ -153,4 +145,4 @@ Q_SIGNALS:
     void outOfSyncWarningClicked();
 };
 
-#endif // DYNAMIC_QT_WALLETVIEW_H
+#endif // CREDITS_QT_WALLETVIEW_H

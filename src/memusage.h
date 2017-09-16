@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_MEMUSAGE_H
-#define DYNAMIC_MEMUSAGE_H
+#ifndef CREDITS_MEMUSAGE_H
+#define CREDITS_MEMUSAGE_H
 
 #include "indirectmap.h"
 
@@ -28,22 +28,22 @@ namespace memusage
 /** Compute the total memory used by allocating alloc bytes. */
 static size_t MallocUsage(size_t alloc);
 
-/** Dynamic memory usage for built-in types is zero. */
-static inline size_t DynamicUsage(const int8_t& v) { return 0; }
-static inline size_t DynamicUsage(const uint8_t& v) { return 0; }
-static inline size_t DynamicUsage(const int16_t& v) { return 0; }
-static inline size_t DynamicUsage(const uint16_t& v) { return 0; }
-static inline size_t DynamicUsage(const int32_t& v) { return 0; }
-static inline size_t DynamicUsage(const uint32_t& v) { return 0; }
-static inline size_t DynamicUsage(const int64_t& v) { return 0; }
-static inline size_t DynamicUsage(const uint64_t& v) { return 0; }
-static inline size_t DynamicUsage(const float& v) { return 0; }
-static inline size_t DynamicUsage(const double& v) { return 0; }
-template<typename X> static inline size_t DynamicUsage(X * const &v) { return 0; }
-template<typename X> static inline size_t DynamicUsage(const X * const &v) { return 0; }
+/** Credits memory usage for built-in types is zero. */
+static inline size_t CreditsUsage(const int8_t& v) { return 0; }
+static inline size_t CreditsUsage(const uint8_t& v) { return 0; }
+static inline size_t CreditsUsage(const int16_t& v) { return 0; }
+static inline size_t CreditsUsage(const uint16_t& v) { return 0; }
+static inline size_t CreditsUsage(const int32_t& v) { return 0; }
+static inline size_t CreditsUsage(const uint32_t& v) { return 0; }
+static inline size_t CreditsUsage(const int64_t& v) { return 0; }
+static inline size_t CreditsUsage(const uint64_t& v) { return 0; }
+static inline size_t CreditsUsage(const float& v) { return 0; }
+static inline size_t CreditsUsage(const double& v) { return 0; }
+template<typename X> static inline size_t CreditsUsage(X * const &v) { return 0; }
+template<typename X> static inline size_t CreditsUsage(const X * const &v) { return 0; }
 
-/** Compute the memory used for dynamically allocated but owned data structures.
- *  For generic data types, this is *not* recursive. DynamicUsage(vector<vector<int> >)
+/** Compute the memory used for creditsally allocated but owned data structures.
+ *  For generic data types, this is *not* recursive. CreditsUsage(vector<vector<int> >)
  *  will compute the memory used for the vector<int>'s, but not for the ints inside.
  *  This is for efficiency reasons, as these functions are intended to be fast. If
  *  application data structures require more accurate inner accounting, they should
@@ -87,37 +87,37 @@ struct stl_shared_counter
 };
 
 template<typename X>
-static inline size_t DynamicUsage(const std::vector<X>& v)
+static inline size_t CreditsUsage(const std::vector<X>& v)
 {
     return MallocUsage(v.capacity() * sizeof(X));
 }
 
 template<unsigned int N, typename X, typename S, typename D>
-static inline size_t DynamicUsage(const prevector<N, X, S, D>& v)
+static inline size_t CreditsUsage(const prevector<N, X, S, D>& v)
 {
     return MallocUsage(v.allocated_memory());
 }
 
 template<typename X, typename Y>
-static inline size_t DynamicUsage(const std::set<X, Y>& s)
+static inline size_t CreditsUsage(const std::set<X, Y>& s)
 {
     return MallocUsage(sizeof(stl_tree_node<X>)) * s.size();
 }
 
 template<typename X, typename Y>
-static inline size_t IncrementalDynamicUsage(const std::set<X, Y>& s)
+static inline size_t IncrementalCreditsUsage(const std::set<X, Y>& s)
 {
     return MallocUsage(sizeof(stl_tree_node<X>));
 }
 
 template<typename X, typename Y, typename Z>
-static inline size_t DynamicUsage(const std::map<X, Y, Z>& m)
+static inline size_t CreditsUsage(const std::map<X, Y, Z>& m)
 {
     return MallocUsage(sizeof(stl_tree_node<std::pair<const X, Y> >)) * m.size();
 }
 
 template<typename X, typename Y, typename Z>
-static inline size_t IncrementalDynamicUsage(const std::map<X, Y, Z>& m)
+static inline size_t IncrementalCreditsUsage(const std::map<X, Y, Z>& m)
 {
     return MallocUsage(sizeof(stl_tree_node<std::pair<const X, Y> >));
 }
@@ -125,25 +125,25 @@ static inline size_t IncrementalDynamicUsage(const std::map<X, Y, Z>& m)
 // indirectmap has underlying map with pointer as key
 
 template<typename X, typename Y>
-static inline size_t DynamicUsage(const indirectmap<X, Y>& m)
+static inline size_t CreditsUsage(const indirectmap<X, Y>& m)
 {
     return MallocUsage(sizeof(stl_tree_node<std::pair<const X*, Y> >)) * m.size();
 }
 
 template<typename X, typename Y>
-static inline size_t IncrementalDynamicUsage(const indirectmap<X, Y>& m)
+static inline size_t IncrementalCreditsUsage(const indirectmap<X, Y>& m)
 {
     return MallocUsage(sizeof(stl_tree_node<std::pair<const X*, Y> >));
 }
 
 template<typename X>
-static inline size_t DynamicUsage(const std::unique_ptr<X>& p)
+static inline size_t CreditsUsage(const std::unique_ptr<X>& p)
 {
     return p ? MallocUsage(sizeof(X)) : 0;
 }
 
 template<typename X>
-static inline size_t DynamicUsage(const std::shared_ptr<X>& p)
+static inline size_t CreditsUsage(const std::shared_ptr<X>& p)
 {
     // A shared_ptr can either use a single continuous memory block for both
     // the counter and the storage (when using std::make_shared), or separate.
@@ -161,29 +161,29 @@ private:
 };
 
 template<typename X, typename Y>
-static inline size_t DynamicUsage(const boost::unordered_set<X, Y>& s)
+static inline size_t CreditsUsage(const boost::unordered_set<X, Y>& s)
 {
     return MallocUsage(sizeof(unordered_node<X>)) * s.size() + MallocUsage(sizeof(void*) * s.bucket_count());
 }
 
 template<typename X, typename Y, typename Z>
-static inline size_t DynamicUsage(const boost::unordered_map<X, Y, Z>& m)
+static inline size_t CreditsUsage(const boost::unordered_map<X, Y, Z>& m)
 {
     return MallocUsage(sizeof(unordered_node<std::pair<const X, Y> >)) * m.size() + MallocUsage(sizeof(void*) * m.bucket_count());
 }
 
 template<typename X, typename Y>
-static inline size_t DynamicUsage(const std::unordered_set<X, Y>& s)
+static inline size_t CreditsUsage(const std::unordered_set<X, Y>& s)
 {
     return MallocUsage(sizeof(unordered_node<X>)) * s.size() + MallocUsage(sizeof(void*) * s.bucket_count());
 }
 
 template<typename X, typename Y, typename Z>
-static inline size_t DynamicUsage(const std::unordered_map<X, Y, Z>& m)
+static inline size_t CreditsUsage(const std::unordered_map<X, Y, Z>& m)
 {
     return MallocUsage(sizeof(unordered_node<std::pair<const X, Y> >)) * m.size() + MallocUsage(sizeof(void*) * m.bucket_count());
 }
 
 }
 
-#endif // DYNAMIC_MEMUSAGE_H
+#endif // CREDITS_MEMUSAGE_H

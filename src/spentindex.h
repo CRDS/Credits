@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_SPENTINDEX_H
-#define DYNAMIC_SPENTINDEX_H
+#ifndef CREDITS_SPENTINDEX_H
+#define CREDITS_SPENTINDEX_H
 
 #include "amount.h"
 #include "uint256.h"
@@ -97,4 +97,4 @@ struct CSpentIndexKeyCompare
     }
 };
 
-#endif // DYNAMIC_SPENTINDEX_H
+#endif // CREDITS_SPENTINDEX_H

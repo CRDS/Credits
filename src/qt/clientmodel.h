@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_CLIENTMODEL_H
-#define DYNAMIC_QT_CLIENTMODEL_H
+#ifndef CREDITS_QT_CLIENTMODEL_H
+#define CREDITS_QT_CLIENTMODEL_H
 
 #include <QObject>
 #include <QDateTime>
@@ -38,7 +38,7 @@ enum NumConnections {
     CONNECTIONS_ALL  = (CONNECTIONS_IN | CONNECTIONS_OUT),
 };
 
-/** Model for Dynamic network client. */
+/** Model for Credits network client. */
 class ClientModel : public QObject
 {
     Q_OBJECT
@@ -53,15 +53,15 @@ public:
 
     //! Return number of connections, default is in- and outbound (total)
     int getNumConnections(unsigned int flags = CONNECTIONS_ALL) const;
-    QString getDynodeCountString() const;
+    QString getMasternodeCountString() const;
     int getNumBlocks() const;
     int getHeaderTipHeight() const;
     int64_t getHeaderTipTime() const;
 
     //! Return number of transactions in the mempool
     long getMempoolSize() const;
-    //! Return the dynamic memory usage of the mempool
-    size_t getMempoolDynamicUsage() const;
+    //! Return the credits memory usage of the mempool
+    size_t getMempoolCreditsUsage() const;
     
     quint64 getTotalBytesRecv() const;
     quint64 getTotalBytesSent() const;
@@ -86,7 +86,7 @@ public:
 private:
     OptionsModel *optionsModel;
     PeerTableModel *peerTableModel;
-    QString cachedDynodeCountString;
+    QString cachedMasternodeCountString;
     BanTableModel *banTableModel;
 
     QTimer *pollTimer;
@@ -97,7 +97,7 @@ private:
 
 Q_SIGNALS:
     void numConnectionsChanged(int count);
-    void strDynodesChanged(const QString &strDynodes);
+    void strMasternodesChanged(const QString &strMasternodes);
     void numBlocksChanged(int count, const QDateTime& blockDate, double nVerificationProgress, bool header);
     void additionalDataSyncProgressChanged(double nSyncProgress);
     void mempoolSizeChanged(long count, size_t mempoolSizeInBytes);
@@ -118,4 +118,4 @@ public Q_SLOTS:
     void updateBanlist();
 };
 
-#endif // DYNAMIC_QT_CLIENTMODEL_H
+#endif // CREDITS_QT_CLIENTMODEL_H

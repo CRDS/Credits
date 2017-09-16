@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -12,8 +12,8 @@
 #include "chainparams.h"
 #include "coins.h"
 #include "consensus/consensus.h"
-#include "dynode-payments.h"
-#include "dynode-sync.h"
+#include "masternode-payments.h"
+#include "masternode-sync.h"
 #include "hash.h"
 #include "main.h"
 #include "consensus/merkle.h"
@@ -40,7 +40,7 @@
 
 //////////////////////////////////////////////////////////////////////////////
 //
-// DynamicMiner
+// CreditsMiner
 //
 
 uint32_t ByteReverse(uint32_t value)
@@ -407,11 +407,11 @@ std::unique_ptr<CBlockTemplate> CreateNewBlock(const CChainParams& chainparams, 
         txNew.vout[0].nValue = blockReward;
         txNew.vin[0].scriptSig = CScript() << nHeight << OP_0;
 
-        // Update coinbase transaction with additional info about dynode and governance payments,
+        // Update coinbase transaction with additional info about masternode and governance payments,
         // get some info back to pass to getblocktemplate
-        FillBlockPayments(txNew, nHeight, blockReward, pblock->txoutDynode, pblock->voutSuperblock);
-        // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutDynode %s txNew %s",
-        //             nHeight, blockReward, pblock->txoutDynode.ToString(), txNew.ToString());
+        FillBlockPayments(txNew, nHeight, blockReward, pblock->txoutMasternode, pblock->voutSuperblock);
+        // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutMasternode %s txNew %s",
+        //             nHeight, blockReward, pblock->txoutMasternode.ToString(), txNew.ToString());
 
         nLastBlockTx = nBlockTx;
         nLastBlockSize = nBlockSize;
@@ -520,11 +520,11 @@ static bool ProcessBlockFound(const CBlock* pblock, const CChainParams& chainpar
 }
 
 // ***TODO*** that part changed in bitcoin, we are using a mix with old one here for now
-void static DynamicMiner(const CChainParams& chainparams)
+void static CreditsMiner(const CChainParams& chainparams)
 {
-    LogPrintf("DynamicMiner -- started\n");
+    LogPrintf("CreditsMiner -- started\n");
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("dynamic-miner");
+    RenameThread("credits-miner");
 
     unsigned int nExtraNonce = 0;
 
@@ -578,13 +578,13 @@ void static DynamicMiner(const CChainParams& chainparams)
 #endif
             if (!pblocktemplate.get())
             {
-                LogPrintf("DynamicMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
+                LogPrintf("CreditsMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
                 return;
             }
             CBlock *pblock = &pblocktemplate->block;
             IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-            LogPrintf("DynamicMiner -- Running miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
+            LogPrintf("CreditsMiner -- Running miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
                 ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
             
             //
@@ -613,7 +613,7 @@ void static DynamicMiner(const CChainParams& chainparams)
                         //assert(hash == pblock->GetHash());
 
                         SetThreadPriority(THREAD_PRIORITY_NORMAL);
-                        LogPrintf("DynamicMiner:\n proof-of-work found  \n  hash: %s  \ntarget: %s\n", hash.GetHex(), hashTarget.GetHex());
+                        LogPrintf("CreditsMiner:\n proof-of-work found  \n  hash: %s  \ntarget: %s\n", hash.GetHex(), hashTarget.GetHex());
                         ProcessBlockFound(pblock, chainparams);
                         SetThreadPriority(THREAD_PRIORITY_LOWEST);
                         coinbaseScript->KeepScript();
@@ -686,7 +686,7 @@ void static DynamicMiner(const CChainParams& chainparams)
     }
     catch (const boost::thread_interrupted&)
     {
-        LogPrintf("DynamicMiner -- terminated\n");
+        LogPrintf("CreditsMiner -- terminated\n");
         
         #ifdef __AVX2__
         WolfArgon2dFreeCtx(Ctx);
@@ -695,7 +695,7 @@ void static DynamicMiner(const CChainParams& chainparams)
     }
     catch (const std::runtime_error &e)
     {
-        LogPrintf("DynamicMiner -- runtime error: %s\n", e.what());
+        LogPrintf("CreditsMiner -- runtime error: %s\n", e.what());
         #ifdef __AVX2__
         WolfArgon2dFreeCtx(Ctx);
         #endif
@@ -707,7 +707,7 @@ void static DynamicMiner(const CChainParams& chainparams)
     #endif
 }
 
-void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainparams)
+void GenerateCreditss(bool fGenerate, int nThreads, const CChainParams& chainparams)
 {
     static boost::thread_group* minerThreads = NULL;
 
@@ -727,5 +727,5 @@ void GenerateDynamics(bool fGenerate, int nThreads, const CChainParams& chainpar
 
     minerThreads = new boost::thread_group();
     for (int i = 0; i < nThreads; i++)
-        minerThreads->create_thread(boost::bind(&DynamicMiner, boost::cref(chainparams)));
+        minerThreads->create_thread(boost::bind(&CreditsMiner, boost::cref(chainparams)));
 }

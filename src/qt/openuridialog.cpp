@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -19,7 +19,7 @@ OpenURIDialog::OpenURIDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 #if QT_VERSION >= 0x040700
-    ui->uriEdit->setPlaceholderText("dynamic:");
+    ui->uriEdit->setPlaceholderText("credits:");
 #endif
 }
 
@@ -36,7 +36,7 @@ QString OpenURIDialog::getURI()
 void OpenURIDialog::accept()
 {
     SendCoinsRecipient rcp;
-    if(GUIUtil::parseDynamicURI(getURI(), &rcp))
+    if(GUIUtil::parseCreditsURI(getURI(), &rcp))
     {
         /* Only accept value URIs */
         QDialog::accept();
@@ -51,5 +51,5 @@ void OpenURIDialog::on_selectFileButton_clicked()
     if(filename.isEmpty())
         return;
     QUrl fileUri = QUrl::fromLocalFile(filename);
-    ui->uriEdit->setText("dynamic:?r=" + QUrl::toPercentEncoding(fileUri.toString()));
+    ui->uriEdit->setText("credits:?r=" + QUrl::toPercentEncoding(fileUri.toString()));
 }

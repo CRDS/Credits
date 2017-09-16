@@ -10,7 +10,7 @@
 #include "txmempool.h"
 #include "random.h"
 #include "script/standard.h"
-#include "test/test_dynamic.h"
+#include "test/test_credits.h"
 #include "utiltime.h"
 
 #include <boost/test/unit_test.hpp>

@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_GUIUTIL_H
-#define DYNAMIC_QT_GUIUTIL_H
+#ifndef CREDITS_QT_GUIUTIL_H
+#define CREDITS_QT_GUIUTIL_H
 
 #include "amount.h"
 
@@ -33,15 +33,15 @@ class QUrl;
 class QWidget;
 QT_END_NAMESPACE
 
-/** Utility functions used by the Dynamic Qt UI.
+/** Utility functions used by the Credits Qt UI.
  */
 namespace GUIUtil
 {
     // Create human-readable string from date
     QString dateTimeStr(const QDateTime &datetime);
     QString dateTimeStr(qint64 nTime);
-    // Render Dynamic addresses in monospace font
-    QFont DynamicAddressFont();
+    // Render Credits addresses in monospace font
+    QFont CreditsAddressFont();
     // Return a monospace font
     QFont fixedPitchFont();
 
@@ -49,10 +49,10 @@ namespace GUIUtil
     void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent);
     void setupAmountWidget(QLineEdit *widget, QWidget *parent);
 
-    // Parse "dynamic:" URI into recipient object, return true on successful parsing
-    bool parseDynamicURI(const QUrl &uri, SendCoinsRecipient *out);
-    bool parseDynamicURI(QString uri, SendCoinsRecipient *out);
-    QString formatDynamicURI(const SendCoinsRecipient &info);
+    // Parse "credits:" URI into recipient object, return true on successful parsing
+    bool parseCreditsURI(const QUrl &uri, SendCoinsRecipient *out);
+    bool parseCreditsURI(QString uri, SendCoinsRecipient *out);
+    QString formatCreditsURI(const SendCoinsRecipient &info);
 
     // Returns true if given address+amount meets "dust" definition
     bool isDust(const QString& address, const CAmount& amount);
@@ -119,10 +119,10 @@ namespace GUIUtil
     // Open debug.log
     void openDebugLogfile();
 	
-    // Open dynamic.conf
+    // Open credits.conf
     void openConfigfile();	
 
-    // Open dynode.conf
+    // Open masternode.conf
     void openSNConfigfile();	
 
     // Browse backup folder
@@ -264,4 +264,4 @@ namespace GUIUtil
 
 } // namespace GUIUtil
 
-#endif // DYNAMIC_QT_GUIUTIL_H
+#endif // CREDITS_QT_GUIUTIL_H

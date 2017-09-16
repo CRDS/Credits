@@ -2,8 +2,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_POLICY_RBF_H
-#define DYNAMIC_POLICY_RBF_H
+#ifndef CREDITS_POLICY_RBF_H
+#define CREDITS_POLICY_RBF_H
 
 #include "txmempool.h"
 
@@ -17,4 +17,4 @@ bool SignalsOptInRBF(const CTransaction &tx);
 // as the sequence numbers of all in-mempool ancestors.
 bool IsRBFOptIn(const CTxMemPoolEntry &entry, CTxMemPool &pool);
 
-#endif // DYNAMIC_POLICY_RBF_H
+#endif // CREDITS_POLICY_RBF_H

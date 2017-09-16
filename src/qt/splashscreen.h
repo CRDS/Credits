@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_SPLASHSCREEN_H
-#define DYNAMIC_QT_SPLASHSCREEN_H
+#ifndef CREDITS_QT_SPLASHSCREEN_H
+#define CREDITS_QT_SPLASHSCREEN_H
 
 #include <QSplashScreen>
 
@@ -14,7 +14,7 @@ class NetworkStyle;
 
 /** Class for the splashscreen with information of the running client.
  *
- * @note this is intentionally not a QSplashScreen. Dynamic initialization
+ * @note this is intentionally not a QSplashScreen. Credits initialization
  * can take a long time, and in that case a progress window that cannot be
  * moved around and minimized has turned out to be frustrating to the user.
  */
@@ -49,4 +49,4 @@ private:
     int curAlignment;
 };
 
-#endif // DYNAMIC_QT_SPLASHSCREEN_H
+#endif // CREDITS_QT_SPLASHSCREEN_H

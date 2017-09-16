@@ -1,11 +1,11 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_RPCCONSOLE_H
-#define DYNAMIC_QT_RPCCONSOLE_H
+#ifndef CREDITS_QT_RPCCONSOLE_H
+#define CREDITS_QT_RPCCONSOLE_H
 
 #include "guiutil.h"
 #include "peertablemodel.h"
@@ -28,7 +28,7 @@ QT_BEGIN_NAMESPACE
 class QItemSelection;
 QT_END_NAMESPACE
 
-/** Local Dynamic RPC console. */
+/** Local Credits RPC console. */
 class RPCConsole: public QDialog
 {
     Q_OBJECT
@@ -94,8 +94,8 @@ public Q_SLOTS:
     void message(int category, const QString &message, bool html = false);
     /** Set number of connections shown in the UI */
     void setNumConnections(int count);
-    /** Set number of Dynodes shown in the UI */        
-    void setDynodeCount(const QString &strDynodes);      
+    /** Set number of Masternodes shown in the UI */        
+    void setMasternodeCount(const QString &strMasternodes);      
     /** Set number of blocks shown in the UI */
     void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers);
     /** Go forward or back in history */
@@ -164,4 +164,4 @@ private:
     QCompleter *autoCompleter;
 };
 
-#endif // DYNAMIC_QT_RPCCONSOLE_H
+#endif // CREDITS_QT_RPCCONSOLE_H

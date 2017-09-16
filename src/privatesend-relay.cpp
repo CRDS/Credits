@@ -1,5 +1,5 @@
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -11,16 +11,16 @@
 
 CPrivateSendRelay::CPrivateSendRelay()
 {
-    vinDynode = CTxIn();
+    vinMasternode = CTxIn();
     nBlockHeight = 0;
     nRelayType = 0;
     in = CTxIn();
     out = CTxOut();
 }
 
-CPrivateSendRelay::CPrivateSendRelay(CTxIn& vinDynodeIn, std::vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
+CPrivateSendRelay::CPrivateSendRelay(CTxIn& vinMasternodeIn, std::vector<unsigned char>& vchSigIn, int nBlockHeightIn, int nRelayTypeIn, CTxIn& in2, CTxOut& out2)
 {
-    vinDynode = vinDynodeIn;
+    vinMasternode = vinMasternodeIn;
     vchSig = vchSigIn;
     nBlockHeight = nBlockHeightIn;
     nRelayType = nRelayTypeIn;
@@ -32,7 +32,7 @@ std::string CPrivateSendRelay::ToString()
 {
     std::ostringstream info;
 
-    info << "vin: " << vinDynode.ToString() <<
+    info << "vin: " << vinMasternode.ToString() <<
         " nBlockHeight: " << (int)nBlockHeight <<
         " nRelayType: "  << (int)nRelayType <<
         " in " << in.ToString() <<
@@ -90,7 +90,7 @@ bool CPrivateSendRelay::VerifyMessage(std::string strSharedKey)
 
 void CPrivateSendRelay::Relay()
 {
-    int nCount = std::min(dnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION), 20);
+    int nCount = std::min(mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION), 20);
     int nRank1 = (rand() % nCount)+1; 
     int nRank2 = (rand() % nCount)+1; 
 
@@ -106,7 +106,7 @@ void CPrivateSendRelay::Relay()
 
 void CPrivateSendRelay::RelayThroughNode(int nRank)
 {
-    CDynode* psn = dnodeman.GetDynodeByRank(nRank, nBlockHeight, MIN_PRIVATESEND_PEER_PROTO_VERSION);
+    CMasternode* psn = mnodeman.GetMasternodeByRank(nRank, nBlockHeight, MIN_PRIVATESEND_PEER_PROTO_VERSION);
 
     if(psn != NULL){
         //printf("RelayThroughNode %s\n", psn->addr.ToString().c_str());

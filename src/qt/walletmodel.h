@@ -1,12 +1,12 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_QT_WALLETMODEL_H
-#define DYNAMIC_QT_WALLETMODEL_H
+#ifndef CREDITS_QT_WALLETMODEL_H
+#define CREDITS_QT_WALLETMODEL_H
 
 #include "paymentrequestplus.h"
 #include "walletmodeltransaction.h"
@@ -20,7 +20,6 @@
 #include <QObject>
 
 class AddressTableModel;
-class NameTableModel;
 class OptionsModel;
 class PlatformStyle;
 class RecentRequestsTableModel;
@@ -102,7 +101,7 @@ public:
     }
 };
 
-/** Interface to Dynamic wallet from Qt view code. */
+/** Interface to Credits wallet from Qt view code. */
 class WalletModel : public QObject
 {
     Q_OBJECT
@@ -138,7 +137,6 @@ public:
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
-    NameTableModel *getNameTableModel();
 
     CAmount getBalance(const CCoinControl *coinControl = NULL) const;
     CAmount getUnconfirmedBalance() const;
@@ -227,7 +225,6 @@ private:
     AddressTableModel *addressTableModel;
     TransactionTableModel *transactionTableModel;
     RecentRequestsTableModel *recentRequestsTableModel;
-    NameTableModel *nameTableModel;
 
     // Cache some values to be able to detect changes
     CAmount cachedBalance;
@@ -286,4 +283,4 @@ public Q_SLOTS:
     void pollBalanceChanged();
 };
 
-#endif // DYNAMIC_QT_WALLETMODEL_H
+#endif // CREDITS_QT_WALLETMODEL_H

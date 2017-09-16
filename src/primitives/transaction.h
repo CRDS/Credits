@@ -2,12 +2,12 @@
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2013-2017 Emercoin Developers
 // Copyright (c) 2014-2017 The Dash Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_PRIMITIVES_TRANSACTION_H
-#define DYNAMIC_PRIMITIVES_TRANSACTION_H
+#ifndef CREDITS_PRIMITIVES_TRANSACTION_H
+#define CREDITS_PRIMITIVES_TRANSACTION_H
 
 #include "amount.h"
 #include "script/script.h"
@@ -307,9 +307,7 @@ public:
 
     // Compute modified tx size for priority calculation (optionally given tx size)
     unsigned int CalculateModifiedSize(unsigned int nTxSize=0) const;
-    // Used for DDNS
-    bool ReadFromDisk(const CDiskTxPos& postx);
-    
+
     bool IsCoinBase() const
     {
         return (vin.size() == 1 && vin[0].prevout.IsNull());
@@ -369,4 +367,4 @@ struct CMutableTransaction
 
 };
 
-#endif // DYNAMIC_PRIMITIVES_TRANSACTION_H
+#endif // CREDITS_PRIMITIVES_TRANSACTION_H

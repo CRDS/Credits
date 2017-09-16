@@ -1,14 +1,14 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "base58.h"
 #include "clientversion.h"
 #ifdef ENABLE_WALLET
-#include "dynode-sync.h"
+#include "masternode-sync.h"
 #endif
 #include "init.h"
 #include "main.h"
@@ -59,8 +59,8 @@ UniValue getinfo(const UniValue& params, bool fHelp)
             "  \"version\": xxxxx,           (numeric) the server version\n"
             "  \"protocolversion\": xxxxx,   (numeric) the protocol version\n"
             "  \"walletversion\": xxxxx,     (numeric) the wallet version\n"
-            "  \"balance\": xxxxxxx,         (numeric) the total dynamic balance of the wallet\n"
-            "  \"privatesend_balance\": xxxxxx, (numeric) the anonymized dynamic balance of the wallet\n"
+            "  \"balance\": xxxxxxx,         (numeric) the total credits balance of the wallet\n"
+            "  \"privatesend_balance\": xxxxxx, (numeric) the anonymized credits balance of the wallet\n"
             "  \"blocks\": xxxxxx,           (numeric) the current number of blocks processed in the server\n"
             "  \"timeoffset\": xxxxx,        (numeric) the time offset\n"
             "  \"connections\": xxxxx,       (numeric) the number of connections\n"
@@ -125,11 +125,11 @@ UniValue debug(const UniValue& params, bool fHelp)
         throw std::runtime_error(
             "debug ( 0|1|addrman|alert|bench|coindb|db|lock|rand|rpc|selectcoins|mempool"
             "|mempoolrej|net|proxy|prune|http|libevent|tor|zmq|"
-            "dynamic|privatesend|instantsend|dynode|spork|keepass|dnpayments|gobject )\n"
+            "credits|privatesend|instantsend|masternode|spork|keepass|mnpayments|gobject )\n"
             "Change debug category on the fly. Specify single category or use comma to specify many.\n"
             "\nExamples:\n"
-            + HelpExampleCli("debug", "dynamic")
-            + HelpExampleRpc("debug", "dynamic,net")
+            + HelpExampleCli("debug", "credits")
+            + HelpExampleRpc("debug", "credits,net")
         );
 
     std::string strMode = params[0].get_str();
@@ -143,11 +143,11 @@ UniValue debug(const UniValue& params, bool fHelp)
     return "Debug mode: " + (fDebug ? strMode : "off");
 }
 
-UniValue dnsync(const UniValue& params, bool fHelp)
+UniValue mnsync(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw std::runtime_error(
-            "dnsync [status|next|reset]\n"
+            "mnsync [status|next|reset]\n"
             "Returns the sync status, updates to the next step or resets it entirely.\n"
         );
 
@@ -155,26 +155,26 @@ UniValue dnsync(const UniValue& params, bool fHelp)
 
     if(strMode == "status") {
         UniValue objStatus(UniValue::VOBJ);
-        objStatus.push_back(Pair("AssetID", dynodeSync.GetAssetID()));
-        objStatus.push_back(Pair("AssetName", dynodeSync.GetAssetName()));
-        objStatus.push_back(Pair("Attempt", dynodeSync.GetAttempt()));
-        objStatus.push_back(Pair("IsBlockchainSynced", dynodeSync.IsBlockchainSynced()));
-        objStatus.push_back(Pair("IsDynodeListSynced", dynodeSync.IsDynodeListSynced()));
-        objStatus.push_back(Pair("IsWinnersListSynced", dynodeSync.IsWinnersListSynced()));
-        objStatus.push_back(Pair("IsSynced", dynodeSync.IsSynced()));
-        objStatus.push_back(Pair("IsFailed", dynodeSync.IsFailed()));
+        objStatus.push_back(Pair("AssetID", masternodeSync.GetAssetID()));
+        objStatus.push_back(Pair("AssetName", masternodeSync.GetAssetName()));
+        objStatus.push_back(Pair("Attempt", masternodeSync.GetAttempt()));
+        objStatus.push_back(Pair("IsBlockchainSynced", masternodeSync.IsBlockchainSynced()));
+        objStatus.push_back(Pair("IsMasternodeListSynced", masternodeSync.IsMasternodeListSynced()));
+        objStatus.push_back(Pair("IsWinnersListSynced", masternodeSync.IsWinnersListSynced()));
+        objStatus.push_back(Pair("IsSynced", masternodeSync.IsSynced()));
+        objStatus.push_back(Pair("IsFailed", masternodeSync.IsFailed()));
         return objStatus;
     }
 
     if(strMode == "next")
     {
-        dynodeSync.SwitchToNextAsset();
-        return "sync updated to " + dynodeSync.GetAssetName();
+        masternodeSync.SwitchToNextAsset();
+        return "sync updated to " + masternodeSync.GetAssetName();
     }
 
     if(strMode == "reset")
     {
-        dynodeSync.Reset();
+        masternodeSync.Reset();
         return "success";
     }
     return "failure";
@@ -210,7 +210,7 @@ public:
             obj.push_back(Pair("hex", HexStr(subscript.begin(), subscript.end())));
             UniValue a(UniValue::VARR);
             BOOST_FOREACH(const CTxDestination& addr, addresses)
-                a.push_back(CDynamicAddress(addr).ToString());
+                a.push_back(CCreditsAddress(addr).ToString());
             obj.push_back(Pair("addresses", a));
             if (whichType == TX_MULTISIG)
                 obj.push_back(Pair("sigsrequired", nRequired));
@@ -269,14 +269,14 @@ UniValue validateaddress(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw std::runtime_error(
-            "validateaddress \"dynamicaddress\"\n"
-            "\nReturn information about the given dynamic address.\n"
+            "validateaddress \"creditsaddress\"\n"
+            "\nReturn information about the given credits address.\n"
             "\nArguments:\n"
-            "1. \"dynamicaddress\"     (string, required) The dynamic address to validate\n"
+            "1. \"creditsaddress\"     (string, required) The credits address to validate\n"
             "\nResult:\n"
             "{\n"
             "  \"isvalid\" : true|false,       (boolean) If the address is valid or not. If not, this is the only property returned.\n"
-            "  \"address\" : \"dynamicaddress\", (string) The dynamic address validated\n"
+            "  \"address\" : \"creditsaddress\", (string) The credits address validated\n"
             "  \"scriptPubKey\" : \"hex\",       (string) The hex encoded scriptPubKey generated by the address\n"
             "  \"ismine\" : true|false,        (boolean) If the address is yours or not\n"
             "  \"iswatchonly\" : true|false,   (boolean) If the address is watchonly\n"
@@ -288,8 +288,8 @@ UniValue validateaddress(const UniValue& params, bool fHelp)
             "  \"hdchainid\" : \"<hash>\"        (string, optional) The ID of the HD chain\n"
             "}\n"
             "\nExamples:\n"
-            + HelpExampleCli("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
-            + HelpExampleRpc("validateaddress", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
+            + HelpExampleCli("validateaddress", "\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
+            + HelpExampleRpc("validateaddress", "\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"")
         );
 
 #ifdef ENABLE_WALLET
@@ -298,7 +298,7 @@ UniValue validateaddress(const UniValue& params, bool fHelp)
     LOCK(cs_main);
 #endif
 
-    CDynamicAddress address(params[0].get_str());
+    CCreditsAddress address(params[0].get_str());
     bool isValid = address.IsValid();
 
     UniValue ret(UniValue::VOBJ);
@@ -355,8 +355,8 @@ CScript _createmultisig_redeemScript(const UniValue& params)
     {
         const std::string& ks = keys[i].get_str();
 #ifdef ENABLE_WALLET
-        // Case 1: Dynamic address and we have full public key:
-        CDynamicAddress address(ks);
+        // Case 1: Credits address and we have full public key:
+        CCreditsAddress address(ks);
         if (pwalletMain && address.IsValid())
         {
             CKeyID keyID;
@@ -406,9 +406,9 @@ UniValue createmultisig(const UniValue& params, bool fHelp)
 
             "\nArguments:\n"
             "1. nrequired      (numeric, required) The number of required signatures out of the n keys or addresses.\n"
-            "2. \"keys\"       (string, required) A json array of keys which are dynamic addresses or hex-encoded public keys\n"
+            "2. \"keys\"       (string, required) A json array of keys which are credits addresses or hex-encoded public keys\n"
             "     [\n"
-            "       \"key\"    (string) dynamic address or hex-encoded public key\n"
+            "       \"key\"    (string) credits address or hex-encoded public key\n"
             "       ,...\n"
             "     ]\n"
 
@@ -430,7 +430,7 @@ UniValue createmultisig(const UniValue& params, bool fHelp)
     // Construct using pay-to-script-hash:
     CScript inner = _createmultisig_redeemScript(params);
     CScriptID innerID(inner);
-    CDynamicAddress address(innerID);
+    CCreditsAddress address(innerID);
 
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("address", address.ToString()));
@@ -443,10 +443,10 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
 {
     if (fHelp || params.size() != 3)
         throw std::runtime_error(
-            "verifymessage \"dynamicaddress\" \"signature\" \"message\"\n"
+            "verifymessage \"creditsaddress\" \"signature\" \"message\"\n"
             "\nVerify a signed message\n"
             "\nArguments:\n"
-            "1. \"dynamicaddress\"  (string, required) The dynamic address to use for the signature.\n"
+            "1. \"creditsaddress\"  (string, required) The credits address to use for the signature.\n"
             "2. \"signature\"       (string, required) The signature provided by the signer in base 64 encoding (see signmessage).\n"
             "3. \"message\"         (string, required) The message that was signed.\n"
             "\nResult:\n"
@@ -455,11 +455,11 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
             "\nUnlock the wallet for 30 seconds\n"
             + HelpExampleCli("walletpassphrase", "\"mypassphrase\" 30") +
             "\nCreate the signature\n"
-            + HelpExampleCli("signmessage", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"my message\"") +
+            + HelpExampleCli("signmessage", "\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"my message\"") +
             "\nVerify the signature\n"
-            + HelpExampleCli("verifymessage", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"signature\" \"my message\"") +
+            + HelpExampleCli("verifymessage", "\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\" \"signature\" \"my message\"") +
             "\nAs json rpc\n"
-            + HelpExampleRpc("verifymessage", "\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\", \"signature\", \"my message\"")
+            + HelpExampleRpc("verifymessage", "\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\", \"signature\", \"my message\"")
         );
 
     LOCK(cs_main);
@@ -468,7 +468,7 @@ UniValue verifymessage(const UniValue& params, bool fHelp)
     std::string strSign     = params[1].get_str();
     std::string strMessage  = params[2].get_str();
 
-    CDynamicAddress addr(strAddress);
+    CCreditsAddress addr(strAddress);
     if (!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -569,9 +569,9 @@ UniValue getmemoryinfo(const UniValue& params, bool fHelp)
 bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &address)
 {
     if (type == 2) {
-        address = CDynamicAddress(CScriptID(hash)).ToString();
+        address = CCreditsAddress(CScriptID(hash)).ToString();
     } else if (type == 1) {
-        address = CDynamicAddress(CKeyID(hash)).ToString();
+        address = CCreditsAddress(CKeyID(hash)).ToString();
     } else {
         return false;
     }
@@ -581,7 +581,7 @@ bool getAddressFromIndex(const int &type, const uint160 &hash, std::string &addr
 bool getAddressesFromParams(const UniValue& params, std::vector<std::pair<uint160, int> > &addresses)
 {
     if (params[0].isStr()) {
-        CDynamicAddress address(params[0].get_str());
+        CCreditsAddress address(params[0].get_str());
         uint160 hashBytes;
         int type = 0;
         if (!address.GetIndexKey(hashBytes, type)) {
@@ -599,7 +599,7 @@ bool getAddressesFromParams(const UniValue& params, std::vector<std::pair<uint16
 
         for (std::vector<UniValue>::iterator it = values.begin(); it != values.end(); ++it) {
 
-            CDynamicAddress address(it->get_str());
+            CCreditsAddress address(it->get_str());
             uint160 hashBytes;
             int type = 0;
             if (!address.GetIndexKey(hashBytes, type)) {
@@ -651,8 +651,8 @@ UniValue getaddressmempool(const UniValue& params, bool fHelp)
             "  }\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
-            + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
+            + HelpExampleCli("getaddressmempool", "'{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddressmempool", "{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -721,8 +721,8 @@ UniValue getaddressutxos(const UniValue& params, bool fHelp)
             "  }\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressutxos", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
-            + HelpExampleRpc("getaddressutxos", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
+            + HelpExampleCli("getaddressutxos", "'{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddressutxos", "{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -789,8 +789,8 @@ UniValue getaddressdeltas(const UniValue& params, bool fHelp)
             "  }\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
-            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
+            + HelpExampleCli("getaddressdeltas", "'{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddressdeltas", "{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
 
@@ -869,8 +869,8 @@ UniValue getaddressbalance(const UniValue& params, bool fHelp)
             "  \"received\"  (string) The total number of satoshis received (including change)\n"
             "}\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddressbalance", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
-            + HelpExampleRpc("getaddressbalance", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
+            + HelpExampleCli("getaddressbalance", "'{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddressbalance", "{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
     std::vector<std::pair<uint160, int> > addresses;
@@ -927,8 +927,8 @@ UniValue getaddresstxids(const UniValue& params, bool fHelp)
             "  ,...\n"
             "]\n"
             "\nExamples:\n"
-            + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
-            + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"D5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
+            + HelpExampleCli("getaddresstxids", "'{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}'")
+            + HelpExampleRpc("getaddresstxids", "{\"addresses\": [\"C5nRy9Tf7Zsef8gMGL2fhWA9ZslrP4K5tf\"]}")
         );
 
     std::vector<std::pair<uint160, int> > addresses;

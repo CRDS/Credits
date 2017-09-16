@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef DYNAMIC_CONSENSUS_PARAMS_H
-#define DYNAMIC_CONSENSUS_PARAMS_H
+#ifndef CREDITS_CONSENSUS_PARAMS_H
+#define CREDITS_CONSENSUS_PARAMS_H
 
 #include "uint256.h"
 
@@ -37,8 +37,7 @@ struct BIP9Deployment {
  */
 struct Params {
     uint256 hashGenesisBlock;
-    int nRewardsStart;
-    int nDynodePaymentsStartBlock;
+    int nMasternodePaymentsStartBlock;
     int nInstantSendKeepLock; // in blocks
     int nBudgetPaymentsStartBlock;
     int nBudgetPaymentsCycleBlocks;
@@ -48,11 +47,47 @@ struct Params {
     int nSuperblockCycle; // in blocks
     int nGovernanceMinQuorum; // Min absolute vote count to trigger an action
     int nGovernanceFilterElements;
-    int nDynodeMinimumConfirmations;
+    int nMasternodeMinimumConfirmations;
     /** Used to check majorities for block version upgrade */
     int nMajorityEnforceBlockUpgrade;
     int nMajorityRejectBlockOutdated;
     int nMajorityWindow;
+
+    int nYr1TotalBlocks;
+    int nYr2TotalBlocks;
+    int nYr3TotalBlocks;
+    int nYr4TotalBlocks;
+    int nYr5TotalBlocks;
+    int nYr6TotalBlocks;
+    int nYr7TotalBlocks;
+    int nYr8TotalBlocks;
+    int nYr9TotalBlocks;
+    int nYr10TotalBlocks;
+    int nYr11TotalBlocks;
+    int nYr12TotalBlocks;
+    int nYr13TotalBlocks;
+    int nYr14TotalBlocks;
+    int nYr15TotalBlocks;
+    int nYr16TotalBlocks;
+    int nYr17TotalBlocks;
+    int nYr18TotalBlocks;
+    int nYr19TotalBlocks;
+    int nYr20TotalBlocks;
+    int nYr21TotalBlocks;
+    int nYr22TotalBlocks;
+    int nYr23TotalBlocks;
+    int nYr24TotalBlocks;
+    int nYr25TotalBlocks;
+    int nYr26TotalBlocks;
+    int nYr27TotalBlocks;
+    int nYr28TotalBlocks;
+    int nYr29TotalBlocks;
+    int nYr30TotalBlocks;
+    int nYr31TotalBlocks;
+    int nYr32TotalBlocks;
+    int nYr33TotalBlocks;
+    int nYr34TotalBlocks;
+    int nYr35TotalBlocks;
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargetting period,
      * (nPowTargetTimespan / nPowTargetSpacing) which is also used for BIP9 deployments.
@@ -70,7 +105,6 @@ struct Params {
     int64_t nPowAveragingWindow;
     int64_t nPowMaxAdjustDown;
     int64_t nPowMaxAdjustUp;
-    int64_t nUpdateDiffAlgoHeight;
 	int64_t AveragingWindowTimespan() const { return nPowAveragingWindow * nPowTargetSpacing; }
     int64_t MinActualTimespan() const { return (AveragingWindowTimespan() * (100 - nPowMaxAdjustUp  )) / 100; }
     int64_t MaxActualTimespan() const { return (AveragingWindowTimespan() * (100 + nPowMaxAdjustDown)) / 100; }
@@ -78,4 +112,4 @@ struct Params {
 };
 } // namespace Consensus
 
-#endif // DYNAMIC_CONSENSUS_PARAMS_H
+#endif // CREDITS_CONSENSUS_PARAMS_H

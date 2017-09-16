@@ -4,17 +4,17 @@
 There are many ways to setup a wallet to support start-many. This guide will walk through two of them.
 
 1. [Importing an existing wallet (recommended if you are consolidating wallets).](#option1)
-2. [Sending 1,000 DYN to new wallet addresses.](#option2)
+2. [Sending 500 CRDS to new wallet addresses.](#option2)
 
 ## <a name="option1"></a>Option 1. Importing an existing wallet
 
 This is the way to go if you are consolidating multiple wallets into one that supports start-many. 
 
-### From your single-instance Dynode Wallet
+### From your single-instance Masternode Wallet
 
 Open your QT Wallet and go to console (from the menu select Tools => Debug Console)
 
-Dump the private key from your Dynode's pulic key.
+Dump the private key from your Masternode's pulic key.
 
 ```
 walletpassphrase [your_wallet_passphrase] 600
@@ -23,7 +23,7 @@ dumpprivkey [sn_public_key]
 
 Copy the resulting priviate key. You'll use it in the next step.
 
-### From your multi-instance Dynode Wallet
+### From your multi-instance Masternode Wallet
 
 Open your QT Wallet and go to console (from the menu select Tools => Debug Console)
 
@@ -36,11 +36,11 @@ importprivkey [single_instance_private_key]
 
 The wallet will re-scan and you will see your available balance increase by the amount that was in the imported wallet.
 
-[Skip Option 2. and go to Create dynode.conf file](#dynodeconf)
+[Skip Option 2. and go to Create masternode.conf file](#masternodeconf)
 
 ## <a name="option2"></a>Option 2. Starting with a new wallet
 
-[If you used Option 1 above, then you can skip down to Create dynode.conf file.](#dynodeconf)
+[If you used Option 1 above, then you can skip down to Create masternode.conf file.](#masternodeconf)
 
 ### Create New Wallet Addresses
 
@@ -48,41 +48,41 @@ The wallet will re-scan and you will see your available balance increase by the 
 2. Click the Receive tab.
 3. Fill in the form to request a payment.
     * Label: sn01
-    * Amount: 1000 (optional)
+    * Amount: 500 (optional)
     * Click *Request payment*
 5. Click the *Copy Address* button
 
-Create a new wallet address for each Dynode.
+Create a new wallet address for each Masternode.
 
 Close your QT Wallet.
 
-### Send 1,000 DYN to New Addresses
+### Send 500 CRDS to New Addresses
 
-Just like setting up a standard SN. Send exactly 1,000 DYN to each new address created above.
+Just like setting up a standard SN. Send exactly 500 CRDS to each new address created above.
 
-### Create New Dynode Private Keys
+### Create New Masternode Private Keys
 
 Open your QT Wallet and go to console (from the menu select Tools => Debug Console)
 
 Issue the following:
 
-```dynode genkey```
+```masternode genkey```
 
-*Note: A Dynode private key will need to be created for each Dynode you run. You should not use the same Dynode private key for multiple Dynodes.*
+*Note: A Masternode private key will need to be created for each Masternode you run. You should not use the same Masternode private key for multiple Masternodes.*
 
 Close your QT Wallet.
 
-## <a name="dynodeconf"></a>Create dynode.conf file
+## <a name="masternodeconf"></a>Create masternode.conf file
 
 Remember... this is local. Make sure your QT is not running.
 
-Create the dynode.conf file in the same directory as your wallet.dat.
+Create the masternode.conf file in the same directory as your wallet.dat.
 
-Copy the Dynode private key and correspondig collateral output transaction that holds the 1K DYNAMIC.
+Copy the Masternode private key and correspondig collateral output transaction that holds the 1K CREDITS.
 
-The Dynode private key may be an existing key from [Option 1](#option1), or a newly generated key from [Option 2](#option2). 
+The Masternode private key may be an existing key from [Option 1](#option1), or a newly generated key from [Option 2](#option2). 
 
-*Please note, the Dynode priviate key is not the same as a wallet private key. Never put your wallet private key in the dynode.conf file. That is equivalent to putting your 1,000 DYN on the remote server and defeats the purpose of a hot/cold setup.*
+*Please note, the Masternode priviate key is not the same as a wallet private key. Never put your wallet private key in the masternode.conf file. That is equivalent to putting your 500 CRDS on the remote server and defeats the purpose of a hot/cold setup.*
 
 ### Get the collateral output
 
@@ -90,18 +90,18 @@ Open your QT Wallet and go to console (from the menu select Tools => Debug Conso
 
 Issue the following:
 
-```dynode outputs```
+```masternode outputs```
 
 Make note of the hash (which is your collaterla_output) and index.
 
-### Enter your Dynode details into your dynode.conf file
-[From the dynamic github repo](https://github.com/duality-solutions/dynamic/blob/master/doc/dynode_conf.md)
+### Enter your Masternode details into your masternode.conf file
+[From the credits github repo](https://github.com/credits-crds/credits/blob/master/doc/masternode_conf.md)
 
-The new dynode.conf format consists of a space seperated text file. Each line consisting of an alias, IP address followed by port, Dynode private key, collateral output transaction id and collateral output index. 
+The new masternode.conf format consists of a space seperated text file. Each line consisting of an alias, IP address followed by port, Masternode private key, collateral output transaction id and collateral output index. 
 (!!! Currently not implemented: "donation address and donation percentage (the latter two are optional and should be in format "address:percentage")." !!!)
 
 ```
-alias ipaddress:port dynode_private_key collateral_output collateral_output_index (!!! see above "donationin_address:donation_percentage" !!!)
+alias ipaddress:port masternode_private_key collateral_output collateral_output_index (!!! see above "donationin_address:donation_percentage" !!!)
 ```
 
 
@@ -109,26 +109,26 @@ alias ipaddress:port dynode_private_key collateral_output collateral_output_inde
 Example:
 
 ```
-sn01 127.0.0.1:31300 93HaYBVUCYjEMeeH1Y4sBGLALQZE1Yc1K64xiqgX37tGBDQL8Xg 2bcd3c84c84f87eaa86e4e56834c92927a07f9e18718810b92e0d0324456a67c 0
-sn02 127.0.0.2:31300 93WaAb3htPJEV8E9aQcN23Jt97bPex7YvWfgMDTUdWJvzmrMqey aa9f1034d973377a5e733272c3d0eced1de22555ad45d6b24abadff8087948d4 0 (!!! see above "7gnwGHt17heGpG9Crfeh4KGpYNFugPhJdh:25" !!!)
+sn01 127.0.0.1:31000 93HaYBVUCYjEMeeH1Y4sBGLALQZE1Yc1K64xiqgX37tGBDQL8Xg 2bcd3c84c84f87eaa86e4e56834c92927a07f9e18718810b92e0d0324456a67c 0
+sn02 127.0.0.2:31000 93WaAb3htPJEV8E9aQcN23Jt97bPex7YvWfgMDTUdWJvzmrMqey aa9f1034d973377a5e733272c3d0eced1de22555ad45d6b24abadff8087948d4 0 (!!! see above "7gnwGHt17heGpG9Crfeh4KGpYNFugPhJdh:25" !!!)
 ```
 
-## What about the dynamic.conf file?
+## What about the credits.conf file?
 
-If you are using a dynode.conf file you no longer need the dynamic.conf file. The exception is if you need custom settings (thanks oblox). 
+If you are using a masternode.conf file you no longer need the credits.conf file. The exception is if you need custom settings (thanks oblox). 
 
-## Update dynamic.conf on server
+## Update credits.conf on server
 
-If you generated a new Dynode private key, you will need to update the remote dynamic.conf files.
+If you generated a new Masternode private key, you will need to update the remote credits.conf files.
 
 Shut down the daemon and then edit the file.
 
-```sudo nano .dynamic/dynamic.conf```
+```sudo nano .credits/credits.conf```
 
-### Edit the dynodeprivkey
-If you generated a new Dynode private key, you will need to update the dynodeprivkey value in your remote dynamic.conf file.
+### Edit the masternodeprivkey
+If you generated a new Masternode private key, you will need to update the masternodeprivkey value in your remote credits.conf file.
 
-## Start your Dynodes
+## Start your Masternodes
 
 ### Remote
 
@@ -136,9 +136,9 @@ If your remote server is not running, start your remote daemon as you normally w
 
 I usually confirm that remote is on the correct block by issuing:
 
-```dynamicd getinfo```
+```creditsd getinfo```
 
-And compare with the official explorer at http://explorer.dynamicpay.io/chain/Dynamic
+And compare with the official explorer at http://explorer.creditspay.io/chain/Credits
 
 ### Local
 
@@ -148,11 +148,11 @@ Finally... time to start from local.
 
 From the menu select Tools => Debug Console
 
-If you want to review your dynode.conf setting before starting the Dynodes, issue the following in the Debug Console:
+If you want to review your masternode.conf setting before starting the Masternodes, issue the following in the Debug Console:
 
-```dynode list-conf```
+```masternode list-conf```
 
 Give it the eye-ball test. If satisfied, you can start your nodes one of two ways.
 
-1. dynode start-alias [alias_from_dynode.conf]. Example ```dynode start-alias sn01```
-2. dynode start-many
+1. masternode start-alias [alias_from_masternode.conf]. Example ```masternode start-alias sn01```
+2. masternode start-many

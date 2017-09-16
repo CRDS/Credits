@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -9,8 +9,8 @@
 #error This header can only be compiled as C++.
 #endif
 
-#ifndef DYNAMIC_PROTOCOL_H
-#define DYNAMIC_PROTOCOL_H
+#ifndef CREDITS_PROTOCOL_H
+#define CREDITS_PROTOCOL_H
 
 #include "netbase.h"
 #include "serialize.h"
@@ -221,17 +221,17 @@ extern const char *REJECT;
  */
 extern const char *SENDHEADERS;
 
-// Dynamic message types
+// Credits message types
 // NOTE: do NOT declare non-implmented here, we don't want them to be exposed to the outside
 // TODO: add description
 extern const char *TXLOCKREQUEST;
 extern const char *TXLOCKVOTE;
 extern const char *SPORK;
 extern const char *GETSPORKS;
-extern const char *DYNODEPAYMENTVOTE;
-extern const char *DYNODEPAYMENTSYNC;
-extern const char *DNANNOUNCE;
-extern const char *DNPING;
+extern const char *MASTERNODEPAYMENTVOTE;
+extern const char *MASTERNODEPAYMENTSYNC;
+extern const char *MNANNOUNCE;
+extern const char *MNPING;
 extern const char *PSACCEPT;
 extern const char *PSVIN;
 extern const char *PSFINALTX;
@@ -242,10 +242,10 @@ extern const char *PSTX;
 extern const char *PSQUEUE;
 extern const char *SSEG;
 extern const char *SYNCSTATUSCOUNT;
-extern const char *DNGOVERNANCESYNC;
-extern const char *DNGOVERNANCEOBJECT;
-extern const char *DNGOVERNANCEOBJECTVOTE;
-extern const char *DNVERIFY;
+extern const char *MNGOVERNANCESYNC;
+extern const char *MNGOVERNANCEOBJECT;
+extern const char *MNGOVERNANCEOBJECTVOTE;
+extern const char *MNVERIFY;
 };
 
 /* Get a vector of all valid message types (see above) */
@@ -254,15 +254,15 @@ const std::vector<std::string> &getAllNetMessageTypes();
 /** nServices flags */
 enum {
     // NODE_NETWORK means that the node is capable of serving the block chain. It is currently
-    // set by all Dynamic nodes, and is unset by SPV clients or other peers that just want
+    // set by all Credits nodes, and is unset by SPV clients or other peers that just want
     // network services but don't provide them.
     NODE_NETWORK = (1 << 0),
     // NODE_GETUTXO means the node is capable of responding to the getutxo protocol request.
-    // Dynamic does not support this but a patch set called Bitcoin XT does.
+    // Credits does not support this but a patch set called Bitcoin XT does.
     // See BIP 64 for details on how this is implemented.
     NODE_GETUTXO = (1 << 1),
     // NODE_BLOOM means the node is capable and willing to handle bloom-filtered connections.
-    // Dynamic nodes used to support this by default, without advertising this bit.
+    // Credits nodes used to support this by default, without advertising this bit.
     NODE_BLOOM = (1 << 2),
 
     // Bits 24-31 are reserved for temporary experiments. Just pick a bit that
@@ -342,20 +342,20 @@ enum {
     // Nodes may always request a MSG_FILTERED_BLOCK in a getdata, however,
     // MSG_FILTERED_BLOCK should not appear in any invs except as a part of getdata.
     MSG_FILTERED_BLOCK,
-    // Dynamic message types
+    // Credits message types
     // NOTE: declare non-implmented here, we must keep this enum consistent and backwards compatible
     MSG_TXLOCK_REQUEST,
     MSG_TXLOCK_VOTE,
     MSG_SPORK,
-    MSG_DYNODE_PAYMENT_VOTE,
-    MSG_DYNODE_PAYMENT_BLOCK,
-    MSG_DYNODE_QUORUM, // not implemented
-    MSG_DYNODE_ANNOUNCE,
-    MSG_DYNODE_PING,
+    MSG_MASTERNODE_PAYMENT_VOTE,
+    MSG_MASTERNODE_PAYMENT_BLOCK,
+    MSG_MASTERNODE_QUORUM, // not implemented
+    MSG_MASTERNODE_ANNOUNCE,
+    MSG_MASTERNODE_PING,
     MSG_PSTX,
     MSG_GOVERNANCE_OBJECT,
     MSG_GOVERNANCE_OBJECT_VOTE,
-    MSG_DYNODE_VERIFY,
+    MSG_MASTERNODE_VERIFY,
 };
 
-#endif // DYNAMIC_PROTOCOL_H
+#endif // CREDITS_PROTOCOL_H

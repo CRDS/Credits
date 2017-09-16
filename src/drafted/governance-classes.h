@@ -4,7 +4,7 @@
  * FIELDS AND CLASSIFICATION
  * --------------------
  *
- *   -- fields can be updated by the network dynamically (adding a company type, etc)
+ *   -- fields can be updated by the network creditsally (adding a company type, etc)
  *   -- fields can be voted on, leveling them up/down
  *   -- levels determine pay in DO/DAO company types 
  *   

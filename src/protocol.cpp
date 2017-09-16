@@ -1,7 +1,7 @@
 // Copyright (c) 2009-2017 Satoshi Nakamoto
 // Copyright (c) 2009-2017 The Bitcoin Developers
 // Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
+// Copyright (c) 2017 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -37,17 +37,17 @@ const char *FILTERADD="filteradd";
 const char *FILTERCLEAR="filterclear";
 const char *REJECT="reject";
 const char *SENDHEADERS="sendheaders";
-// Dynamic message types
+// Credits message types
 const char *TXLOCKREQUEST="is";
 const char *TXLOCKVOTE="txlvote";
 const char *SPORK="spork";
 const char *GETSPORKS="getsporks";
-const char *DYNODEPAYMENTVOTE="dnw";
-const char *DYNODEPAYMENTBLOCK="dnwb";
-const char *DYNODEPAYMENTSYNC="dnget";
-const char *DNQUORUM="dn quorum"; // not implemented
-const char *DNANNOUNCE="dnb";
-const char *DNPING="dnp";
+const char *MASTERNODEPAYMENTVOTE="mnw";
+const char *MASTERNODEPAYMENTBLOCK="mnwb";
+const char *MASTERNODEPAYMENTSYNC="mnget";
+const char *MNQUORUM="mn quorum"; // not implemented
+const char *MNANNOUNCE="mnb";
+const char *MNPING="mnp";
 const char *PSACCEPT="psa";
 const char *PSVIN="psi";
 const char *PSFINALTX="psf";
@@ -58,10 +58,10 @@ const char *PSTX="pstx";
 const char *PSQUEUE="psq";
 const char *SSEG="sseg";
 const char *SYNCSTATUSCOUNT="ssc";
-const char *DNGOVERNANCESYNC="govsync";
-const char *DNGOVERNANCEOBJECT="govobj";
-const char *DNGOVERNANCEOBJECTVOTE="govobjvote";
-const char *DNVERIFY="dnv";
+const char *MNGOVERNANCESYNC="govsync";
+const char *MNGOVERNANCEOBJECT="govobj";
+const char *MNGOVERNANCEOBJECTVOTE="govobjvote";
+const char *MNVERIFY="mnv";
 };
 
 static const char* ppszTypeName[] =
@@ -70,20 +70,20 @@ static const char* ppszTypeName[] =
     NetMsgType::TX,
     NetMsgType::BLOCK,
     "filtered block", // Should never occur
-    // Dynamic message types
+    // Credits message types
     // NOTE: include non-implmented here, we must keep this list in sync with enum in protocol.h
     NetMsgType::TXLOCKREQUEST,
     NetMsgType::TXLOCKVOTE,
     NetMsgType::SPORK,
-    NetMsgType::DYNODEPAYMENTVOTE,
-    NetMsgType::DYNODEPAYMENTBLOCK,
-    NetMsgType::DNQUORUM, // not implemented
-    NetMsgType::DNANNOUNCE,
-    NetMsgType::DNPING,
+    NetMsgType::MASTERNODEPAYMENTVOTE,
+    NetMsgType::MASTERNODEPAYMENTBLOCK,
+    NetMsgType::MNQUORUM, // not implemented
+    NetMsgType::MNANNOUNCE,
+    NetMsgType::MNPING,
     NetMsgType::PSTX,
-    NetMsgType::DNGOVERNANCEOBJECT,
-    NetMsgType::DNGOVERNANCEOBJECTVOTE,
-    NetMsgType::DNVERIFY,
+    NetMsgType::MNGOVERNANCEOBJECT,
+    NetMsgType::MNGOVERNANCEOBJECTVOTE,
+    NetMsgType::MNVERIFY,
 };
 
 /** All known message types. Keep this in the same order as the list of
@@ -112,17 +112,17 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::FILTERCLEAR,
     NetMsgType::REJECT,
     NetMsgType::SENDHEADERS,
-    // Dynamic message types
+    // Credits message types
     // NOTE: do NOT include non-implmented here, we want them to be "Unknown command" in ProcessMessage()
     NetMsgType::TXLOCKREQUEST,
     NetMsgType::TXLOCKVOTE,
     NetMsgType::SPORK,
     NetMsgType::GETSPORKS,
-    NetMsgType::DYNODEPAYMENTVOTE,
-    // NetMsgType::DYNODEPAYMENTBLOCK, // there is no message for this, only inventory
-    NetMsgType::DYNODEPAYMENTSYNC,
-    NetMsgType::DNANNOUNCE,
-    NetMsgType::DNPING,
+    NetMsgType::MASTERNODEPAYMENTVOTE,
+    // NetMsgType::MASTERNODEPAYMENTBLOCK, // there is no message for this, only inventory
+    NetMsgType::MASTERNODEPAYMENTSYNC,
+    NetMsgType::MNANNOUNCE,
+    NetMsgType::MNPING,
     NetMsgType::PSACCEPT,
     NetMsgType::PSVIN,
     NetMsgType::PSFINALTX,
@@ -133,10 +133,10 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::PSQUEUE,
     NetMsgType::SSEG,
     NetMsgType::SYNCSTATUSCOUNT,
-    NetMsgType::DNGOVERNANCESYNC,
-    NetMsgType::DNGOVERNANCEOBJECT,
-    NetMsgType::DNGOVERNANCEOBJECTVOTE,
-    NetMsgType::DNVERIFY,
+    NetMsgType::MNGOVERNANCESYNC,
+    NetMsgType::MNGOVERNANCEOBJECT,
+    NetMsgType::MNGOVERNANCEOBJECTVOTE,
+    NetMsgType::MNVERIFY,
 };
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes+ARRAYLEN(allNetMessageTypes));
 
