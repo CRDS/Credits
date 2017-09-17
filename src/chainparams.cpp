@@ -313,9 +313,10 @@ public:
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
-        if(!startNewChain)
+        if(!startNewChain) {
             assert(consensus.hashGenesisBlock == uint256S("0x000d1affae588c5c766b2488fc9211801a6d53b06ec9bd8e237092798a4bb242"));
             assert(genesis.hashMerkleRoot == uint256S("0x1df9b425c9a06de51b3fb210ffd2e051e05718e264e8ee4692592746c1566a0c"));
+        }
 
         vFixedSeeds.clear();
         vSeeds.clear();
@@ -450,9 +451,10 @@ public:
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
-        if(!startNewChain)
+        if(!startNewChain) {
             assert(consensus.hashGenesisBlock == uint256S("0x0059cc0c9e478d929bf09cc1062f78cd0b335f8d2051adb83fec545e54c52bd2"));
             assert(genesis.hashMerkleRoot == uint256S("0x1df9b425c9a06de51b3fb210ffd2e051e05718e264e8ee4692592746c1566a0c"));
+        }
 
         vFixedSeeds.clear(); //! Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();  //! Regtest mode doesn't have any DNS seeds.
