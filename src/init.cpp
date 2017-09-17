@@ -921,7 +921,7 @@ void InitLogging()
     fLogIPs = GetBoolArg("-logips", DEFAULT_LOGIPS);
 
     LogPrintf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
-    LogPrintf("Credits version %s (%s)\n", FormatFullVersion(), CLIENT_DATE);
+    LogPrintf("Credits version %s\n", FormatFullVersion());
 }
 
 /** Initialize Credits.
