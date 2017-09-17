@@ -635,9 +635,17 @@ bool CMasternodeBroadcast::CheckOutpoint(int& nDos)
             LogPrint("Masternode", "CMasternodeBroadcast::CheckOutpoint -- Failed to find Masternode UTXO, Masternode=%s\n", vin.prevout.ToStringShort());
             return false;
         }
-        if(coins.vout[vin.prevout.n].nValue != 500 * COIN) {
-            LogPrint("Masternode", "CMasternodeBroadcast::CheckOutpoint -- Masternode UTXO should have 500 CRDS, Masternode=%s\n", vin.prevout.ToStringShort());
-            return false;
+
+        if (chainActive.Height() < Params().GetConsensus().nHardForkOne) {
+            if(coins.vout[vin.prevout.n].nValue != 500 * COIN) {
+                LogPrint("Masternode", "CMasternodeBroadcast::CheckOutpoint -- Masternode UTXO should have 500 CRDS, Masternode=%s\n", vin.prevout.ToStringShort());
+                return false;
+            }
+        } else {
+            if(coins.vout[vin.prevout.n].nValue != 5000 * COIN) {
+                LogPrint("Masternode", "CMasternodeBroadcast::CheckOutpoint -- Masternode UTXO should have 5000 CRDS, Masternode=%s\n", vin.prevout.ToStringShort());
+                return false;
+            }
         }
         if(chainActive.Height() - coins.nHeight + 1 < Params().GetConsensus().nMasternodeMinimumConfirmations) {
             LogPrintf("CMasternodeBroadcast::CheckOutpoint -- Masternode UTXO must have at least %d confirmations, Masternode=%s\n",
@@ -659,7 +667,7 @@ bool CMasternodeBroadcast::CheckOutpoint(int& nDos)
     }
 
     // verify that sig time is legit in past
-    // should be at least not earlier than block when 500 CRDS tx got nMasternodeMinimumConfirmations
+    // should be at least not earlier than block when 500 CRDS (5000 CRDS after fork) tx got nMasternodeMinimumConfirmations
     uint256 hashBlock = uint256();
     CTransaction tx2;
     GetTransaction(vin.prevout.hash, tx2, Params().GetConsensus(), hashBlock, true);
@@ -667,7 +675,7 @@ bool CMasternodeBroadcast::CheckOutpoint(int& nDos)
         LOCK(cs_main);
         BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
         if (mi != mapBlockIndex.end() && (*mi).second) {
-            CBlockIndex* pMNIndex = (*mi).second; // block for 500 CRDS tx -> 1 confirmation
+            CBlockIndex* pMNIndex = (*mi).second; // block for 500 CRDS (5,000 after fork) tx -> 1 confirmation
             CBlockIndex* pConfIndex = chainActive[pMNIndex->nHeight + Params().GetConsensus().nMasternodeMinimumConfirmations - 1]; // block where tx got nMasternodeMinimumConfirmations
             if(pConfIndex->GetBlockTime() > sigTime) {
                 LogPrintf("CMasternodeBroadcast::CheckOutpoint -- Bad sigTime %d (%d conf block is at %d) for Masternode %s %s\n",
@@ -688,8 +696,13 @@ bool CMasternodeBroadcast::IsVinAssociatedWithPubkey(const CTxIn& txin, const CP
     CTransaction tx;
     uint256 hash;
     if(GetTransaction(txin.prevout.hash, tx, Params().GetConsensus(), hash, true)) {
-        BOOST_FOREACH(CTxOut out, tx.vout)
-            if(out.nValue == 500*COIN && out.scriptPubKey == payee) return true;
+        if (chainActive.Height() < Params().GetConsensus().nHardForkOne) {
+            BOOST_FOREACH(CTxOut out, tx.vout)
+                    if(out.nValue == 500*COIN && out.scriptPubKey == payee) return true;
+        } else {
+            BOOST_FOREACH(CTxOut out, tx.vout)
+                    if(out.nValue == 5000*COIN && out.scriptPubKey == payee) return true;
+        }
     }
 
     return false;

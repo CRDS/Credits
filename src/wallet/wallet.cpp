@@ -35,6 +35,7 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "consensus/validation.h"
+#include "chainparams.h"
 
 #include <assert.h>
 
@@ -2416,6 +2417,18 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                 } else {
                     found = true;
                 }
+
+                if (chainActive.Height() >= Params().GetConsensus().nHardForkOne) {
+                    if (nCoinType == ONLY_NOT500IFMN) {
+                        found = !(fMasterNode && pcoin->vout[i].nValue == 5000*COIN);
+                    } else if (nCoinType == ONLY_NONDENOMINATED_NOT500IFMN) {
+                        if (IsCollateralAmount(pcoin->vout[i].nValue)) continue;
+                        found = !IsDenominatedAmount(pcoin->vout[i].nValue);
+                        if(found && fMasterNode) found = pcoin->vout[i].nValue != 5000*COIN; // do not use Hot MN funds
+                    } else if (nCoinType == ONLY_500) {
+                        found = pcoin->vout[i].nValue == 5000*COIN;
+                    }
+                }
                 if(!found) continue;
 
                 isminetype mine = IsMine(pcoin->vout[i]);
@@ -3309,9 +3322,15 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 if (!SelectCoins(nValueToSelect, setCoins, nValueIn, coinControl, nCoinType, fUseInstantSend))
                 {
                     if (nCoinType == ONLY_NOT500IFMN) {
-                        strFailReason = _("Unable to locate enough funds for this transaction that are not equal 500 CRDS.");
+                        if (chainActive.Height() < Params().GetConsensus().nHardForkOne)
+                            strFailReason = _("Unable to locate enough funds for this transaction that are not equal 500 CRDS.");
+                        else
+                            strFailReason = _("Unable to locate enough funds for this transaction that are not equal 5000 CRDS.");
                     } else if (nCoinType == ONLY_NONDENOMINATED_NOT500IFMN) {
-                        strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 500 CRDS.");
+                        if (chainActive.Height() < Params().GetConsensus().nHardForkOne)
+                            strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 500 CRDS.");
+                        else
+                            strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 5000 CRDS.");
                     } else if (nCoinType == ONLY_DENOMINATED) {
                         strFailReason = _("Unable to locate enough PrivateSend denominated funds for this transaction.");
                         strFailReason += " " + _("PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.");

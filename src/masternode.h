@@ -12,6 +12,7 @@
 #include "net.h"
 #include "timedata.h"
 #include "spork.h"
+#include "chainparams.h"
 
 class CMasternode;
 class CMasternodeBroadcast;
@@ -379,7 +380,7 @@ public:
     bool SimpleCheck(int& nDos);
     bool Update(CMasternode* pmn, int& nDos);
     bool CheckOutpoint(int& nDos);
-    /// Is the input associated with this public key? (and there is 500 CRDS - checking if valid Masternode)
+    /// Is the input associated with this public key? (and there is 500 CRDS (5,000 after fork) - checking if valid Masternode)
     bool IsVinAssociatedWithPubkey(const CTxIn& vin, const CPubKey& pubkey);
 
     bool Sign(CKey& keyCollateralAddress);
