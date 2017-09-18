@@ -171,15 +171,11 @@ public:
         if(!startNewChain) {
             assert(consensus.hashGenesisBlock == uint256S("0x0000dea5d2c92cf3f1dce5031cc2b368b2a5e3ebea73ea1278fef673d10b1345"));
             assert(genesis.hashMerkleRoot == uint256S("0x1df9b425c9a06de51b3fb210ffd2e051e05718e264e8ee4692592746c1566a0c"));
-		}
-		
-        /*
-        vSeeds.push_back(CDNSSeedData("", ""));
-        vSeeds.push_back(CDNSSeedData("", "dyn.dnsseeder.com"));
-        vSeeds.push_back(CDNSSeedData("dnsseeder.host", "dyn.dnsseeder.host"));
-        vSeeds.push_back(CDNSSeedData("dnsseeder.net", "dyn.dnsseeder.net"));
-        */
+	}
         
+        vSeeds.push_back(CDNSSeedData("crds.co", "dnsseed1.crds.co"));
+        vSeeds.push_back(CDNSSeedData("crds.co", "dnsseed2.crds.co"));
+
         // Credits addresses start with 'C'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,28);
         // Credits script addresses start with '5'
