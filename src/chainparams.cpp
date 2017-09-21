@@ -257,7 +257,7 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
-        consensus.nHardForkOne = 1;
+        consensus.nHardForkOne = 500;
         consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
@@ -272,10 +272,10 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 510;
         consensus.nMajorityRejectBlockOutdated = 750;
         consensus.nMajorityWindow = 1000;
-        consensus.powLimit = uint256S("000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowAveragingWindow = 17;
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Credits: 24 hours
-        consensus.nPowTargetSpacing = 2 * 64; // Credits: 256 seconds
+        consensus.nPowTargetSpacing = 10; // Credits: 256 seconds
         consensus.nPowMaxAdjustDown = 32; // Credits: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Credits: 16% adjustment up
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
@@ -302,17 +302,15 @@ public:
         nPruneAfterHeight = 100;
         startNewChain = false;
 
-        genesis = CreateGenesisBlock(1497712720, 4579, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
+        genesis = CreateGenesisBlock(1505899386, 252, UintToArith256(consensus.powLimit).GetCompact(), 1, (1 * COIN));
         if(startNewChain == true) {
             MineGenesis(genesis, consensus.powLimit, true);
         }
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
-        if(!startNewChain) {
-            assert(consensus.hashGenesisBlock == uint256S("0x000d1affae588c5c766b2488fc9211801a6d53b06ec9bd8e237092798a4bb242"));
-            assert(genesis.hashMerkleRoot == uint256S("0x1df9b425c9a06de51b3fb210ffd2e051e05718e264e8ee4692592746c1566a0c"));
-        }
+        if(!startNewChain)
+            assert(consensus.hashGenesisBlock == uint256S("0x00499e139d0c1554076333cab98480b9679dac1e12b5cf5c0622d0a4cc136767"));
 
         vFixedSeeds.clear();
         vSeeds.clear();
@@ -447,10 +445,8 @@ public:
 
         consensus.hashGenesisBlock = genesis.GetHash();
 
-        if(!startNewChain) {
+        if(!startNewChain)
             assert(consensus.hashGenesisBlock == uint256S("0x0059cc0c9e478d929bf09cc1062f78cd0b335f8d2051adb83fec545e54c52bd2"));
-            assert(genesis.hashMerkleRoot == uint256S("0x1df9b425c9a06de51b3fb210ffd2e051e05718e264e8ee4692592746c1566a0c"));
-        }
 
         vFixedSeeds.clear(); //! Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();  //! Regtest mode doesn't have any DNS seeds.
