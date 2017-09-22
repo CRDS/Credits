@@ -2405,29 +2405,26 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                 if(nCoinType == ONLY_DENOMINATED) {
                     found = IsDenominatedAmount(pcoin->vout[i].nValue);
                 } else if(nCoinType == ONLY_NOT500IFMN) {
-                    found = !(fMasterNode && pcoin->vout[i].nValue == 500*COIN);
+                    if (chainActive.Height() < Params().GetConsensus().nHardForkOne)
+                        found = !(fMasterNode && pcoin->vout[i].nValue == 500*COIN);
+                    else
+                        found = !(fMasterNode && pcoin->vout[i].nValue == 5000*COIN);
                 } else if(nCoinType == ONLY_NONDENOMINATED_NOT500IFMN) {
                     if (IsCollateralAmount(pcoin->vout[i].nValue)) continue; // do not use collateral amounts
                     found = !IsDenominatedAmount(pcoin->vout[i].nValue);
-                    if(found && fMasterNode) found = pcoin->vout[i].nValue != 500*COIN; // do not use Hot MN funds
+                    if (chainActive.Height() < Params().GetConsensus().nHardForkOne)
+                        if(found && fMasterNode) found = pcoin->vout[i].nValue != 500*COIN; // do not use Hot MN funds
+                    else
+                        if(found && fMasterNode) found = pcoin->vout[i].nValue != 5000*COIN; // do not use Hot MN funds
                 } else if(nCoinType == ONLY_500) {
-                    found = pcoin->vout[i].nValue == 500*COIN;
+                    if (chainActive.Height() < Params().GetConsensus().nHardForkOne)
+                        found = pcoin->vout[i].nValue == 500*COIN;
+                    else
+                        found = pcoin->vout[i].nValue == 5000*COIN;
                 } else if(nCoinType == ONLY_PRIVATESEND_COLLATERAL) {
                     found = IsCollateralAmount(pcoin->vout[i].nValue);
                 } else {
                     found = true;
-                }
-
-                if (chainActive.Height() >= Params().GetConsensus().nHardForkOne) {
-                    if (nCoinType == ONLY_NOT500IFMN) {
-                        found = !(fMasterNode && pcoin->vout[i].nValue == 5000*COIN);
-                    } else if (nCoinType == ONLY_NONDENOMINATED_NOT500IFMN) {
-                        if (IsCollateralAmount(pcoin->vout[i].nValue)) continue;
-                        found = !IsDenominatedAmount(pcoin->vout[i].nValue);
-                        if(found && fMasterNode) found = pcoin->vout[i].nValue != 5000*COIN; // do not use Hot MN funds
-                    } else if (nCoinType == ONLY_500) {
-                        found = pcoin->vout[i].nValue == 5000*COIN;
-                    }
                 }
                 if(!found) continue;
 
