@@ -2405,25 +2405,14 @@ void CWallet::AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed, 
                 if(nCoinType == ONLY_DENOMINATED) {
                     found = IsDenominatedAmount(pcoin->vout[i].nValue);
                 } else if(nCoinType == ONLY_NOT500IFMN) {
-                    if (chainActive.Height() < Params().GetConsensus().nHardForkOne)
-                        found = !(fMasterNode && pcoin->vout[i].nValue == 500*COIN);
-                    else
-                        found = !(fMasterNode && pcoin->vout[i].nValue == 5000*COIN);
+                    found = !(fMasterNode && pcoin->vout[i].nValue == 5000*COIN);
                 } else if(nCoinType == ONLY_NONDENOMINATED_NOT500IFMN) {
                     if (IsCollateralAmount(pcoin->vout[i].nValue)) continue; // do not use collateral amounts
                     found = !IsDenominatedAmount(pcoin->vout[i].nValue);
-                    if (chainActive.Height() < Params().GetConsensus().nHardForkOne) {
-                        if(found && fMasterNode)
-                            found = pcoin->vout[i].nValue != 500*COIN; // do not use Hot MN funds
-                    } else {
-                        if(found && fMasterNode)
-                            found = pcoin->vout[i].nValue != 5000*COIN; // do not use Hot MN funds
-                    }
+                    if(found && fMasterNode)
+                        found = pcoin->vout[i].nValue != 5000*COIN; // do not use Hot MN funds
                 } else if(nCoinType == ONLY_500) {
-                    if (chainActive.Height() < Params().GetConsensus().nHardForkOne)
-                        found = pcoin->vout[i].nValue == 500*COIN;
-                    else
-                        found = pcoin->vout[i].nValue == 5000*COIN;
+                    found = pcoin->vout[i].nValue == 5000*COIN;
                 } else if(nCoinType == ONLY_PRIVATESEND_COLLATERAL) {
                     found = IsCollateralAmount(pcoin->vout[i].nValue);
                 } else {
@@ -3322,15 +3311,9 @@ bool CWallet::CreateTransaction(const std::vector<CRecipient>& vecSend, CWalletT
                 if (!SelectCoins(nValueToSelect, setCoins, nValueIn, coinControl, nCoinType, fUseInstantSend))
                 {
                     if (nCoinType == ONLY_NOT500IFMN) {
-                        if (chainActive.Height() < Params().GetConsensus().nHardForkOne)
-                            strFailReason = _("Unable to locate enough funds for this transaction that are not equal 500 CRDS.");
-                        else
-                            strFailReason = _("Unable to locate enough funds for this transaction that are not equal 5000 CRDS.");
+                        strFailReason = _("Unable to locate enough funds for this transaction that are not equal 5000 CRDS.");
                     } else if (nCoinType == ONLY_NONDENOMINATED_NOT500IFMN) {
-                        if (chainActive.Height() < Params().GetConsensus().nHardForkOne)
-                            strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 500 CRDS.");
-                        else
-                            strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 5000 CRDS.");
+                        strFailReason = _("Unable to locate enough PrivateSend non-denominated funds for this transaction that are not equal 5000 CRDS.");
                     } else if (nCoinType == ONLY_DENOMINATED) {
                         strFailReason = _("Unable to locate enough PrivateSend denominated funds for this transaction.");
                         strFailReason += " " + _("PrivateSend uses exact denominated amounts to send funds, you might simply need to anonymize some more coins.");
