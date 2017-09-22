@@ -11,7 +11,7 @@ SetCompressor /SOLID lzma
 
 # MUI Symbol Definitions
 !define MUI_ICON "pixmaps/credits.ico"
-!define MUI_WELCOMEFINISHPAGE_BITMAP "share/pixmaps/nsis-wizard.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "pixmaps/nsis-wizard.bmp"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT
 !define MUI_HEADERIMAGE_BITMAP "pixmaps/nsis-header.bmp"
