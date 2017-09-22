@@ -113,7 +113,7 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nHardForkOne = 175000;
+        consensus.nHardForkOne = 250000;
         consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 20546
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 20545; // actual historical value
@@ -257,7 +257,7 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
-        consensus.nHardForkOne = 500;
+        consensus.nHardForkOne = 2300;
         consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
