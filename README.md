@@ -8,7 +8,7 @@ Graph on Pull Request History
 
 [![Throughput Graph](https://graphs.waffle.io/Credits-CRDS/Credits/throughput.svg)](https://waffle.io/Credits-CRDS/Credits/metrics/throughput)  
 
-# **Credits (CRDS) v1.0.0.0**
+# **Credits (CRDS) v1.1.0.0**
 
 ![CRDS logo](https://github.com/Credits-CRDS/Credits/blob/master/src/qt/res/icons/light/about.png)
 
@@ -24,7 +24,7 @@ What is Credits?
 * PoW Reward per Block: See Below
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
-* Masternode Collateral Amount: 500 CRDS
+* Masternode Collateral Amount: 5000 CRDS
 * Masternode Min Confirmation: 16 Blocks
 * Masternode Reward: See Below
 * Total Coins: 95,000,000 (~36 Years)
