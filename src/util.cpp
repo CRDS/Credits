@@ -291,7 +291,7 @@ bool LogAcceptCategory(const char* category)
  */
 static std::string LogTimestampStr(const std::string &str, bool *fStartedNewLine)
 {
-    std::string strStamped;
+    string strStamped;
 
     if (!fLogTimestamps)
         return str;
@@ -304,6 +304,11 @@ static std::string LogTimestampStr(const std::string &str, bool *fStartedNewLine
         strStamped += ' ' + str;
     } else
         strStamped = str;
+
+    if (!str.empty() && str[str.size()-1] == '\n')
+        *fStartedNewLine = true;
+    else
+        *fStartedNewLine = false;
 
     return strStamped;
 }
