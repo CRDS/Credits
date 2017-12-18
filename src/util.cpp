@@ -93,6 +93,8 @@
 #include <boost/algorithm/string/predicate.hpp> // for startswith() and endswith()
 #include <boost/thread.hpp>
 
+using namespace std;
+
 //Credits only features
 bool fMasterNode = false;
 bool fLiteMode = false;
