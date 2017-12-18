@@ -333,13 +333,7 @@ int LogPrintStr(const std::string &str)
     int ret = 0; // Returns total number of characters written
     static bool fStartedNewLine = true;
 
-    std::string strThreadLogged = LogThreadNameStr(str, &fStartedNewLine);
-    std::string strTimestamped = LogTimestampStr(strThreadLogged, &fStartedNewLine);
-
-    if (!str.empty() && str[str.size()-1] == '\n')
-        fStartedNewLine = true;
-    else
-        fStartedNewLine = false;
+    string strTimestamped = LogTimestampStr(str, &fStartedNewLine);
 
     if (fPrintToConsole)
     {
