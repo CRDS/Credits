@@ -113,7 +113,8 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nHardForkOne = 250000;
+        consensus.nHardForkOne = 250000; // block
+	consensus.nHardForkTwo = 342000; // block
         consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 100.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 20545; // Credits doesn't use budget payments.
@@ -211,17 +212,9 @@ public:
             2000        // * estimated number of transactions per day after checkpoint
         };
 
-        consensus.nTotalBlocksPhase[0] = 342000;
-	    
-	for(i = 1; i <= 6; i++) {
-	    consensus.nTotalBlocksPhase[i] = 342000 + 125000 * i
-	}
-	
-	consensus.nTotalBlocksPhase[7] = 1375000
-	
-	for(i = 1; i <= 5; i++) {
-	    consensus.nTotalBlocksPhase[i] = 1375000 + 125000 * i
-	}
+        consensus.nPhase1TotalBlocks = 342000;
+	consensus.nPhase2TotalBlocks = 1375000;
+	consensus.nPhase3TotalBlocks = 2000000;
     }
 };
 static CMainParams mainParams;
@@ -234,6 +227,7 @@ public:
     CTestNetParams() {
         strNetworkID = "test";
         consensus.nHardForkOne = 2300;
+	consensus.nHardForkTwo = 4600;
         consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
@@ -328,17 +322,9 @@ public:
             1000        // * estimated number of transactions per day after checkpoint
         };
 
-        consensus.nTotalBlocksPhase[0] = 342000;
-	    
-	for(i = 1; i <= 6; i++) {
-	    consensus.nTotalBlocksPhase[i] = 342000 + 125000 * i
-	}
-	
-	consensus.nTotalBlocksPhase[7] = 1375000
-	
-	for(i = 1; i <= 5; i++) {
-	    consensus.nTotalBlocksPhase[i] = 1375000 + 125000 * i
-	}
+        consensus.nPhase1TotalBlocks = 342000;
+	consensus.nPhase2TotalBlocks = 1375000;
+	consensus.nPhase3TotalBlocks = 2000000;
     }
 };
 static CTestNetParams testNetParams;
@@ -431,17 +417,9 @@ public:
         // Regtest Credits BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 
-        consensus.nTotalBlocksPhase[0] = 342000;
-	    
-	for(i = 1; i <= 6; i++) {
-	    consensus.nTotalBlocksPhase[i] = 342000 + 125000 * i
-	}
-	
-	consensus.nTotalBlocksPhase[7] = 1375000
-	
-	for(i = 1; i <= 5; i++) {
-	    consensus.nTotalBlocksPhase[i] = 1375000 + 125000 * i
-	}
+        consensus.nPhase1TotalBlocks = 342000;
+	consensus.nPhase2TotalBlocks = 1375000;
+	consensus.nPhase3TotalBlocks = 2000000;
     }
 };
 static CRegTestParams regTestParams;
