@@ -37,7 +37,8 @@ struct BIP9Deployment {
  */
 struct Params {
     uint256 hashGenesisBlock;
-    int nHardForkOne;
+    int nHardForkOne; // block
+    int nHardForkTwo; // block
     int nMasternodePaymentsStartBlock;
     int nInstantSendKeepLock; // in blocks
     int nBudgetPaymentsStartBlock;
@@ -54,7 +55,10 @@ struct Params {
     int nMajorityRejectBlockOutdated;
     int nMajorityWindow;
 
-    int nTotalBlocksPhase[13];
+    int nPhase1TotalBlocks;
+    int nPhase2TotalBlocks;
+    int nPhase3TotalBlocks;
+    int nPhase4TotalBlocks;
 	
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargetting period,
