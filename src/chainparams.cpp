@@ -114,13 +114,13 @@ public:
     CMainParams() {
         strNetworkID = "main";
         consensus.nHardForkOne = 250000;
-        consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 20546
+        consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 100.
         consensus.nInstantSendKeepLock = 24;
-        consensus.nBudgetPaymentsStartBlock = 20545; // actual historical value
-        consensus.nBudgetPaymentsCycleBlocks = 20545; //Blocks per month
+        consensus.nBudgetPaymentsStartBlock = 20545; // Credits doesn't use budget payments.
+        consensus.nBudgetPaymentsCycleBlocks = 20545; // Blocks per month
         consensus.nBudgetPaymentsWindowBlocks = 100;
         consensus.nBudgetProposalEstablishingTime = 24 * 60 * 60;
-        consensus.nSuperblockStartBlock = 20546;
+        consensus.nSuperblockStartBlock = 20546; // Credits doesn't have superblocks.
         consensus.nSuperblockCycle = 20545; // 675 (Blocks per day) x 365.25 (Days per Year) / 12 = 20545
         consensus.nGovernanceMinQuorum = 10;
         consensus.nGovernanceFilterElements = 20000;
