@@ -213,8 +213,9 @@ public:
         };
 
         consensus.nPhase1TotalBlocks = 342000;
-	consensus.nPhase2TotalBlocks = 1375000;
-	consensus.nPhase3TotalBlocks = 2000000;
+	consensus.nPhase2TotalBlocks = 1092000;
+	consensus.nPhase3TotalBlocks = 1375000;
+	consensus.nPhase4TotalBlocks = 2000000;
     }
 };
 static CMainParams mainParams;
@@ -323,8 +324,9 @@ public:
         };
 
         consensus.nPhase1TotalBlocks = 342000;
-	consensus.nPhase2TotalBlocks = 1375000;
-	consensus.nPhase3TotalBlocks = 2000000;
+	consensus.nPhase2TotalBlocks = 1092000;
+	consensus.nPhase3TotalBlocks = 1375000;
+	consensus.nPhase4TotalBlocks = 2000000;
     }
 };
 static CTestNetParams testNetParams;
@@ -418,8 +420,9 @@ public:
         nExtCoinType = 1;
 
         consensus.nPhase1TotalBlocks = 342000;
-	consensus.nPhase2TotalBlocks = 1375000;
-	consensus.nPhase3TotalBlocks = 2000000;
+	consensus.nPhase2TotalBlocks = 1092000;
+	consensus.nPhase3TotalBlocks = 1375000;
+	consensus.nPhase4TotalBlocks = 2000000;
     }
 };
 static CRegTestParams regTestParams;
