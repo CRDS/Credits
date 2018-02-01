@@ -211,41 +211,17 @@ public:
             2000        // * estimated number of transactions per day after checkpoint
         };
 
-        consensus.nYr1TotalBlocks = 246544;
-        consensus.nYr2TotalBlocks = 493088;
-        consensus.nYr3TotalBlocks = 739631;
-        consensus.nYr4TotalBlocks = 986175;
-        consensus.nYr5TotalBlocks = 1232719;
-        consensus.nYr6TotalBlocks = 1479263;
-        consensus.nYr7TotalBlocks = 1725806;
-        consensus.nYr8TotalBlocks = 1972350;
-        consensus.nYr9TotalBlocks = 2218894;
-        consensus.nYr10TotalBlocks = 2465438;
-        consensus.nYr11TotalBlocks = 2711981;
-        consensus.nYr12TotalBlocks = 2958525;
-        consensus.nYr13TotalBlocks = 3205069;
-        consensus.nYr14TotalBlocks = 3451613;
-        consensus.nYr15TotalBlocks = 3698156;
-        consensus.nYr16TotalBlocks = 3944700;
-        consensus.nYr17TotalBlocks = 4191244;
-        consensus.nYr18TotalBlocks = 4437788;
-        consensus.nYr19TotalBlocks = 4684331;
-        consensus.nYr20TotalBlocks = 4930875;
-        consensus.nYr21TotalBlocks = 5177419;
-        consensus.nYr22TotalBlocks = 5423963;
-        consensus.nYr23TotalBlocks = 5670506;
-        consensus.nYr24TotalBlocks = 5917050;
-        consensus.nYr25TotalBlocks = 6163594;
-        consensus.nYr26TotalBlocks = 6410138;
-        consensus.nYr27TotalBlocks = 6656681;
-        consensus.nYr28TotalBlocks = 6903225;
-        consensus.nYr29TotalBlocks = 7149769;
-        consensus.nYr30TotalBlocks = 7396313;
-        consensus.nYr31TotalBlocks = 7642856;
-        consensus.nYr32TotalBlocks = 7889400;
-        consensus.nYr33TotalBlocks = 8135944;
-        consensus.nYr34TotalBlocks = 8382488;
-        consensus.nYr35TotalBlocks = 8629031;
+        consensus.nTotalBlocksPhase[0] = 342000;
+	    
+	for(i = 1; i <= 6; i++) {
+	    consensus.nTotalBlocksPhase[i] = 342000 + 125000 * i
+	}
+	
+	consensus.nTotalBlocksPhase[7] = 1375000
+	
+	for(i = 1; i <= 5; i++) {
+	    consensus.nTotalBlocksPhase[i] = 1375000 + 125000 * i
+	}
     }
 };
 static CMainParams mainParams;
@@ -352,41 +328,17 @@ public:
             1000        // * estimated number of transactions per day after checkpoint
         };
 
-        consensus.nYr1TotalBlocks = 246544;
-        consensus.nYr2TotalBlocks = 493088;
-        consensus.nYr3TotalBlocks = 739631;
-        consensus.nYr4TotalBlocks = 986175;
-        consensus.nYr5TotalBlocks = 1232719;
-        consensus.nYr6TotalBlocks = 1479263;
-        consensus.nYr7TotalBlocks = 1725806;
-        consensus.nYr8TotalBlocks = 1972350;
-        consensus.nYr9TotalBlocks = 2218894;
-        consensus.nYr10TotalBlocks = 2465438;
-        consensus.nYr11TotalBlocks = 2711981;
-        consensus.nYr12TotalBlocks = 2958525;
-        consensus.nYr13TotalBlocks = 3205069;
-        consensus.nYr14TotalBlocks = 3451613;
-        consensus.nYr15TotalBlocks = 3698156;
-        consensus.nYr16TotalBlocks = 3944700;
-        consensus.nYr17TotalBlocks = 4191244;
-        consensus.nYr18TotalBlocks = 4437788;
-        consensus.nYr19TotalBlocks = 4684331;
-        consensus.nYr20TotalBlocks = 4930875;
-        consensus.nYr21TotalBlocks = 5177419;
-        consensus.nYr22TotalBlocks = 5423963;
-        consensus.nYr23TotalBlocks = 5670506;
-        consensus.nYr24TotalBlocks = 5917050;
-        consensus.nYr25TotalBlocks = 6163594;
-        consensus.nYr26TotalBlocks = 6410138;
-        consensus.nYr27TotalBlocks = 6656681;
-        consensus.nYr28TotalBlocks = 6903225;
-        consensus.nYr29TotalBlocks = 7149769;
-        consensus.nYr30TotalBlocks = 7396313;
-        consensus.nYr31TotalBlocks = 7642856;
-        consensus.nYr32TotalBlocks = 7889400;
-        consensus.nYr33TotalBlocks = 8135944;
-        consensus.nYr34TotalBlocks = 8382488;
-        consensus.nYr35TotalBlocks = 8629031;
+        consensus.nTotalBlocksPhase[0] = 342000;
+	    
+	for(i = 1; i <= 6; i++) {
+	    consensus.nTotalBlocksPhase[i] = 342000 + 125000 * i
+	}
+	
+	consensus.nTotalBlocksPhase[7] = 1375000
+	
+	for(i = 1; i <= 5; i++) {
+	    consensus.nTotalBlocksPhase[i] = 1375000 + 125000 * i
+	}
     }
 };
 static CTestNetParams testNetParams;
@@ -479,41 +431,17 @@ public:
         // Regtest Credits BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 
-        consensus.nYr1TotalBlocks = 246544;
-        consensus.nYr2TotalBlocks = 493088;
-        consensus.nYr3TotalBlocks = 739631;
-        consensus.nYr4TotalBlocks = 986175;
-        consensus.nYr5TotalBlocks = 1232719;
-        consensus.nYr6TotalBlocks = 1479263;
-        consensus.nYr7TotalBlocks = 1725806;
-        consensus.nYr8TotalBlocks = 1972350;
-        consensus.nYr9TotalBlocks = 2218894;
-        consensus.nYr10TotalBlocks = 2465438;
-        consensus.nYr11TotalBlocks = 2711981;
-        consensus.nYr12TotalBlocks = 2958525;
-        consensus.nYr13TotalBlocks = 3205069;
-        consensus.nYr14TotalBlocks = 3451613;
-        consensus.nYr15TotalBlocks = 3698156;
-        consensus.nYr16TotalBlocks = 3944700;
-        consensus.nYr17TotalBlocks = 4191244;
-        consensus.nYr18TotalBlocks = 4437788;
-        consensus.nYr19TotalBlocks = 4684331;
-        consensus.nYr20TotalBlocks = 4930875;
-        consensus.nYr21TotalBlocks = 5177419;
-        consensus.nYr22TotalBlocks = 5423963;
-        consensus.nYr23TotalBlocks = 5670506;
-        consensus.nYr24TotalBlocks = 5917050;
-        consensus.nYr25TotalBlocks = 6163594;
-        consensus.nYr26TotalBlocks = 6410138;
-        consensus.nYr27TotalBlocks = 6656681;
-        consensus.nYr28TotalBlocks = 6903225;
-        consensus.nYr29TotalBlocks = 7149769;
-        consensus.nYr30TotalBlocks = 7396313;
-        consensus.nYr31TotalBlocks = 7642856;
-        consensus.nYr32TotalBlocks = 7889400;
-        consensus.nYr33TotalBlocks = 8135944;
-        consensus.nYr34TotalBlocks = 8382488;
-        consensus.nYr35TotalBlocks = 8629031;
+        consensus.nTotalBlocksPhase[0] = 342000;
+	    
+	for(i = 1; i <= 6; i++) {
+	    consensus.nTotalBlocksPhase[i] = 342000 + 125000 * i
+	}
+	
+	consensus.nTotalBlocksPhase[7] = 1375000
+	
+	for(i = 1; i <= 5; i++) {
+	    consensus.nTotalBlocksPhase[i] = 1375000 + 125000 * i
+	}
     }
 };
 static CRegTestParams regTestParams;
