@@ -2820,7 +2820,12 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         fMasternodePaid = false;
     }
 
-    CAmount DevReward = COIN / 2;
+    CAmount DevReward = 0 * COIN;
+    
+    if (chainActive.height() > Params().GetConsensus().nHardForkTwo && chainActive.height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+    DevReward = COIN / 2;
+    }
+    
     CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees) + DevReward;
     std::string strError = "";
 
