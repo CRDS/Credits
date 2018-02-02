@@ -137,8 +137,12 @@ static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 12;
 /** Maximum number of unconnecting headers announcements before DoS score */
 static const int MAX_UNCONNECTING_HEADERS = 10;
 
-//Credits Constants
+// Credits Constants
 static const CAmount MIN_TXOUT_AMOUNT = MIN_TX_FEE;
+
+// Credits Variables
+CAmount nIntPoWReward
+CAmount nIntMNReward
 
 struct BlockHasher
 {
