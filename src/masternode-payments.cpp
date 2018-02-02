@@ -297,24 +297,38 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
     
     CAmount PoWPayment;
     CAmount MNPayment = GetMasternodePayment(hasPayment);
-        
-    if (chainActive.height() > Params().GetConsensus().nHardForkTwo) {
+    CAmount DevPayment;
+    
+    if (chainActive.height() < Params().GetConsensus().nHardForkTwo) {
     CAmount noFees = 0 * COIN;
     PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, noFees);
     }
     else
         PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, nFees);
 
+    // The Dev Reward will consist of 0.5 CRDS and will be paid between blocks 342,001 and 1,375,000, including them as well.
+    if (chainActive.height() > Params().GetConsensus().nHardForkTwo && chainActive.height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+    DevPayment = COIN / 2;
+    }
+    
+    txNew.vout.resize(2);    
     txNew.vout[0].nValue = PoWPayment;
-
+    
+    CScript devAddress = GetScriptForDestination(CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo);
+    txNew.vout[1].scriptPubKey = devAddress;
+    txNew.vout[1].nValue = DevPayment;
+    
     if(hasPayment) {
-        txNew.vout.resize(2);
+        txNew.vout.resize(3);
         
         txNew.vout[0].nValue = PoWPayment;
         
         txNew.vout[1].scriptPubKey = payee;
         txNew.vout[1].nValue = MNPayment;
 
+        txNew.vout[2].scriptPubKey = devAddress;
+        txNew.vout[2].nValue = DevPayment;
+        
         CTxDestination address1;
         ExtractDestination(payee, address1);
         CCreditsAddress address2(address1);
