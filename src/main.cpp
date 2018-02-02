@@ -2820,7 +2820,8 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         fMasternodePaid = false;
     }
 
-    CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees);
+    CAmount DevReward = COIN / 2;
+    CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees) + DevReward;
     std::string strError = "";
 
     if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)){
