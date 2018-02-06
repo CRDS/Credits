@@ -7,7 +7,7 @@ Use the autogen script to prepare the build environment.
     make
  
 Precompiled binaries are available at github, see
-https://github.com/Credits-CRDS/Credits
+https://github.com/CRDS/Credits/releases
 
 Always verify the signatures and checksums.
 
