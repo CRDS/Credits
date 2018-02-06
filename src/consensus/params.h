@@ -55,6 +55,7 @@ struct Params {
     int nMajorityRejectBlockOutdated;
     int nMajorityWindow;
 
+    int nIntPhaseTotalBlocks;
     int nPhase1TotalBlocks;
     int nPhase2TotalBlocks;
     int nPhase3TotalBlocks;
