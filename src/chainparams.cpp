@@ -212,6 +212,7 @@ public:
             2000        // * estimated number of transactions per day after checkpoint
         };
 
+	consensus.nIntPhaseTotalBlocks = 125000;
         consensus.nPhase1TotalBlocks = 342000;
 	consensus.nPhase2TotalBlocks = 1092000;
 	consensus.nPhase3TotalBlocks = 1375000;
@@ -227,9 +228,9 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
-        consensus.nHardForkOne = 2300;
-	consensus.nHardForkTwo = 4600;
-        consensus.nMasternodePaymentsStartBlock = 0;
+        consensus.nHardForkOne = 2000;
+	consensus.nHardForkTwo = 3000;
+        consensus.nMasternodePaymentsStartBlock = 1000;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
         consensus.nBudgetPaymentsCycleBlocks = 50;
@@ -246,7 +247,7 @@ public:
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowAveragingWindow = 17;
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Credits: 24 hours
-        consensus.nPowTargetSpacing = 10; // Credits: 256 seconds
+        consensus.nPowTargetSpacing = 2 * 64; // Credits: 128 seconds
         consensus.nPowMaxAdjustDown = 32; // Credits: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Credits: 16% adjustment up
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
@@ -323,10 +324,11 @@ public:
             1000        // * estimated number of transactions per day after checkpoint
         };
 
-        consensus.nPhase1TotalBlocks = 342000;
-	consensus.nPhase2TotalBlocks = 1092000;
-	consensus.nPhase3TotalBlocks = 1375000;
-	consensus.nPhase4TotalBlocks = 2000000;
+	consensus.nIntPhaseTotalBlocks = 1000;
+        consensus.nPhase1TotalBlocks = 3000;
+	consensus.nPhase2TotalBlocks = 9000;
+	consensus.nPhase3TotalBlocks = 11000;
+	consensus.nPhase4TotalBlocks = 16000;
     }
 };
 static CTestNetParams testNetParams;
@@ -419,6 +421,7 @@ public:
         // Regtest Credits BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 
+	consensus.nIntPhaseTotalBlocks = 125000;
         consensus.nPhase1TotalBlocks = 342000;
 	consensus.nPhase2TotalBlocks = 1092000;
 	consensus.nPhase3TotalBlocks = 1375000;
