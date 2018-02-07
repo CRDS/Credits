@@ -140,10 +140,6 @@ static const int MAX_UNCONNECTING_HEADERS = 10;
 // Credits Constants
 static const CAmount MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
-// Credits Variables
-static CAmount nIntPoWReward;
-static CAmount nIntMNReward;
-
 struct BlockHasher
 {
     size_t operator()(const uint256& hash) const { return hash.GetCheapHash(); }
