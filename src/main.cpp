@@ -1757,6 +1757,8 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
 
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 {
+    CAmount nPoWReward;
+    int nIntPhase;
     if (chainActive.Height() == 0) {
         CAmount nSubsidy = 475000 * COIN;
         LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
@@ -1789,6 +1791,8 @@ CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 
 CAmount GetMasternodePayment(bool fMasternode)
 {   
+    CAmount nIntMNReward;
+    int nIntPhase;
     if (fMasternode && chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock && chainActive.Height() <= Params().GetConsensus().nPhase1TotalBlocks) {
         nIntMNReward = 1 * COIN;
         LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
@@ -1828,6 +1832,7 @@ CAmount GetMasternodePayment(bool fMasternode)
         nIntMNReward = 2 * COIN;
         LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
         return nIntMNReward;
+    }
 }
 
 bool IsInitialBlockDownload()
@@ -2822,7 +2827,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
 
     CAmount DevReward = 0 * COIN;
     
-    if (chainActive.height() > Params().GetConsensus().nHardForkTwo && chainActive.height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+    if (chainActive.Height() > Params().GetConsensus().nHardForkTwo && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
     DevReward = COIN / 2;
     }
     
