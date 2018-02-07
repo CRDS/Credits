@@ -297,9 +297,9 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
     
     CAmount PoWPayment;
     CAmount MNPayment = GetMasternodePayment(hasPayment);
-    CAmount DevPayment;
+    CAmount devPayment;
     
-    if (chainActive.height() < Params().GetConsensus().nHardForkTwo) {
+    if (chainActive.Height() < Params().GetConsensus().nHardForkTwo) {
     CAmount noFees = 0 * COIN;
     PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, noFees);
     }
@@ -309,26 +309,36 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
     txNew.vout[0].nValue = PoWPayment;
     
     // The Dev Reward will consist of 0.5 CRDS and will be paid between blocks 342,001 and 1,375,000, including them as well.
-    if (chainActive.height() > Params().GetConsensus().nHardForkTwo && chainActive.height() <= Params().GetConsensus().nPhase3TotalBlocks) {
-    txNew.vout.resize(2);    
+    if (chainActive.Height() > Params().GetConsensus().nHardForkTwo && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+    txNew.vout.resize(3);
     txNew.vout[0].nValue = PoWPayment;
-    
-    DevPayment = COIN / 2;
-    CScript devAddress = GetScriptForDestination(CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo);
-    txNew.vout[1].scriptPubKey = devAddress;
-    txNew.vout[1].nValue = DevPayment;
+
+    txNew.vout[1].scriptPubKey = payee;
+    txNew.vout[1].nValue = MNPayment;
+
+    devPayment = COIN / 2;
+    std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
+    CCreditsAddress intAddress(strDevAddress.c_str());
+    CScriptID intScriptID = boost::get<CScriptID>(intAddress.Get());
+    CScript devScript = CScript() << OP_HASH160 << ToByteVector(intScriptID) << OP_EQUAL;
+        
+    txNew.vout[2].scriptPubKey = devScript;
+    txNew.vout[2].nValue = devPayment;
+        
+    CTxDestination address1;
+    ExtractDestination(payee, address1);
+    CCreditsAddress address2(address1);
+        
+    LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", MNPayment, address2.ToString());
     }
-    
-    if(hasPayment) {
-        txNew.vout.resize(3);
+
+    else if(hasPayment) {
+        txNew.vout.resize(2);
         
         txNew.vout[0].nValue = PoWPayment;
         
         txNew.vout[1].scriptPubKey = payee;
         txNew.vout[1].nValue = MNPayment;
-
-        txNew.vout[2].scriptPubKey = devAddress;
-        txNew.vout[2].nValue = DevPayment;
         
         CTxDestination address1;
         ExtractDestination(payee, address1);
