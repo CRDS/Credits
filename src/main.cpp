@@ -1770,14 +1770,14 @@ CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
         return nIntPoWReward;
     }
     else if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase2TotalBlocks) {
-        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) % 125000;
+        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
         switch(nIntPhase) {
-            case 1: nIntPoWReward = 8 * COIN;
-            case 2: nIntPoWReward = 7 * COIN;
-            case 3: nIntPoWReward = 6 * COIN;
-            case 4: nIntPoWReward = 5 * COIN;
-            case 5: nIntPoWReward = 4 * COIN;
-            case 6: nIntPoWReward = 3 * COIN;
+            case 0: nIntPoWReward = 8 * COIN;
+            case 1: nIntPoWReward = 7 * COIN;
+            case 2: nIntPoWReward = 6 * COIN;
+            case 3: nIntPoWReward = 5 * COIN;
+            case 4: nIntPoWReward = 4 * COIN;
+            case 5: nIntPoWReward = 3 * COIN;
         }
         LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(nIntPoWReward + nFees), nIntPoWReward + nFees);
         return nIntPoWReward + nFees;
@@ -1799,14 +1799,14 @@ CAmount GetMasternodePayment(bool fMasternode)
         return nIntMNReward;
     }
     else if (fMasternode && chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase2TotalBlocks) {
-        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) % Params().GetConsensus().nIntPhaseTotalBlocks;
+        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
         switch(nIntPhase) {
-            case 1: nIntMNReward = 2 * COIN;
-            case 2: nIntMNReward = 3 * COIN;
-            case 3: nIntMNReward = 4 * COIN;
-            case 4: nIntMNReward = 5 * COIN;
-            case 5: nIntMNReward = 6 * COIN;
-            case 6: nIntMNReward = 7 * COIN;
+            case 0: nIntMNReward = 2 * COIN;
+            case 1: nIntMNReward = 3 * COIN;
+            case 2: nIntMNReward = 4 * COIN;
+            case 3: nIntMNReward = 5 * COIN;
+            case 4: nIntMNReward = 6 * COIN;
+            case 5: nIntMNReward = 7 * COIN;
         }
         LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
         return nIntMNReward;
@@ -1817,13 +1817,13 @@ CAmount GetMasternodePayment(bool fMasternode)
         return nIntMNReward;
     }
     else if (fMasternode && chainActive.Height() > Params().GetConsensus().nPhase3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase4TotalBlocks) {
-        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase3TotalBlocks) % Params().GetConsensus().nIntPhaseTotalBlocks;
+        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase3TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
         switch(nIntPhase) {
-            case 1: nIntMNReward = 7 * COIN;
-            case 2: nIntMNReward = 6 * COIN;
-            case 3: nIntMNReward = 5 * COIN;
-            case 4: nIntMNReward = 4 * COIN;
-            case 5: nIntMNReward = 3 * COIN;
+            case 0: nIntMNReward = 7 * COIN;
+            case 1: nIntMNReward = 6 * COIN;
+            case 2: nIntMNReward = 5 * COIN;
+            case 3: nIntMNReward = 4 * COIN;
+            case 4: nIntMNReward = 3 * COIN;
         }
         LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
         return nIntMNReward;
