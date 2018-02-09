@@ -1757,7 +1757,7 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
 
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 {
-    CAmount nPoWReward;
+    CAmount nIntPoWReward;
     int nIntPhase;
     if (chainActive.Height() == 0) {
         CAmount nSubsidy = 475000 * COIN;
