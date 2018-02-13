@@ -278,7 +278,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
 
     if (chainActive.Height() <= Params().GetConsensus().nMasternodePaymentsStartBlock){
             if (fDebug)
-                LogPrintf("CreateNewBlock: No Masternode payments prior to block 20,546\n");
+                LogPrintf("CreateNewBlock: No Masternode payments prior to block 100\n");
             hasPayment = false;
     }
 
@@ -309,7 +309,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
     txNew.vout[0].nValue = PoWPayment;
     
     // The Dev Reward will consist of 0.5 CRDS and will be paid between blocks 342,001 and 1,375,000, including them as well.
-    if (chainActive.Height() > Params().GetConsensus().nHardForkTwo && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+    if (hasPayment && chainActive.Height() > Params().GetConsensus().nHardForkTwo && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
     txNew.vout.resize(3);
     txNew.vout[0].nValue = PoWPayment;
 
@@ -330,6 +330,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
     CCreditsAddress address2(address1);
         
     LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", MNPayment, address2.ToString());
+    LogPrintf("CMasternodePayments::FillBlockPayee -- Development Fund payment %lld to %s\n", devPayment, intAddress.ToString());
     }
 
     else if(hasPayment) {
