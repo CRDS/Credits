@@ -226,7 +226,7 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
     if (chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock) {
         // FILL BLOCK PAYEE WITH MASTERNODE PAYMENT OTHERWISE
         CAmount noFees = 0 * COIN;
-        int nIntPoWReward = GetPoWBlockPayment(nHeight, noFees);
+        int nIntPoWReward = GetPoWBlockPayment(nBlockHeight, noFees);
         CAmount nFees = blockReward - nIntPoWReward;
         mnpayments.FillBlockPayee(txNew, nFees);
         LogPrint("mnpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutMasternodeRet %s txNew %s",
