@@ -1773,10 +1773,15 @@ CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
         nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
         switch(nIntPhase) {
             case 0: nIntPoWReward = 8 * COIN;
+                    break;
             case 1: nIntPoWReward = 7 * COIN;
+                    break;
             case 2: nIntPoWReward = 6 * COIN;
+                    break;
             case 3: nIntPoWReward = 5 * COIN;
+                    break;
             case 4: nIntPoWReward = 4 * COIN;
+                    break;
             case 5: nIntPoWReward = 3 * COIN;
         }
         LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(nIntPoWReward + nFees), nIntPoWReward + nFees);
@@ -1802,10 +1807,15 @@ CAmount GetMasternodePayment(bool fMasternode)
         nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
         switch(nIntPhase) {
             case 0: nIntMNReward = 2 * COIN;
+                    break;
             case 1: nIntMNReward = 3 * COIN;
+                    break;
             case 2: nIntMNReward = 4 * COIN;
+                    break;
             case 3: nIntMNReward = 5 * COIN;
+                    break;
             case 4: nIntMNReward = 6 * COIN;
+                    break;
             case 5: nIntMNReward = 7 * COIN;
         }
         LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
@@ -1820,10 +1830,15 @@ CAmount GetMasternodePayment(bool fMasternode)
         nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase3TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
         switch(nIntPhase) {
             case 0: nIntMNReward = 7 * COIN;
+                    break;
             case 1: nIntMNReward = 6 * COIN;
+                    break;
             case 2: nIntMNReward = 5 * COIN;
+                    break;
             case 3: nIntMNReward = 4 * COIN;
+                    break;
             case 4: nIntMNReward = 3 * COIN;
+                    break;
         }
         LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
         return nIntMNReward;
