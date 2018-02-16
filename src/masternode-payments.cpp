@@ -318,10 +318,10 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
         devPayment = COIN / 2;
         std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
         CCreditsAddress intAddress(strDevAddress.c_str());
-        CScriptID intScriptID = boost::get<CScriptID>(intAddress.Get());
-        CScript devScript = CScript() << OP_HASH160 << ToByteVector(intScriptID) << OP_EQUAL;
+        CTxDestination devDestination = intAddress.Get();
+        CScript devScriptPubKey = GetScriptForDestination(devDestination);
         
-        txNew.vout[1].scriptPubKey = devScript;
+        txNew.vout[1].scriptPubKey = devScriptPubKey;
         txNew.vout[1].nValue = devPayment;
     
         LogPrintf("CMasternodePayments::FillBlockPayee -- Development Fund payment %lld to %s\n", devPayment, intAddress.ToString());
@@ -345,8 +345,10 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
             devPayment = COIN / 2;
             std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
             CCreditsAddress intAddress(strDevAddress.c_str());
-            CScriptID intScriptID = boost::get<CScriptID>(intAddress.Get());
-            CScript devScript = CScript() << OP_HASH160 << ToByteVector(intScriptID) << OP_EQUAL;
+            CTxDestination devDestination = intAddress.Get();
+            CScript devScriptPubKey = GetScriptForDestination(devDestination);
+        
+            txNew.vout[1].scriptPubKey = devScriptPubKey;
         
             txNew.vout[2].scriptPubKey = devScript;
             txNew.vout[2].nValue = devPayment;
