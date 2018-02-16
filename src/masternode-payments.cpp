@@ -348,9 +348,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
             CTxDestination devDestination = intAddress.Get();
             CScript devScriptPubKey = GetScriptForDestination(devDestination);
         
-            txNew.vout[1].scriptPubKey = devScriptPubKey;
-        
-            txNew.vout[2].scriptPubKey = devScript;
+            txNew.vout[2].scriptPubKey = devScriptPubKey;
             txNew.vout[2].nValue = devPayment;
             
             LogPrintf("CMasternodePayments::FillBlockPayee -- Development Fund payment %lld to %s\n", devPayment, intAddress.ToString());
