@@ -113,14 +113,15 @@ class CMainParams : public CChainParams {
 public:
     CMainParams() {
         strNetworkID = "main";
-        consensus.nHardForkOne = 250000;
-        consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 20546
+        consensus.nHardForkOne = 250000; // block
+	consensus.nHardForkTwo = 342000; // block
+        consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 100.
         consensus.nInstantSendKeepLock = 24;
-        consensus.nBudgetPaymentsStartBlock = 20545; // actual historical value
-        consensus.nBudgetPaymentsCycleBlocks = 20545; //Blocks per month
+        consensus.nBudgetPaymentsStartBlock = 20545; // Credits doesn't use budget payments.
+        consensus.nBudgetPaymentsCycleBlocks = 20545; // Blocks per month
         consensus.nBudgetPaymentsWindowBlocks = 100;
         consensus.nBudgetProposalEstablishingTime = 24 * 60 * 60;
-        consensus.nSuperblockStartBlock = 20546;
+        consensus.nSuperblockStartBlock = 20546; // Credits doesn't have superblocks.
         consensus.nSuperblockCycle = 20545; // 675 (Blocks per day) x 365.25 (Days per Year) / 12 = 20545
         consensus.nGovernanceMinQuorum = 10;
         consensus.nGovernanceFilterElements = 20000;
@@ -211,41 +212,11 @@ public:
             2000        // * estimated number of transactions per day after checkpoint
         };
 
-        consensus.nYr1TotalBlocks = 246544;
-        consensus.nYr2TotalBlocks = 493088;
-        consensus.nYr3TotalBlocks = 739631;
-        consensus.nYr4TotalBlocks = 986175;
-        consensus.nYr5TotalBlocks = 1232719;
-        consensus.nYr6TotalBlocks = 1479263;
-        consensus.nYr7TotalBlocks = 1725806;
-        consensus.nYr8TotalBlocks = 1972350;
-        consensus.nYr9TotalBlocks = 2218894;
-        consensus.nYr10TotalBlocks = 2465438;
-        consensus.nYr11TotalBlocks = 2711981;
-        consensus.nYr12TotalBlocks = 2958525;
-        consensus.nYr13TotalBlocks = 3205069;
-        consensus.nYr14TotalBlocks = 3451613;
-        consensus.nYr15TotalBlocks = 3698156;
-        consensus.nYr16TotalBlocks = 3944700;
-        consensus.nYr17TotalBlocks = 4191244;
-        consensus.nYr18TotalBlocks = 4437788;
-        consensus.nYr19TotalBlocks = 4684331;
-        consensus.nYr20TotalBlocks = 4930875;
-        consensus.nYr21TotalBlocks = 5177419;
-        consensus.nYr22TotalBlocks = 5423963;
-        consensus.nYr23TotalBlocks = 5670506;
-        consensus.nYr24TotalBlocks = 5917050;
-        consensus.nYr25TotalBlocks = 6163594;
-        consensus.nYr26TotalBlocks = 6410138;
-        consensus.nYr27TotalBlocks = 6656681;
-        consensus.nYr28TotalBlocks = 6903225;
-        consensus.nYr29TotalBlocks = 7149769;
-        consensus.nYr30TotalBlocks = 7396313;
-        consensus.nYr31TotalBlocks = 7642856;
-        consensus.nYr32TotalBlocks = 7889400;
-        consensus.nYr33TotalBlocks = 8135944;
-        consensus.nYr34TotalBlocks = 8382488;
-        consensus.nYr35TotalBlocks = 8629031;
+	consensus.nIntPhaseTotalBlocks = 125000;
+        consensus.nPhase1TotalBlocks = 342000;
+	consensus.nPhase2TotalBlocks = 1092000;
+	consensus.nPhase3TotalBlocks = 1375000;
+	consensus.nPhase4TotalBlocks = 2000000;
     }
 };
 static CMainParams mainParams;
@@ -257,8 +228,9 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
-        consensus.nHardForkOne = 2300;
-        consensus.nMasternodePaymentsStartBlock = 0;
+        consensus.nHardForkOne = 2000;
+	consensus.nHardForkTwo = 3000;
+        consensus.nMasternodePaymentsStartBlock = 1000;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
         consensus.nBudgetPaymentsCycleBlocks = 50;
@@ -275,7 +247,7 @@ public:
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowAveragingWindow = 17;
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Credits: 24 hours
-        consensus.nPowTargetSpacing = 10; // Credits: 256 seconds
+        consensus.nPowTargetSpacing = 2 * 64; // Credits: 128 seconds
         consensus.nPowMaxAdjustDown = 32; // Credits: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Credits: 16% adjustment up
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
@@ -352,41 +324,11 @@ public:
             1000        // * estimated number of transactions per day after checkpoint
         };
 
-        consensus.nYr1TotalBlocks = 246544;
-        consensus.nYr2TotalBlocks = 493088;
-        consensus.nYr3TotalBlocks = 739631;
-        consensus.nYr4TotalBlocks = 986175;
-        consensus.nYr5TotalBlocks = 1232719;
-        consensus.nYr6TotalBlocks = 1479263;
-        consensus.nYr7TotalBlocks = 1725806;
-        consensus.nYr8TotalBlocks = 1972350;
-        consensus.nYr9TotalBlocks = 2218894;
-        consensus.nYr10TotalBlocks = 2465438;
-        consensus.nYr11TotalBlocks = 2711981;
-        consensus.nYr12TotalBlocks = 2958525;
-        consensus.nYr13TotalBlocks = 3205069;
-        consensus.nYr14TotalBlocks = 3451613;
-        consensus.nYr15TotalBlocks = 3698156;
-        consensus.nYr16TotalBlocks = 3944700;
-        consensus.nYr17TotalBlocks = 4191244;
-        consensus.nYr18TotalBlocks = 4437788;
-        consensus.nYr19TotalBlocks = 4684331;
-        consensus.nYr20TotalBlocks = 4930875;
-        consensus.nYr21TotalBlocks = 5177419;
-        consensus.nYr22TotalBlocks = 5423963;
-        consensus.nYr23TotalBlocks = 5670506;
-        consensus.nYr24TotalBlocks = 5917050;
-        consensus.nYr25TotalBlocks = 6163594;
-        consensus.nYr26TotalBlocks = 6410138;
-        consensus.nYr27TotalBlocks = 6656681;
-        consensus.nYr28TotalBlocks = 6903225;
-        consensus.nYr29TotalBlocks = 7149769;
-        consensus.nYr30TotalBlocks = 7396313;
-        consensus.nYr31TotalBlocks = 7642856;
-        consensus.nYr32TotalBlocks = 7889400;
-        consensus.nYr33TotalBlocks = 8135944;
-        consensus.nYr34TotalBlocks = 8382488;
-        consensus.nYr35TotalBlocks = 8629031;
+	consensus.nIntPhaseTotalBlocks = 1000;
+        consensus.nPhase1TotalBlocks = 3000;
+	consensus.nPhase2TotalBlocks = 9000;
+	consensus.nPhase3TotalBlocks = 11000;
+	consensus.nPhase4TotalBlocks = 16000;
     }
 };
 static CTestNetParams testNetParams;
@@ -479,41 +421,11 @@ public:
         // Regtest Credits BIP44 coin type is '1' (All coin's testnet default)
         nExtCoinType = 1;
 
-        consensus.nYr1TotalBlocks = 246544;
-        consensus.nYr2TotalBlocks = 493088;
-        consensus.nYr3TotalBlocks = 739631;
-        consensus.nYr4TotalBlocks = 986175;
-        consensus.nYr5TotalBlocks = 1232719;
-        consensus.nYr6TotalBlocks = 1479263;
-        consensus.nYr7TotalBlocks = 1725806;
-        consensus.nYr8TotalBlocks = 1972350;
-        consensus.nYr9TotalBlocks = 2218894;
-        consensus.nYr10TotalBlocks = 2465438;
-        consensus.nYr11TotalBlocks = 2711981;
-        consensus.nYr12TotalBlocks = 2958525;
-        consensus.nYr13TotalBlocks = 3205069;
-        consensus.nYr14TotalBlocks = 3451613;
-        consensus.nYr15TotalBlocks = 3698156;
-        consensus.nYr16TotalBlocks = 3944700;
-        consensus.nYr17TotalBlocks = 4191244;
-        consensus.nYr18TotalBlocks = 4437788;
-        consensus.nYr19TotalBlocks = 4684331;
-        consensus.nYr20TotalBlocks = 4930875;
-        consensus.nYr21TotalBlocks = 5177419;
-        consensus.nYr22TotalBlocks = 5423963;
-        consensus.nYr23TotalBlocks = 5670506;
-        consensus.nYr24TotalBlocks = 5917050;
-        consensus.nYr25TotalBlocks = 6163594;
-        consensus.nYr26TotalBlocks = 6410138;
-        consensus.nYr27TotalBlocks = 6656681;
-        consensus.nYr28TotalBlocks = 6903225;
-        consensus.nYr29TotalBlocks = 7149769;
-        consensus.nYr30TotalBlocks = 7396313;
-        consensus.nYr31TotalBlocks = 7642856;
-        consensus.nYr32TotalBlocks = 7889400;
-        consensus.nYr33TotalBlocks = 8135944;
-        consensus.nYr34TotalBlocks = 8382488;
-        consensus.nYr35TotalBlocks = 8629031;
+	consensus.nIntPhaseTotalBlocks = 125000;
+        consensus.nPhase1TotalBlocks = 342000;
+	consensus.nPhase2TotalBlocks = 1092000;
+	consensus.nPhase3TotalBlocks = 1375000;
+	consensus.nPhase4TotalBlocks = 2000000;
     }
 };
 static CRegTestParams regTestParams;

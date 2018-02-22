@@ -1757,299 +1757,97 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
 
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 {
+    CAmount nIntPoWReward;
+    int nIntPhase;
     if (chainActive.Height() == 0) {
         CAmount nSubsidy = 475000 * COIN;
         LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nYr1TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_1_POW_REWARD), YEAR_1_POW_REWARD);
-        return YEAR_1_POW_REWARD + nFees;
+    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nPhase1TotalBlocks) {
+        nIntPoWReward = 10 * COIN;
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(nIntPoWReward), nIntPoWReward);
+        return nIntPoWReward;
     }
-    else if (chainActive.Height() > Params().GetConsensus().nYr1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr2TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_2_POW_REWARD), YEAR_2_POW_REWARD);
-        return YEAR_2_POW_REWARD + nFees;
+    else if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase2TotalBlocks) {
+        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
+        switch(nIntPhase) {
+            case 0: nIntPoWReward = 8 * COIN;
+                    break;
+            case 1: nIntPoWReward = 7 * COIN;
+                    break;
+            case 2: nIntPoWReward = 6 * COIN;
+                    break;
+            case 3: nIntPoWReward = 5 * COIN;
+                    break;
+            case 4: nIntPoWReward = 4 * COIN;
+                    break;
+            case 5: nIntPoWReward = 3 * COIN;
+        }
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(nIntPoWReward + nFees), nIntPoWReward + nFees);
+        return nIntPoWReward + nFees;
     }
-    else if (chainActive.Height() > Params().GetConsensus().nYr2TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr3TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_3_POW_REWARD), YEAR_3_POW_REWARD);
-        return YEAR_3_POW_REWARD + nFees;
+    else {
+        nIntPoWReward = 2 * COIN;
+        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(nIntPoWReward + nFees), nIntPoWReward + nFees);
+        return nIntPoWReward + nFees;
     }
-    else if (chainActive.Height() > Params().GetConsensus().nYr3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr4TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_4_POW_REWARD), YEAR_4_POW_REWARD);
-        return YEAR_4_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr4TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr5TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_5_POW_REWARD), YEAR_5_POW_REWARD);
-        return YEAR_5_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr5TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr6TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_6_POW_REWARD), YEAR_6_POW_REWARD);
-        return YEAR_6_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr6TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr7TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_7_POW_REWARD), YEAR_7_POW_REWARD);
-        return YEAR_7_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr7TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr8TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_8_POW_REWARD), YEAR_8_POW_REWARD);
-        return YEAR_8_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr8TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr9TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_9_POW_REWARD), YEAR_9_POW_REWARD);
-        return YEAR_9_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr9TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr10TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_10_POW_REWARD), YEAR_10_POW_REWARD);
-        return YEAR_10_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr10TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr11TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_11_POW_REWARD), YEAR_11_POW_REWARD);
-        return YEAR_11_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr11TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr12TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_12_POW_REWARD), YEAR_12_POW_REWARD);
-        return YEAR_12_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr12TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr13TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_13_POW_REWARD), YEAR_13_POW_REWARD);
-        return YEAR_13_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr13TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr14TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_14_POW_REWARD), YEAR_14_POW_REWARD);
-        return YEAR_14_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr14TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr15TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_15_POW_REWARD), YEAR_15_POW_REWARD);
-        return YEAR_15_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr15TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr16TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_16_POW_REWARD), YEAR_16_POW_REWARD);
-        return YEAR_16_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr16TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr17TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_17_POW_REWARD), YEAR_17_POW_REWARD);
-        return YEAR_17_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr17TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr18TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_18_POW_REWARD), YEAR_18_POW_REWARD);
-        return YEAR_18_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr18TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr19TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_19_POW_REWARD), YEAR_19_POW_REWARD);
-        return YEAR_19_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr19TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr20TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_20_POW_REWARD), YEAR_20_POW_REWARD);
-        return YEAR_20_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr20TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr21TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_21_POW_REWARD), YEAR_21_POW_REWARD);
-        return YEAR_21_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr21TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr22TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_22_POW_REWARD), YEAR_22_POW_REWARD);
-        return YEAR_22_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr22TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr23TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_23_POW_REWARD), YEAR_23_POW_REWARD);
-        return YEAR_23_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr23TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr24TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_24_POW_REWARD), YEAR_24_POW_REWARD);
-        return YEAR_24_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr24TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr25TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_25_POW_REWARD), YEAR_25_POW_REWARD);
-        return YEAR_25_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr25TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr26TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_26_POW_REWARD), YEAR_26_POW_REWARD);
-        return YEAR_26_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr26TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr27TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_27_POW_REWARD), YEAR_27_POW_REWARD);
-        return YEAR_27_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr27TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr28TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_28_POW_REWARD), YEAR_28_POW_REWARD);
-        return YEAR_28_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr28TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr29TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_29_POW_REWARD), YEAR_29_POW_REWARD);
-        return YEAR_29_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr29TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr30TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_30_POW_REWARD), YEAR_30_POW_REWARD);
-        return YEAR_30_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr30TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr31TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_31_POW_REWARD), YEAR_31_POW_REWARD);
-        return YEAR_31_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr31TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr32TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_32_POW_REWARD), YEAR_32_POW_REWARD);
-        return YEAR_32_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr32TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr33TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_33_POW_REWARD), YEAR_33_POW_REWARD);
-        return YEAR_33_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr33TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr34TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_34_POW_REWARD), YEAR_34_POW_REWARD);
-        return YEAR_34_POW_REWARD + nFees;
-    }
-    else if (chainActive.Height() > Params().GetConsensus().nYr34TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr35TotalBlocks) {
-        LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(YEAR_35_POW_REWARD), YEAR_35_POW_REWARD);
-        return YEAR_35_POW_REWARD + nFees;
-    }
-    else 
-        return YEAR_1_POW_REWARD + nFees;
 }
 
 CAmount GetMasternodePayment(bool fMasternode)
 {   
-    if (fMasternode && chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock && chainActive.Height() <= Params().GetConsensus().nYr1TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_1_MASTERNODE_PAYMENT), YEAR_1_MASTERNODE_PAYMENT);
-        return YEAR_1_MASTERNODE_PAYMENT;
+    CAmount nIntMNReward;
+    int nIntPhase;
+    if (fMasternode && chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock && chainActive.Height() <= Params().GetConsensus().nPhase1TotalBlocks) {
+        nIntMNReward = 1 * COIN;
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
+        return nIntMNReward;
     }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr2TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_2_MASTERNODE_PAYMENT), YEAR_2_MASTERNODE_PAYMENT);
-        return YEAR_2_MASTERNODE_PAYMENT;
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase2TotalBlocks) {
+        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
+        switch(nIntPhase) {
+            case 0: nIntMNReward = 2 * COIN;
+                    break;
+            case 1: nIntMNReward = 3 * COIN;
+                    break;
+            case 2: nIntMNReward = 4 * COIN;
+                    break;
+            case 3: nIntMNReward = 5 * COIN;
+                    break;
+            case 4: nIntMNReward = 6 * COIN;
+                    break;
+            case 5: nIntMNReward = 7 * COIN;
+        }
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
+        return nIntMNReward;
     }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr2TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr3TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_3_MASTERNODE_PAYMENT), YEAR_3_MASTERNODE_PAYMENT);
-        return YEAR_3_MASTERNODE_PAYMENT;
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nPhase2TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+        nIntMNReward = 8 * COIN;
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
+        return nIntMNReward;
     }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr4TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_4_MASTERNODE_PAYMENT), YEAR_4_MASTERNODE_PAYMENT);
-        return YEAR_4_MASTERNODE_PAYMENT;
+    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nPhase3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase4TotalBlocks) {
+        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase3TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
+        switch(nIntPhase) {
+            case 0: nIntMNReward = 7 * COIN;
+                    break;
+            case 1: nIntMNReward = 6 * COIN;
+                    break;
+            case 2: nIntMNReward = 5 * COIN;
+                    break;
+            case 3: nIntMNReward = 4 * COIN;
+                    break;
+            case 4: nIntMNReward = 3 * COIN;
+                    break;
+        }
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
+        return nIntMNReward;
     }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr4TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr5TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_5_MASTERNODE_PAYMENT), YEAR_5_MASTERNODE_PAYMENT);
-        return YEAR_5_MASTERNODE_PAYMENT;
+    else {
+        nIntMNReward = 2 * COIN;
+        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
+        return nIntMNReward;
     }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr5TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr6TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_6_MASTERNODE_PAYMENT), YEAR_6_MASTERNODE_PAYMENT);
-        return YEAR_6_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr6TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr7TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_7_MASTERNODE_PAYMENT), YEAR_7_MASTERNODE_PAYMENT);
-        return YEAR_7_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr7TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr8TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_8_MASTERNODE_PAYMENT), YEAR_8_MASTERNODE_PAYMENT);
-        return YEAR_8_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr8TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr9TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_9_MASTERNODE_PAYMENT), YEAR_9_MASTERNODE_PAYMENT);
-        return YEAR_9_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr9TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr10TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_10_MASTERNODE_PAYMENT), YEAR_10_MASTERNODE_PAYMENT);
-        return YEAR_10_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr10TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr11TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_11_MASTERNODE_PAYMENT), YEAR_11_MASTERNODE_PAYMENT);
-        return YEAR_11_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr11TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr12TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_12_MASTERNODE_PAYMENT), YEAR_12_MASTERNODE_PAYMENT);
-        return YEAR_12_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr12TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr13TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_13_MASTERNODE_PAYMENT), YEAR_13_MASTERNODE_PAYMENT);
-        return YEAR_13_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr13TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr14TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_14_MASTERNODE_PAYMENT), YEAR_14_MASTERNODE_PAYMENT);
-        return YEAR_14_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr14TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr15TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_15_MASTERNODE_PAYMENT), YEAR_15_MASTERNODE_PAYMENT);
-        return YEAR_15_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr15TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr16TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_16_MASTERNODE_PAYMENT), YEAR_16_MASTERNODE_PAYMENT);
-        return YEAR_16_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr16TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr17TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_17_MASTERNODE_PAYMENT), YEAR_17_MASTERNODE_PAYMENT);
-        return YEAR_17_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr17TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr18TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_18_MASTERNODE_PAYMENT), YEAR_18_MASTERNODE_PAYMENT);
-        return YEAR_18_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr18TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr19TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_19_MASTERNODE_PAYMENT), YEAR_19_MASTERNODE_PAYMENT);
-        return YEAR_19_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr19TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr20TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_20_MASTERNODE_PAYMENT), YEAR_20_MASTERNODE_PAYMENT);
-        return YEAR_20_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr20TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr21TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_21_MASTERNODE_PAYMENT), YEAR_21_MASTERNODE_PAYMENT);
-        return YEAR_21_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr21TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr22TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_22_MASTERNODE_PAYMENT), YEAR_22_MASTERNODE_PAYMENT);
-        return YEAR_22_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr22TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr23TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_23_MASTERNODE_PAYMENT), YEAR_23_MASTERNODE_PAYMENT);
-        return YEAR_23_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr23TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr24TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_24_MASTERNODE_PAYMENT), YEAR_24_MASTERNODE_PAYMENT);
-        return YEAR_24_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr24TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr25TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_25_MASTERNODE_PAYMENT), YEAR_25_MASTERNODE_PAYMENT);
-        return YEAR_25_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr25TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr26TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_26_MASTERNODE_PAYMENT), YEAR_26_MASTERNODE_PAYMENT);
-        return YEAR_26_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr26TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr27TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_27_MASTERNODE_PAYMENT), YEAR_27_MASTERNODE_PAYMENT);
-        return YEAR_27_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr27TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr28TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_28_MASTERNODE_PAYMENT), YEAR_28_MASTERNODE_PAYMENT);
-        return YEAR_28_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr28TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr29TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_29_MASTERNODE_PAYMENT), YEAR_29_MASTERNODE_PAYMENT);
-        return YEAR_29_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr29TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr30TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_30_MASTERNODE_PAYMENT), YEAR_30_MASTERNODE_PAYMENT);
-        return YEAR_30_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr30TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr31TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_31_MASTERNODE_PAYMENT), YEAR_31_MASTERNODE_PAYMENT);
-        return YEAR_31_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr31TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr32TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_32_MASTERNODE_PAYMENT), YEAR_32_MASTERNODE_PAYMENT);
-        return YEAR_32_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr32TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr33TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_33_MASTERNODE_PAYMENT), YEAR_33_MASTERNODE_PAYMENT);
-        return YEAR_33_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr33TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr34TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_34_MASTERNODE_PAYMENT), YEAR_34_MASTERNODE_PAYMENT);
-        return YEAR_34_MASTERNODE_PAYMENT;
-    }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nYr34TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr35TotalBlocks) {
-        LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(YEAR_35_MASTERNODE_PAYMENT), YEAR_35_MASTERNODE_PAYMENT);
-        return YEAR_35_MASTERNODE_PAYMENT;
-    }
-    else
-        return YEAR_1_MASTERNODE_PAYMENT;
 }
 
 bool IsInitialBlockDownload()
@@ -3042,7 +2840,13 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         fMasternodePaid = false;
     }
 
-    CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees);
+    CAmount DevReward = 0 * COIN;
+    
+    if (chainActive.Height() > Params().GetConsensus().nHardForkTwo && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+    DevReward = COIN / 2;
+    }
+    
+    CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees) + DevReward;
     std::string strError = "";
 
     if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)){

@@ -156,6 +156,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
             return true;
         }
 
+        // Superblocks are disabled for Credits.
         int nOffset = nBlockHeight % consensusParams.nBudgetPaymentsCycleBlocks;
         if(nBlockHeight >= consensusParams.nBudgetPaymentsStartBlock &&
             nOffset < consensusParams.nBudgetPaymentsWindowBlocks) {
@@ -170,13 +171,9 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
             return true;
         }
 
-        if(sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)) {
-            LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
-            return false;
-        }
-
-        LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
-        return true;
+        // Masternodes must be paid with every block. 
+        LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+        return false;
     }
 
     // superblocks started
@@ -228,7 +225,10 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
 
     if (chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock) {
         // FILL BLOCK PAYEE WITH MASTERNODE PAYMENT OTHERWISE
-        mnpayments.FillBlockPayee(txNew, nBlockHeight);
+        CAmount noFees = 0 * COIN;
+        int nIntPoWReward = GetPoWBlockPayment(nBlockHeight, noFees);
+        CAmount nFees = blockReward - nIntPoWReward;
+        mnpayments.FillBlockPayee(txNew, nFees);
         LogPrint("mnpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutMasternodeRet %s txNew %s",
                                 nBlockHeight, blockReward, txoutMasternodeRet.ToString(), txNew.ToString());
     }
@@ -279,15 +279,14 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
     bool hasPayment = true;
     CScript payee;
 
-    if (chainActive.Height() <= Params().GetConsensus().nMasternodePaymentsStartBlock){
+    if (chainActive.Height() <= Params().GetConsensus().nMasternodePaymentsStartBlock) {
             if (fDebug)
-                LogPrintf("CreateNewBlock: No Masternode payments prior to block 20,546\n");
+                LogPrintf("CreateNewBlock: No Masternode payments prior to block 100\n");
             hasPayment = false;
     }
 
-    //spork
-    if(!mnpayments.GetBlockPayee(pindexPrev->nHeight+1, payee)){       
-        //no Masternode detected
+    if (!mnpayments.GetBlockPayee(pindexPrev->nHeight+1, payee)){       
+        //Checks whether or not there is a Masternode to be paid
         CMasternode* winningNode = mnodeman.Find(payee);
         if(winningNode){
             payee = GetScriptForDestination(winningNode->pubKeyCollateralAddress.GetID());
@@ -297,136 +296,66 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
             hasPayment = false;
         }
     }
+    
+    CAmount PoWPayment;
+    CAmount MNPayment = GetMasternodePayment(hasPayment);
+    CAmount devPayment;
+    
+    if (chainActive.Height() <= Params().GetConsensus().nPhase1TotalBlocks) {
+        CAmount noFees = 0 * COIN;
+        PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, noFees);
+    } else
+        PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, nFees);
 
-    CAmount blockValue;
-    CAmount masternodePayment;
-
-    if (chainActive.Height() == 0) { blockValue = 475000 * COIN; }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nYr1TotalBlocks) { blockValue = YEAR_1_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr2TotalBlocks) { blockValue = YEAR_2_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr2TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr3TotalBlocks) { blockValue = YEAR_3_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr4TotalBlocks) { blockValue = YEAR_4_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr4TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr5TotalBlocks) { blockValue = YEAR_5_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr5TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr6TotalBlocks) { blockValue = YEAR_6_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr6TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr7TotalBlocks) { blockValue = YEAR_7_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr7TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr8TotalBlocks) { blockValue = YEAR_8_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr8TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr9TotalBlocks) { blockValue = YEAR_9_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr9TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr10TotalBlocks) { blockValue = YEAR_10_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr10TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr11TotalBlocks) { blockValue = YEAR_11_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr11TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr12TotalBlocks) { blockValue = YEAR_12_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr12TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr13TotalBlocks) { blockValue = YEAR_13_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr13TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr14TotalBlocks) { blockValue = YEAR_14_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr14TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr15TotalBlocks) { blockValue = YEAR_15_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr15TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr16TotalBlocks) { blockValue = YEAR_16_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr16TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr17TotalBlocks) { blockValue = YEAR_17_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr17TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr18TotalBlocks) { blockValue = YEAR_18_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr18TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr19TotalBlocks) { blockValue = YEAR_19_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr19TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr20TotalBlocks) { blockValue = YEAR_20_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr20TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr21TotalBlocks) { blockValue = YEAR_21_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr21TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr22TotalBlocks) { blockValue = YEAR_22_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr22TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr23TotalBlocks) { blockValue = YEAR_23_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr23TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr24TotalBlocks) { blockValue = YEAR_24_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr24TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr25TotalBlocks) { blockValue = YEAR_25_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr25TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr26TotalBlocks) { blockValue = YEAR_26_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr26TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr27TotalBlocks) { blockValue = YEAR_27_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr27TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr28TotalBlocks) { blockValue = YEAR_28_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr28TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr29TotalBlocks) { blockValue = YEAR_29_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr29TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr30TotalBlocks) { blockValue = YEAR_30_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr30TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr31TotalBlocks) { blockValue = YEAR_31_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr31TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr32TotalBlocks) { blockValue = YEAR_32_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr32TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr33TotalBlocks) { blockValue = YEAR_33_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr33TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr34TotalBlocks) { blockValue = YEAR_34_POW_REWARD; }
-    else if (chainActive.Height() > Params().GetConsensus().nYr34TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr35TotalBlocks) { blockValue = YEAR_35_POW_REWARD; }
-    else { blockValue = YEAR_1_POW_REWARD; }
-
-    if (hasPayment && chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock && chainActive.Height() <= Params().GetConsensus().nYr1TotalBlocks) { masternodePayment = YEAR_1_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr2TotalBlocks) { masternodePayment = YEAR_2_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr2TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr3TotalBlocks) { masternodePayment = YEAR_3_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr4TotalBlocks) { masternodePayment = YEAR_4_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr4TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr5TotalBlocks) { masternodePayment = YEAR_5_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr5TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr6TotalBlocks) { masternodePayment = YEAR_6_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr6TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr7TotalBlocks) { masternodePayment = YEAR_7_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr7TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr8TotalBlocks) { masternodePayment = YEAR_8_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr8TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr9TotalBlocks) { masternodePayment = YEAR_9_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr9TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr10TotalBlocks) { masternodePayment = YEAR_10_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr10TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr11TotalBlocks) { masternodePayment = YEAR_11_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr11TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr12TotalBlocks) { masternodePayment = YEAR_12_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr12TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr13TotalBlocks) { masternodePayment = YEAR_13_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr13TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr14TotalBlocks) { masternodePayment = YEAR_14_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr14TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr15TotalBlocks) { masternodePayment = YEAR_15_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr15TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr16TotalBlocks) { masternodePayment = YEAR_16_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr16TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr17TotalBlocks) { masternodePayment = YEAR_17_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr17TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr18TotalBlocks) { masternodePayment = YEAR_18_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr18TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr19TotalBlocks) { masternodePayment = YEAR_19_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr19TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr20TotalBlocks) { masternodePayment = YEAR_20_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr20TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr21TotalBlocks) { masternodePayment = YEAR_21_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr21TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr22TotalBlocks) { masternodePayment = YEAR_22_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr22TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr23TotalBlocks) { masternodePayment = YEAR_23_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr23TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr24TotalBlocks) { masternodePayment = YEAR_24_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr24TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr25TotalBlocks) { masternodePayment = YEAR_25_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr25TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr26TotalBlocks) { masternodePayment = YEAR_26_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr26TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr27TotalBlocks) { masternodePayment = YEAR_27_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr27TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr28TotalBlocks) { masternodePayment = YEAR_28_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr28TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr29TotalBlocks) { masternodePayment = YEAR_29_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr29TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr30TotalBlocks) { masternodePayment = YEAR_30_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr30TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr31TotalBlocks) { masternodePayment = YEAR_31_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr31TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr32TotalBlocks) { masternodePayment = YEAR_32_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr32TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr33TotalBlocks) { masternodePayment = YEAR_33_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr33TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr34TotalBlocks) { masternodePayment = YEAR_34_MASTERNODE_PAYMENT; }
-    else if (hasPayment && chainActive.Height() > Params().GetConsensus().nYr34TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr35TotalBlocks) { masternodePayment = YEAR_35_MASTERNODE_PAYMENT; }
-    else  { masternodePayment = YEAR_1_MASTERNODE_PAYMENT; }
-
-    txNew.vout[0].nValue = blockValue;
-
-    if(hasPayment){
+    txNew.vout[0].nValue = PoWPayment;
+    
+    // The Dev Reward will consist of 0.5 CRDS and will be paid between blocks 342,001 and 1,375,000, including them as well.
+    if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
         txNew.vout.resize(2);
+        txNew.vout[0].nValue = PoWPayment;
 
+        devPayment = 0.5 * COIN;
+        std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
+        CCreditsAddress intAddress(strDevAddress.c_str());
+        CTxDestination devDestination = intAddress.Get();
+        CScript devScriptPubKey = GetScriptForDestination(devDestination);
+        
+        txNew.vout[1].scriptPubKey = devScriptPubKey;
+        txNew.vout[1].nValue = devPayment;
+    
+        LogPrintf("CMasternodePayments::FillBlockPayee -- Development Fund payment %lld to %s\n", devPayment, intAddress.ToString());
+    
+    if (hasPayment) {
+        txNew.vout.resize(2);
+        
+        txNew.vout[0].nValue = PoWPayment;
+        
         txNew.vout[1].scriptPubKey = payee;
-        txNew.vout[1].nValue = masternodePayment;
+        txNew.vout[1].nValue = MNPayment;
+        
+        if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+            txNew.vout.resize(3);
+            
+            txNew.vout[0].nValue = PoWPayment;
 
-        if (chainActive.Height() == 0) { txNew.vout[0].nValue = 475000 * COIN; }
-        else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nYr1TotalBlocks) { txNew.vout[0].nValue = YEAR_1_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr2TotalBlocks) { txNew.vout[0].nValue = YEAR_2_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr2TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr3TotalBlocks) { txNew.vout[0].nValue = YEAR_3_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr4TotalBlocks) { txNew.vout[0].nValue = YEAR_4_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr4TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr5TotalBlocks) { txNew.vout[0].nValue = YEAR_5_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr5TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr6TotalBlocks) { txNew.vout[0].nValue = YEAR_6_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr6TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr7TotalBlocks) { txNew.vout[0].nValue = YEAR_7_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr7TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr8TotalBlocks) { txNew.vout[0].nValue = YEAR_8_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr8TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr9TotalBlocks) { txNew.vout[0].nValue = YEAR_9_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr9TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr10TotalBlocks) { txNew.vout[0].nValue = YEAR_10_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr10TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr11TotalBlocks) { txNew.vout[0].nValue = YEAR_11_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr11TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr12TotalBlocks) { txNew.vout[0].nValue = YEAR_12_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr12TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr13TotalBlocks) { txNew.vout[0].nValue = YEAR_13_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr13TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr14TotalBlocks) { txNew.vout[0].nValue = YEAR_14_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr14TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr15TotalBlocks) { txNew.vout[0].nValue = YEAR_15_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr15TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr16TotalBlocks) { txNew.vout[0].nValue = YEAR_16_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr16TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr17TotalBlocks) { txNew.vout[0].nValue = YEAR_17_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr17TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr18TotalBlocks) { txNew.vout[0].nValue = YEAR_18_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr18TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr19TotalBlocks) { txNew.vout[0].nValue = YEAR_19_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr19TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr20TotalBlocks) { txNew.vout[0].nValue = YEAR_20_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr20TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr21TotalBlocks) { txNew.vout[0].nValue = YEAR_21_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr21TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr22TotalBlocks) { txNew.vout[0].nValue = YEAR_22_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr22TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr23TotalBlocks) { txNew.vout[0].nValue = YEAR_23_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr23TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr24TotalBlocks) { txNew.vout[0].nValue = YEAR_24_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr24TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr25TotalBlocks) { txNew.vout[0].nValue = YEAR_25_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr25TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr26TotalBlocks) { txNew.vout[0].nValue = YEAR_26_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr26TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr27TotalBlocks) { txNew.vout[0].nValue = YEAR_27_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr27TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr28TotalBlocks) { txNew.vout[0].nValue = YEAR_28_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr28TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr29TotalBlocks) { txNew.vout[0].nValue = YEAR_29_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr29TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr30TotalBlocks) { txNew.vout[0].nValue = YEAR_30_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr30TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr31TotalBlocks) { txNew.vout[0].nValue = YEAR_31_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr31TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr32TotalBlocks) { txNew.vout[0].nValue = YEAR_32_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr32TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr33TotalBlocks) { txNew.vout[0].nValue = YEAR_33_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr33TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr34TotalBlocks) { txNew.vout[0].nValue = YEAR_34_POW_REWARD; }
-        else if (chainActive.Height() > Params().GetConsensus().nYr34TotalBlocks && chainActive.Height() <= Params().GetConsensus().nYr35TotalBlocks) { txNew.vout[0].nValue = YEAR_35_POW_REWARD; }
-        else { txNew.vout[0].nValue = YEAR_1_POW_REWARD; }
+            txNew.vout[1].scriptPubKey = payee;
+            txNew.vout[1].nValue = MNPayment;
 
+            devPayment = 0.5 * COIN;
+            std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
+            CCreditsAddress intAddress(strDevAddress.c_str());
+            CTxDestination devDestination = intAddress.Get();
+            CScript devScriptPubKey = GetScriptForDestination(devDestination);
+        
+            txNew.vout[2].scriptPubKey = devScriptPubKey;
+            txNew.vout[2].nValue = devPayment;
+        }
+        
         CTxDestination address1;
         ExtractDestination(payee, address1);
         CCreditsAddress address2(address1);
 
-        LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", masternodePayment, address2.ToString());
+        LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", MNPayment, address2.ToString());
     }
 }
 

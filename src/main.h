@@ -137,83 +137,8 @@ static const unsigned int MAX_BLOCKS_TO_ANNOUNCE = 12;
 /** Maximum number of unconnecting headers announcements before DoS score */
 static const int MAX_UNCONNECTING_HEADERS = 10;
 
-//Credits Constants
+// Credits Constants
 static const CAmount MIN_TXOUT_AMOUNT = MIN_TX_FEE;
-
-// 35 Year Proof of Work Payments
-static const CAmount YEAR_1_POW_REWARD = COIN * 10;
-static const CAmount YEAR_2_POW_REWARD = COIN * 10;
-static const CAmount YEAR_3_POW_REWARD = COIN * 9;
-static const CAmount YEAR_4_POW_REWARD = COIN * 9;
-static const CAmount YEAR_5_POW_REWARD = COIN * 8;
-static const CAmount YEAR_6_POW_REWARD = COIN * 8;
-static const CAmount YEAR_7_POW_REWARD = COIN * 7;
-static const CAmount YEAR_8_POW_REWARD = COIN * 7;
-static const CAmount YEAR_9_POW_REWARD = COIN * 6;
-static const CAmount YEAR_10_POW_REWARD = COIN * 6;
-static const CAmount YEAR_11_POW_REWARD = COIN * 5;
-static const CAmount YEAR_12_POW_REWARD = COIN * 5;
-static const CAmount YEAR_13_POW_REWARD = COIN * 4;
-static const CAmount YEAR_14_POW_REWARD = COIN * 4;
-static const CAmount YEAR_15_POW_REWARD = COIN * 3;
-static const CAmount YEAR_16_POW_REWARD = COIN * 3;
-static const CAmount YEAR_17_POW_REWARD = COIN * 2;
-static const CAmount YEAR_18_POW_REWARD = COIN * 2;
-static const CAmount YEAR_19_POW_REWARD = COIN * 1;
-static const CAmount YEAR_20_POW_REWARD = COIN * 1;
-static const CAmount YEAR_21_POW_REWARD = COIN * 1;
-static const CAmount YEAR_22_POW_REWARD = COIN * 1;
-static const CAmount YEAR_23_POW_REWARD = COIN * 1;
-static const CAmount YEAR_24_POW_REWARD = COIN * 1;
-static const CAmount YEAR_25_POW_REWARD = COIN * 1;
-static const CAmount YEAR_26_POW_REWARD = COIN * 1;
-static const CAmount YEAR_27_POW_REWARD = COIN * 1;
-static const CAmount YEAR_28_POW_REWARD = COIN * 1;
-static const CAmount YEAR_29_POW_REWARD = COIN * 1;
-static const CAmount YEAR_30_POW_REWARD = COIN * 1;
-static const CAmount YEAR_31_POW_REWARD = COIN * 1;
-static const CAmount YEAR_32_POW_REWARD = COIN * 1;
-static const CAmount YEAR_33_POW_REWARD = COIN * 1;
-static const CAmount YEAR_34_POW_REWARD = COIN * 1;
-static const CAmount YEAR_35_POW_REWARD = COIN * 1;
-
-// 35 Year Masternode Payments
-static const CAmount YEAR_1_MASTERNODE_PAYMENT = COIN * 1;
-static const CAmount YEAR_2_MASTERNODE_PAYMENT = COIN * 1;
-static const CAmount YEAR_3_MASTERNODE_PAYMENT = COIN * 2;
-static const CAmount YEAR_4_MASTERNODE_PAYMENT = COIN * 2;
-static const CAmount YEAR_5_MASTERNODE_PAYMENT = COIN * 3;
-static const CAmount YEAR_6_MASTERNODE_PAYMENT = COIN * 3;
-static const CAmount YEAR_7_MASTERNODE_PAYMENT = COIN * 4;
-static const CAmount YEAR_8_MASTERNODE_PAYMENT = COIN * 4;
-static const CAmount YEAR_9_MASTERNODE_PAYMENT = COIN * 5;
-static const CAmount YEAR_10_MASTERNODE_PAYMENT = COIN * 5;
-static const CAmount YEAR_11_MASTERNODE_PAYMENT = COIN * 6;
-static const CAmount YEAR_12_MASTERNODE_PAYMENT = COIN * 6;
-static const CAmount YEAR_13_MASTERNODE_PAYMENT = COIN * 7;
-static const CAmount YEAR_14_MASTERNODE_PAYMENT = COIN * 7;
-static const CAmount YEAR_15_MASTERNODE_PAYMENT = COIN * 8;
-static const CAmount YEAR_16_MASTERNODE_PAYMENT = COIN * 8;
-static const CAmount YEAR_17_MASTERNODE_PAYMENT = COIN * 9;
-static const CAmount YEAR_18_MASTERNODE_PAYMENT = COIN * 9;
-static const CAmount YEAR_19_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_20_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_21_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_22_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_23_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_24_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_25_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_26_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_27_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_28_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_29_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_30_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_31_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_32_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_33_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_34_MASTERNODE_PAYMENT = COIN * 10;
-static const CAmount YEAR_35_MASTERNODE_PAYMENT = COIN * 10;
-
 
 struct BlockHasher
 {
