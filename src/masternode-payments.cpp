@@ -304,18 +304,17 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
     if (chainActive.Height() <= Params().GetConsensus().nPhase1TotalBlocks) {
         CAmount noFees = 0 * COIN;
         PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, noFees);
-    
     } else
         PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, nFees);
 
     txNew.vout[0].nValue = PoWPayment;
     
     // The Dev Reward will consist of 0.5 CRDS and will be paid between blocks 342,001 and 1,375,000, including them as well.
-    if (!hasPayment && chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+    if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
         txNew.vout.resize(2);
         txNew.vout[0].nValue = PoWPayment;
 
-        devPayment = COIN / 2;
+        devPayment = 0.5 * COIN;
         std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
         CCreditsAddress intAddress(strDevAddress.c_str());
         CTxDestination devDestination = intAddress.Get();
@@ -326,7 +325,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
     
         LogPrintf("CMasternodePayments::FillBlockPayee -- Development Fund payment %lld to %s\n", devPayment, intAddress.ToString());
     
-    } else if (hasPayment) {
+    if (hasPayment) {
         txNew.vout.resize(2);
         
         txNew.vout[0].nValue = PoWPayment;
@@ -342,7 +341,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
             txNew.vout[1].scriptPubKey = payee;
             txNew.vout[1].nValue = MNPayment;
 
-            devPayment = COIN / 2;
+            devPayment = 0.5 * COIN;
             std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
             CCreditsAddress intAddress(strDevAddress.c_str());
             CTxDestination devDestination = intAddress.Get();
@@ -350,8 +349,6 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
         
             txNew.vout[2].scriptPubKey = devScriptPubKey;
             txNew.vout[2].nValue = devPayment;
-            
-            LogPrintf("CMasternodePayments::FillBlockPayee -- Development Fund payment %lld to %s\n", devPayment, intAddress.ToString());
         }
         
         CTxDestination address1;
