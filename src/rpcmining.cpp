@@ -459,8 +459,13 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
             "      \"script\" : \"xxxx\",            (string) payee scriptPubKey\n"
             "      \"amount\": n                   (numeric) required amount to pay\n"
             "  },\n"
+            "  \"fundreward\" : {                   (json object) required Development Fund payee that must be included in the next block, not found in all blocks\n"
+            "      \"payee\" : \"xxxx\",             (string) payee address\n"
+            "      \"script\" : \"xxxx\",            (string) payee scriptPubKey\n"
+            "      \"amount\": n                   (numeric) required amount to pay\n"
+            "  },\n"
             "  \"masternode_payments_started\" :  true|false, (boolean) true, if Masternode payments started\n"
-            "  \"masternode_payments_enforced\" : true|false, (boolean) true, if Masternode payments are enforced\n"
+            "  \"masternode_payments_enforced\" : true\n"
             "  \"superblock\" : [                  (array) required superblock payees that must be included in the next block\n"
             "      {\n"
             "         \"payee\" : \"xxxx\",          (string) payee address\n"
@@ -769,6 +774,20 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     result.push_back(Pair("masternode", masternodeObj));
     result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nMasternodePaymentsStartBlock));
     result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
+ 
+    if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+        UniValue fundRewardObj(UniValue::VOBJ);
+        std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
+        CCreditsAddress intAddress(strDevAddress.c_str());
+        CTxDestination devDestination = intAddress.Get();
+        CScript devScriptPubKey = GetScriptForDestination(devDestination);
+ 
+        fundRewardObj.push_back(Pair("payee", strDevAddress.c_str());
+        fundRewardObj.push_back(Pair("script", HexStr(devScriptPubKey.begin(), devScriptPubKey.end())));
+        fundRewardObj.push_back(Pair("amount", 0.5 * COIN));
+        
+        result.push_back(Pair("fundreward", fundRewardObj));
+    }
 
     UniValue superblockObjArray(UniValue::VARR);
     if(pblock->voutSuperblock.size()) {
