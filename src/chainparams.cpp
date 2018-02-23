@@ -228,8 +228,8 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
-        consensus.nHardForkOne = 2000;
-	consensus.nHardForkTwo = 3000;
+        consensus.nHardForkOne = 2300;
+	consensus.nHardForkTwo = 38000;
         consensus.nMasternodePaymentsStartBlock = 1000;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
@@ -247,7 +247,7 @@ public:
         consensus.powLimit = uint256S("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowAveragingWindow = 17;
         consensus.nPowTargetTimespan = 24 * 60 * 60; // Credits: 24 hours
-        consensus.nPowTargetSpacing = 2 * 64; // Credits: 128 seconds
+        consensus.nPowTargetSpacing = 10; // Credits Testnet: 10 seconds
         consensus.nPowMaxAdjustDown = 32; // Credits: 32% adjustment down
         consensus.nPowMaxAdjustUp = 16; // Credits: 16% adjustment up
         assert(maxUint/UintToArith256(consensus.powLimit) >= consensus.nPowAveragingWindow);
@@ -324,11 +324,11 @@ public:
             1000        // * estimated number of transactions per day after checkpoint
         };
 
-	consensus.nIntPhaseTotalBlocks = 1000;
-        consensus.nPhase1TotalBlocks = 3000;
-	consensus.nPhase2TotalBlocks = 9000;
-	consensus.nPhase3TotalBlocks = 11000;
-	consensus.nPhase4TotalBlocks = 16000;
+	consensus.nIntPhaseTotalBlocks = 5000;
+        consensus.nPhase1TotalBlocks = 38000;
+	consensus.nPhase2TotalBlocks = 68000;
+	consensus.nPhase3TotalBlocks = 80000;
+	consensus.nPhase4TotalBlocks = 110000;
     }
 };
 static CTestNetParams testNetParams;
