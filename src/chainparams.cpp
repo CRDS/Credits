@@ -230,7 +230,7 @@ public:
         strNetworkID = "test";
         consensus.nHardForkOne = 2300;
 	consensus.nHardForkTwo = 38000;
-        consensus.nMasternodePaymentsStartBlock = 1000;
+        consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
         consensus.nBudgetPaymentsCycleBlocks = 50;
