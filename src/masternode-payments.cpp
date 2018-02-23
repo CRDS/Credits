@@ -139,8 +139,8 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, CAmount blockRewar
 
 bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount blockReward)
 {
-    if (chainActive.Height() <= Params().GetConsensus().nPhase1TotalBlocks && !masternodeSync.IsSynced()) {
-        //there is no budget data to use to check anything, let's just accept the longest chain
+    if (!masternodeSync.IsSynced()) {
+        //There is no budget / Masternode data to use to check anything, the longest chain is accepted.
         if(fDebug) LogPrintf("IsBlockPayeeValid -- WARNING: Client not synced, skipping block payee checks\n");
         return true;
     }
@@ -171,7 +171,12 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
             return true;
         }
 
-        // Masternodes must be paid with every block. 
+        if (nBlockHeight <= Params().GetConsensus().nHardForkTwo) {
+        LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
+        return true;
+        }
+        
+        // Masternodes must be paid with every block after block nHardForkTwo.
         LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
         return false;
     }
@@ -203,13 +208,14 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
         return true;
     }
 
-    if(sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)) {
-        LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
-        return false;
-    }
-
+    if (nBlockHeight <= Params().GetConsensus().nHardForkTwo) {
     LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
     return true;
+    }
+        
+    // Masternodes must be paid with every block after block nHardForkTwo.
+    LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+    return false;
 }
 
 void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutMasternodeRet, std::vector<CTxOut>& voutSuperblockRet)
