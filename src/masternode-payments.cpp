@@ -324,6 +324,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
         txNew.vout[1].nValue = devPayment;
     
         LogPrintf("CMasternodePayments::FillBlockPayee -- Development Fund payment %lld to %s\n", devPayment, intAddress.ToString());
+    }
     
     if (hasPayment) {
         txNew.vout.resize(2);
