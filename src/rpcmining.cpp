@@ -782,7 +782,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
         CTxDestination devDestination = intAddress.Get();
         CScript devScriptPubKey = GetScriptForDestination(devDestination);
  
-        fundRewardObj.push_back(Pair("payee", strDevAddress.c_str());
+        fundRewardObj.push_back(Pair("payee", strDevAddress.c_str()));
         fundRewardObj.push_back(Pair("script", HexStr(devScriptPubKey.begin(), devScriptPubKey.end())));
         fundRewardObj.push_back(Pair("amount", 0.5 * COIN));
         
