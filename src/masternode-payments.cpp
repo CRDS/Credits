@@ -234,7 +234,7 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
         CAmount noFees = 0 * COIN;
         int nIntPoWReward = GetPoWBlockPayment(nBlockHeight, noFees);
         CAmount nFees = blockReward - nIntPoWReward;
-        mnpayments.FillBlockPayee(txNew, nFees);
+        mnpayments.FillBlockPayee(txNew, nFees, txoutMasternodeRet);
         LogPrint("mnpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutMasternodeRet %s txNew %s",
                                 nBlockHeight, blockReward, txoutMasternodeRet.ToString(), txNew.ToString());
     }
@@ -277,8 +277,10 @@ bool CMasternodePayments::CanVote(COutPoint outMasternode, int nBlockHeight)
 *   Fill Masternode ONLY payment block
 */
 
-void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
+void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees, CTxOut& txoutMasternodeRet)
 {
+    txoutMasternodeRet = CTxOut();
+    
     CBlockIndex* pindexPrev = chainActive.Tip();       
     if(!pindexPrev) return;        
 
@@ -361,6 +363,8 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
         CTxDestination address1;
         ExtractDestination(payee, address1);
         CCreditsAddress address2(address1);
+        
+        txoutMasternodeRet = CTxOut(MNPayment, payee);
 
         LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", MNPayment, address2.ToString());
     }
