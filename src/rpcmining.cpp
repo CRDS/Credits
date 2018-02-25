@@ -1,8 +1,8 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2017 Credits Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2017-2018 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -460,7 +460,12 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
             "      \"amount\": n                   (numeric) required amount to pay\n"
             "  },\n"
             "  \"masternode_payments_started\" :  true|false, (boolean) true, if Masternode payments started\n"
-            "  \"masternode_payments_enforced\" : true|false, (boolean) true, if Masternode payments are enforced\n"
+            "  \"masternode_payments_enforced\" : true\n"
+            "  \"fundreward\" : {                   (json object) required Development Fund payee that must be included in the next block, not found in all blocks\n"
+            "      \"payee\" : \"xxxx\",             (string) payee address\n"
+            "      \"script\" : \"xxxx\",            (string) payee scriptPubKey\n"
+            "      \"amount\": n                   (numeric) required amount to pay\n"
+            "  },\n"
             "  \"superblock\" : [                  (array) required superblock payees that must be included in the next block\n"
             "      {\n"
             "         \"payee\" : \"xxxx\",          (string) payee address\n"
@@ -768,7 +773,21 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     }
     result.push_back(Pair("masternode", masternodeObj));
     result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nMasternodePaymentsStartBlock));
-    result.push_back(Pair("masternode_payments_enforced", true);
+    result.push_back(Pair("masternode_payments_enforced", true));
+ 
+    if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+        UniValue fundRewardObj(UniValue::VOBJ);
+        std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
+        CCreditsAddress intAddress(strDevAddress.c_str());
+        CTxDestination devDestination = intAddress.Get();
+        CScript devScriptPubKey = GetScriptForDestination(devDestination);
+ 
+        fundRewardObj.push_back(Pair("payee", strDevAddress.c_str()));
+        fundRewardObj.push_back(Pair("script", HexStr(devScriptPubKey.begin(), devScriptPubKey.end())));
+        fundRewardObj.push_back(Pair("amount", 0.5 * COIN));
+        
+        result.push_back(Pair("fundreward", fundRewardObj));
+    }
 
     UniValue superblockObjArray(UniValue::VARR);
     if(pblock->voutSuperblock.size()) {

@@ -1,4 +1,4 @@
-# **Credits (CRDS) v1.1.1.0**
+# **Credits (CRDS) v1.2.0.0**
 
 ![CRDS logo](https://github.com/Credits-CRDS/Credits/blob/master/src/qt/res/icons/light/about.png)
 
@@ -9,16 +9,17 @@ What is Credits?
 * Coin Suffix: CRDS
 * PoW Mining Algorithm: Argon2d
 * PoW Difficulty Algorithm: DELTA
-* PoW Period: ~36 years
 * PoW Target Spacing: 128 Seconds
 * PoW Reward per Block: See Below
 * Maturity: 10 Blocks
 * PoW Blocks: ~675 per day
-* Masternode Collateral Amount: 5000 CRDS
+* Masternode Collateral Amount: 5,000 CRDS
 * Masternode Min Confirmation: 16 Blocks
 * Masternode Reward: See Below
-* Total Coins: 95,000,000 (~36 Years)
+* Total Coins (until 2 PoW / 2 MN reward): 18,987,500* (~6 Years)
 * Min TX Fee: 0.0001 CRDS
+
+*Until block 350,000 all transaction fees get burned.
 
 Credits uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (CRDS) are carried out collectively by the Credits network. Credits is the name of open source software which enables the use of the currency CRDS.
 
@@ -50,47 +51,26 @@ Magic Bytes = 0x1f 0x22 0x05 0x2f
 
 **Rewards Structure**
 
- Years|      Blocks        |   PoW  | Masternodes |
-------|--------------------|--------|-------------|
- 0-1  |       0 -  246544  | 10CRDS |    1CRDS    |
- 1-2  |  246545 -  493088  | 10CRDS |    1CRDS    |
- 2-3  |  493089 -  739631  |  9CRDS |    2CRDS    |
- 3-4  |  739632 -  986175  |  9CRDS |    2CRDS    |
- 4-5  |  986176 - 1232719  |  8CRDS |    3CRDS    |
- 5-6  | 1232720 - 1479263  |  8CRDS |    3CRDS    |
- 6-7  | 1479264 - 1725806  |  7CRDS |    4CRDS    |
- 7-8  | 1725807 - 1972350  |  7CRDS |    4CRDS    |
- 8-9  | 1972351 - 2218894  |  6CRDS |    5CRDS    |
- 9-10 | 2218895 - 2465438  |  6CRDS |    5CRDS    |
-10-11 | 2465439 - 2711981  |  5CRDS |    6CRDS    |
-11-12 | 2711982 - 2958525  |  5CRDS |    6CRDS    |
-12-13 | 2958526 - 3205069  |  4CRDS |    7CRDS    |
-13-14 | 3205070 - 3451613  |  4CRDS |    7CRDS    |
-14-15 | 3451614 - 3698156  |  3CRDS |    8CRDS    |
-15-16 | 3698156 - 3944700  |  3CRDS |    8CRDS    |
-16-17 | 3944701 - 4191244  |  2CRDS |    9CRDS    |
-17-18 | 4191245 - 4437788  |  2CRDS |    9CRDS    |
-18-19 | 4437789 - 4684331  |  1CRDS |   10CRDS    |
-19-20 | 4684332 - 4930875  |  1CRDS |   10CRDS    |
-20-21 | 4930876 - 5177419  |  1CRDS |   10CRDS    |
-21-22 | 5177420 - 5423963  |  1CRDS |   10CRDS    |
-22-23 | 5423964 - 5670506  |  1CRDS |   10CRDS    |
-23-24 | 5670507 - 5917050  |  1CRDS |   10CRDS    |
-24-25 | 5917051 - 6163594  |  1CRDS |   10CRDS    |
-25-26 | 6163595 - 6410138  |  1CRDS |   10CRDS    |
-26-27 | 6410139 - 6656681  |  1CRDS |   10CRDS    |
-27-28 | 6656682 - 6903225  |  1CRDS |   10CRDS    |
-28-30 | 6903226 - 7149769  |  1CRDS |   10CRDS    |   
-30-31 | 7149770 - 7396313  |  1CRDS |   10CRDS    |
-31-32 | 7396314 - 7642856  |  1CRDS |   10CRDS    |
-32-33 | 7642857 - 7889400  |  1CRDS |   10CRDS    |
-33-34 | 7889401 - 8135944  |  1CRDS |   10CRDS    |
-34-35 | 8135945 - 8382488  |  1CRDS |   10CRDS    |
-35-36 | 8382489 - 8629031  |  1CRDS |   10CRDS    |
+ Year |           Blocks        |   PoW   | Masternodes  | Development Fund |  Total Generated  |
+------|-------------------------|---------|--------------|------------------|-------------------|
+ 2017 |           0 - 350,000   | 10 CRDS |    1 CRDS    |      0 CRDS      |     11 CRDS       |
+ 2018 |     350,001 - 475,000   |  8 CRDS |    2 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2018 |     475,001 - 600,000   |  7 CRDS |    3 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2019 |     600,001 - 725,000   |  6 CRDS |    4 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2019 |     725,001 - 850,000   |  5 CRDS |    5 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2020 |     850,001 - 975,000   |  4 CRDS |    6 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2020 |    975,001 - 1,100,000  |  3 CRDS |    7 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2021 |  1,100,001 - 1,375,000  |  2 CRDS |    8 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2022 |  1,375,001 - 1,500,000  |  2 CRDS |    7 CRDS    |      0 CRDS      |      9 CRDS     |
+ 2022 |  1,500,001 - 1,625,000  |  2 CRDS |    6 CRDS    |      0 CRDS      |      8 CRDS     |
+ 2023 |  1,625,001 - 1,750,000  |  2 CRDS |    5 CRDS    |      0 CRDS      |      7 CRDS     |
+ 2023 |  1,750,001 - 1,875,000  |  2 CRDS |    4 CRDS    |      0 CRDS      |      6 CRDS     |
+ 2024 |  1,875,001 - 2,000,000  |  2 CRDS |    3 CRDS    |      0 CRDS      |      5 CRDS     |
+ 2024 |  2,000,001 - ∞  |  2 CRDS |    2 CRDS    |      0 CRDS      |      4 CRDS     |
 
 UNIX BUILD NOTES
 ====================
-Some notes on how to build Credits in Unix. 
+Some notes on how to build Credits in Unix.
 
 Note
 ---------------------
@@ -124,7 +104,7 @@ These dependencies are required:
  libssl      | SSL Support      | Secure communications
  libboost    | Boost            | C++ Library
  libevent    | Networking       | OS independent asynchronous networking
- 
+
 Optional dependencies:
 
  Library     | Purpose          | Description
@@ -135,7 +115,7 @@ Optional dependencies:
  protobuf    | Payments in GUI  | Data interchange format used for payment protocol (only needed when GUI enabled)
  libqrencode | QR codes in GUI  | Optional for generating QR codes (only needed when GUI enabled)
  libzmq3     | ZMQ notification | Optional, allows generating ZMQ notifications (requires ZMQ version >= 4.x)
- 
+
 For the versions used in the release, see [release-process.md](release-process.md) under *Fetch and build inputs*.
 
 System requirements
@@ -149,7 +129,7 @@ Dependency Build Instructions: Ubuntu & Debian
 Build requirements:
 
     sudo apt-get install build-essential libtool automake autotools-dev autoconf pkg-config libssl-dev libcrypto++-dev libevent-dev git
-    
+
 for Ubuntu 12.04 and later or Debian 7 and later libboost-all-dev has to be installed:
 
     sudo apt-get install libboost-all-dev
@@ -185,7 +165,7 @@ Optional (see --with-miniupnpc and --enable-upnp-default):
 ZMQ dependencies (provides ZMQ API 4.x):
 
         sudo apt-get install libzmq3-dev
-    
+
 Dependencies for the GUI: Ubuntu & Debian
 -----------------------------------------
 
@@ -201,7 +181,7 @@ For Qt 5 you need the following:
 libqrencode (optional) can be installed with:
 
     sudo apt-get install libqrencode-dev
-    
+
 Once these are installed, they will be found by configure and a credits-qt executable will be
 built by default.
 
@@ -250,7 +230,7 @@ tar -xzvf db-4.8.30.NC.tar.gz
 cd db-4.8.30.NC/build_unix/
 #  Note: Do a static build so that it can be embedded into the exectuable, instead of having to find a .so at runtime
 ../dist/configure --prefix=/usr/local --enable-cxx
-make 
+make
 sudo make install
 
 # Configure Credits to use our own-built instance of BDB
@@ -330,12 +310,12 @@ Mining is also possible in disable-wallet mode, but only using the `getblocktemp
 
 AVX2 Mining Optimisations
 -------------------------
-For increased performance when mining, AVX2 optimisations can be enabled. 
+For increased performance when mining, AVX2 optimisations can be enabled.
 
 Prior to running the build commands:
 
     CPPFLAGS=-march=native
-    
+
 CPU's with AVX2 support:
 
     Intel
