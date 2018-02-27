@@ -2581,6 +2581,16 @@ static int64_t nTimeIndex = 0;
 static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
 
+bool IsFundRewardValid(const CTransaction& txNew, CAmount fundReward) {
+    std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
+    CCreditsAddress intAddress(strDevAddress.c_str());
+    CTxDestination devDestination = intAddress.Get();
+    CScript devScriptPubKey = GetScriptForDestination(devDestination);
+    
+    if (txNew.vout[2].scriptPubKey != devScriptPubKey || txNew.vout[2].nValue != fundReward)
+        return false;
+}
+
 bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, bool fJustCheck, const bool fWriteNames)
 {
     const CChainParams& chainparams = Params();
@@ -2840,10 +2850,14 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
         fMasternodePaid = false;
     }
 
-    CAmount DevReward = 0 * COIN;
+    CAmount fundReward = 0 * COIN;
     
     if (chainActive.Height() > Params().GetConsensus().nHardForkTwo && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
-    DevReward = COIN / 2;
+        fundReward = 0.5 * COIN;
+        
+        if (!IsFundRewardValid(block.vtx[0]), fundReward) {
+        return state.DoS(0, error("ConnectBlock(CRDS): didn't pay the Development Fund"), REJECT_INVALID, "bad-cb-amount");
+        }
     }
     
     CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees) + DevReward;
