@@ -261,6 +261,8 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees);
 CAmount GetMasternodePayment(bool fMasternode = true);
 
+bool IsFundRewardValid(const CTransaction& txNew, CAmount fundReward);
+
 /**
  * Prune block and undo files (blk???.dat and undo???.dat) so that the disk space used is less than a user-defined target.
  * The user sets the target (in MB) on the command line or in config file.  This will be run on startup and whenever new
