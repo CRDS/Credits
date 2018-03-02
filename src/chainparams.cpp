@@ -114,7 +114,7 @@ public:
     CMainParams() {
         strNetworkID = "main";
         consensus.nHardForkOne = 250000; // block
-	consensus.nHardForkTwo = 342000; // block
+	consensus.nHardForkTwo = 400000; // block
         consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 100.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 20545; // Credits doesn't use budget payments.
@@ -213,7 +213,7 @@ public:
         };
 
 	consensus.nIntPhaseTotalBlocks = 125000;
-        consensus.nPhase1TotalBlocks = 342000;
+        consensus.nPhase1TotalBlocks = 400000;
 	consensus.nPhase2TotalBlocks = 1092000;
 	consensus.nPhase3TotalBlocks = 1375000;
 	consensus.nPhase4TotalBlocks = 2000000;
