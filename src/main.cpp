@@ -2589,6 +2589,7 @@ bool IsFundRewardValid(const CTransaction& txNew, CAmount fundReward) {
     
     if (txNew.vout[2].scriptPubKey != devScriptPubKey || txNew.vout[2].nValue != fundReward)
         return false;
+    return true;
 }
 
 bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, bool fJustCheck, const bool fWriteNames)
@@ -2855,12 +2856,12 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     if (chainActive.Height() > Params().GetConsensus().nHardForkTwo && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
         fundReward = 0.5 * COIN;
         
-        if (!IsFundRewardValid(block.vtx[0]), fundReward) {
+        if (!IsFundRewardValid(block.vtx[0], fundReward)) {
         return state.DoS(0, error("ConnectBlock(CRDS): didn't pay the Development Fund"), REJECT_INVALID, "bad-cb-amount");
         }
     }
     
-    CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees) + DevReward;
+    CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees) + fundReward;
     std::string strError = "";
 
     if(!IsBlockValueValid(block, pindex->nHeight, nExpectedBlockValue, strError)){
