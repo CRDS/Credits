@@ -13,6 +13,8 @@
 #include "script/script.h"
 #include "script/sign.h"
 #include "script/standard.h"
+#include "main.h"
+#include "chainparams.h"
 
 #include <boost/foreach.hpp>
 
@@ -63,6 +65,18 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
             return ISMINE_SPENDABLE;
         break;
     case TX_SCRIPTHASH:
+    {
+        if (chainActive.Height() >= Params().GetConsensus().nHardForkTwo) {
+          CScriptID scriptID = CScriptID(uint160(vSolutions[0]));
+          CScript subscript;
+          if (keystore.GetCScript(scriptID, subscript)) {
+            isminetype ret = IsMine(keystore, subscript);
+            if (ret == ISMINE_SPENDABLE)
+              return ret;
+          }
+        }
+        break;
+    }
     case TX_MULTISIG:
     {
         // Only consider transactions "mine" if we own ALL the

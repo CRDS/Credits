@@ -208,7 +208,7 @@ public:
     int GetMinMasternodePaymentsProto();
     void ProcessMessage(CNode* pfrom, std::string& strCommand, CDataStream& vRecv);
     std::string GetRequiredPaymentsString(int nBlockHeight);
-    void FillBlockPayee(CMutableTransaction& txNew, CAmount nFees);
+    void FillBlockPayee(CMutableTransaction& txNew, CAmount nFees, CTxOut& txoutMasternodeRet);
     std::string ToString() const;
 
     int GetBlockCount() { return mapMasternodeBlocks.size(); }

@@ -114,14 +114,14 @@ public:
     CMainParams() {
         strNetworkID = "main";
         consensus.nHardForkOne = 250000; // block
-        consensus.nHardForkTwo = 350000; // block
+        consensus.nHardForkTwo = 375000; // block
         consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 100.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 20545; // Credits doesn't use budget payments.
         consensus.nBudgetPaymentsCycleBlocks = 20545; // Blocks per month
         consensus.nBudgetPaymentsWindowBlocks = 100;
         consensus.nBudgetProposalEstablishingTime = 24 * 60 * 60;
-        consensus.nSuperblockStartBlock = 20546; // Credits doesn't use superblocks.
+        consensus.nSuperblockStartBlock = 20546; // Credits doesn't have superblocks.
         consensus.nSuperblockCycle = 20545; // 675 (Blocks per day) x 365.25 (Days per Year) / 12 = 20545
         consensus.nGovernanceMinQuorum = 10;
         consensus.nGovernanceFilterElements = 20000;
@@ -213,10 +213,10 @@ public:
         };
 
 	consensus.nIntPhaseTotalBlocks = 125000;
-  consensus.nPhase1TotalBlocks = 350000;
-	consensus.nPhase2TotalBlocks = 1100000;
-	consensus.nPhase3TotalBlocks = 1375000;
-	consensus.nPhase4TotalBlocks = 2000000;
+  consensus.nPhase1LastBlock = 375000;
+	consensus.nPhase2LastBlock = 1125000;
+	consensus.nPhase3LastBlock = 1375000;
+	consensus.nPhase4LastBlock = 2000000;
     }
 };
 static CMainParams mainParams;
@@ -228,8 +228,8 @@ class CTestNetParams : public CChainParams {
 public:
     CTestNetParams() {
         strNetworkID = "test";
-        consensus.nHardForkOne = 3000;
-        consensus.nHardForkTwo = 5000;
+        consensus.nHardForkOne = 5000;
+        consensus.nHardForkTwo = 30000;
         consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;
@@ -255,7 +255,7 @@ public:
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 254; // 75% of nMinerConfirmationWindow
         consensus.nMinerConfirmationWindow = 338; // nPowTargetTimespan / nPowTargetSpacing
-		consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
+        consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
 
@@ -325,10 +325,10 @@ public:
         };
 
 	consensus.nIntPhaseTotalBlocks = 5000;
-  consensus.nPhase1TotalBlocks = 5000;
-	consensus.nPhase2TotalBlocks = 35000;
-	consensus.nPhase3TotalBlocks = 50000;
-	consensus.nPhase4TotalBlocks = 80000;
+  consensus.nPhase1LastBlock = 30000;
+	consensus.nPhase2LastBlock = 60000;
+	consensus.nPhase3LastBlock = 80000;
+	consensus.nPhase4LastBlock = 110000;
     }
 };
 static CTestNetParams testNetParams;
@@ -422,10 +422,10 @@ public:
         nExtCoinType = 1;
 
 	consensus.nIntPhaseTotalBlocks = 125000;
-  consensus.nPhase1TotalBlocks = 350000;
-	consensus.nPhase2TotalBlocks = 1100000;
-	consensus.nPhase3TotalBlocks = 1375000;
-	consensus.nPhase4TotalBlocks = 2000000;
+  consensus.nPhase1LastBlock = 375000;
+	consensus.nPhase2LastBlock = 1125000;
+	consensus.nPhase3LastBlock = 1375000;
+	consensus.nPhase4LastBlock = 2000000;
     }
 };
 static CRegTestParams regTestParams;

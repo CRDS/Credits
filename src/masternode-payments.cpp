@@ -171,7 +171,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
             return true;
         }
 
-        if (nBlockHeight <= Params().GetConsensus().nHardForkTwo) {
+        if (nBlockHeight <= consensusParams.nHardForkTwo) {
         LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
         return true;
         }
@@ -184,7 +184,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
     // superblocks started
     // SEE IF THIS IS A VALID SUPERBLOCK
 
-    if(!sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)) {
+    if(sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)) {
         if(CSuperblockManager::IsSuperblockTriggered(nBlockHeight)) {
             if(CSuperblockManager::IsValid(txNew, nBlockHeight, blockReward)) {
                 LogPrint("gobject", "IsBlockPayeeValid -- Valid superblock at height %d: %s", nBlockHeight, txNew.ToString());
@@ -208,7 +208,7 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
         return true;
     }
 
-    if (nBlockHeight <= Params().GetConsensus().nHardForkTwo) {
+    if (nBlockHeight <= consensusParams.nHardForkTwo) {
     LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
     return true;
     }
@@ -234,7 +234,7 @@ void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blo
         CAmount noFees = 0 * COIN;
         int nIntPoWReward = GetPoWBlockPayment(nBlockHeight, noFees);
         CAmount nFees = blockReward - nIntPoWReward;
-        mnpayments.FillBlockPayee(txNew, nFees);
+        mnpayments.FillBlockPayee(txNew, nFees, txoutMasternodeRet);
         LogPrint("mnpayments", "FillBlockPayments -- nBlockHeight %d blockReward %lld txoutMasternodeRet %s txNew %s",
                                 nBlockHeight, blockReward, txoutMasternodeRet.ToString(), txNew.ToString());
     }
@@ -277,8 +277,10 @@ bool CMasternodePayments::CanVote(COutPoint outMasternode, int nBlockHeight)
 *   Fill Masternode ONLY payment block
 */
 
-void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees)
+void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFees, CTxOut& txoutMasternodeRet)
 {
+    txoutMasternodeRet = CTxOut();
+
     CBlockIndex* pindexPrev = chainActive.Tip();
     if(!pindexPrev) return;
 
@@ -287,7 +289,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
 
     if (chainActive.Height() <= Params().GetConsensus().nMasternodePaymentsStartBlock) {
             if (fDebug)
-                LogPrintf("CreateNewBlock: No Masternode payments prior to block 100\n");
+                LogPrintf("CreateNewBlock: No Masternode payments prior to block 101\n");
             hasPayment = false;
     }
 
@@ -303,33 +305,27 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
         }
     }
 
-    CAmount PoWPayment;
+    CAmount PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, nFees);;
     CAmount MNPayment = GetMasternodePayment(hasPayment);
-    CAmount fundPayment;
-
-    if (chainActive.Height() <= Params().GetConsensus().nPhase1TotalBlocks) {
-        CAmount noFees = 0 * COIN;
-        PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, noFees);
-    } else
-        PoWPayment = GetPoWBlockPayment(pindexPrev->nHeight, nFees);
+    CAmount devPayment = 0.5 * COIN;
+    int nNextHeight = chainActive.Height() + 1;
 
     txNew.vout[0].nValue = PoWPayment;
 
     // The Dev Reward will consist of 0.5 CRDS and will be paid between blocks 342,001 and 1,375,000, including them as well.
-    if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+    if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
         txNew.vout.resize(2);
         txNew.vout[0].nValue = PoWPayment;
 
-        fundPayment = 0.5 * COIN;
-        std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
+        std::string strDevAddress = "5Bxtg7JFWzJLE7Gyyr2DAPZHch87BRBSFE";
         CCreditsAddress intAddress(strDevAddress.c_str());
         CTxDestination devDestination = intAddress.Get();
         CScript devScriptPubKey = GetScriptForDestination(devDestination);
 
         txNew.vout[1].scriptPubKey = devScriptPubKey;
-        txNew.vout[1].nValue = fundPayment;
+        txNew.vout[1].nValue = devPayment;
 
-        LogPrintf("CMasternodePayments::FillBlockPayee -- Development Fund payment %lld to %s\n", fundPayment, intAddress.ToString());
+        LogPrintf("CMasternodePayments::FillBlockPayee -- 1st Check Development Fund payment %lld to %s\n", devPayment, intAddress.ToString());
     }
 
     if (hasPayment) {
@@ -340,7 +336,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
         txNew.vout[1].scriptPubKey = payee;
         txNew.vout[1].nValue = MNPayment;
 
-        if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+        if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
             txNew.vout.resize(3);
 
             txNew.vout[0].nValue = PoWPayment;
@@ -348,19 +344,22 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
             txNew.vout[1].scriptPubKey = payee;
             txNew.vout[1].nValue = MNPayment;
 
-            fundPayment = 0.5 * COIN;
-            std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
+            std::string strDevAddress = "5Bxtg7JFWzJLE7Gyyr2DAPZHch87BRBSFE";
             CCreditsAddress intAddress(strDevAddress.c_str());
             CTxDestination devDestination = intAddress.Get();
             CScript devScriptPubKey = GetScriptForDestination(devDestination);
 
             txNew.vout[2].scriptPubKey = devScriptPubKey;
-            txNew.vout[2].nValue = fundPayment;
+            txNew.vout[2].nValue = devPayment;
+
+            LogPrintf("CMasternodePayments::FillBlockPayee -- 2nd Check Development Fund payment %lld to %s\n", devPayment, intAddress.ToString());
         }
 
         CTxDestination address1;
         ExtractDestination(payee, address1);
         CCreditsAddress address2(address1);
+
+        txoutMasternodeRet = CTxOut(MNPayment, payee);
 
         LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", MNPayment, address2.ToString());
     }

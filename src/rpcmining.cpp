@@ -45,7 +45,7 @@
  * Temporary functions for the purpose of
  * getblock
  **/
- 
+
 // Key used by getwork miners.
 // Allocated in InitRPCMining, free'd in ShutdownRPCMining
 static CReserveKey* pMiningKey = NULL;
@@ -381,7 +381,7 @@ static UniValue BIP22ValidationResult(const CValidationState& state)
     return "valid?";
 }
 
-std::string gbt_vb_name(const Consensus::DeploymentPos pos) 
+std::string gbt_vb_name(const Consensus::DeploymentPos pos)
 {
     const struct BIP9DeploymentInfo& vbinfo = VersionBitsDeploymentInfo[pos];
     std::string s = vbinfo.name;
@@ -644,13 +644,13 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     UpdateTime(pblock, consensusParams, pindexPrev);
     pblock->nNonce = 0;
 
-    UniValue aCaps(UniValue::VARR); 
+    UniValue aCaps(UniValue::VARR);
     aCaps.push_back("proposal");
 
     UniValue transactions(UniValue::VARR);
     std::map<uint256, int64_t> setTxIndex;
     int i = 0;
-    BOOST_FOREACH (const CTransaction& tx, pblock->vtx) 
+    BOOST_FOREACH (const CTransaction& tx, pblock->vtx)
     {
         uint256 txHash = tx.GetHash();
         setTxIndex[txHash] = i++;
@@ -688,7 +688,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     aMutable.push_back("time");
     aMutable.push_back("transactions");
     aMutable.push_back("prevblock");
-    
+
     UniValue result(UniValue::VOBJ);
     result.push_back(Pair("capabilities", aCaps));
 
@@ -774,18 +774,20 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     result.push_back(Pair("masternode", masternodeObj));
     result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nMasternodePaymentsStartBlock));
     result.push_back(Pair("masternode_payments_enforced", true));
- 
-    if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+
+    int nNextHeight = chainActive.Height() + 1;
+
+    if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
         UniValue fundRewardObj(UniValue::VOBJ);
-        std::string strDevAddress = "CXAMcudgejBnG5P5z6ENNGtQxdKD1sZRAo";
+        std::string strDevAddress = "5Bxtg7JFWzJLE7Gyyr2DAPZHch87BRBSFE";
         CCreditsAddress intAddress(strDevAddress.c_str());
         CTxDestination devDestination = intAddress.Get();
         CScript devScriptPubKey = GetScriptForDestination(devDestination);
- 
+
         fundRewardObj.push_back(Pair("payee", strDevAddress.c_str()));
         fundRewardObj.push_back(Pair("script", HexStr(devScriptPubKey.begin(), devScriptPubKey.end())));
         fundRewardObj.push_back(Pair("amount", 0.5 * COIN));
-        
+
         result.push_back(Pair("fundreward", fundRewardObj));
     }
 

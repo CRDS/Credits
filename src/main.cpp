@@ -1757,20 +1757,22 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex)
 
 CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 {
+    // TODO: The next version should use the nHeight parameter rather than chainActive.Height().
+
     CAmount nIntPoWReward;
-    int nIntPhase;
+    int nIntPhase, nNextHeight = chainActive.Height() + 1;
     if (chainActive.Height() == 0) {
         CAmount nSubsidy = 475000 * COIN;
         LogPrint("superblock creation", "GetPoWBlockPayment() : create=%s nSubsidy=%d\n", FormatMoney(nSubsidy), nSubsidy);
         return nSubsidy;
     }
-    else if (chainActive.Height() >= 1 && chainActive.Height() <= Params().GetConsensus().nPhase1TotalBlocks) {
+    else if (chainActive.Height() >= 1 && nNextHeight <= Params().GetConsensus().nPhase1LastBlock) {
         nIntPoWReward = 10 * COIN;
         LogPrint("creation", "GetPoWBlockPayment() : create=%s PoW Reward=%d\n", FormatMoney(nIntPoWReward), nIntPoWReward);
         return nIntPoWReward;
     }
-    else if (chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase2TotalBlocks) {
-        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
+    else if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase2LastBlock) {
+        nIntPhase = (nNextHeight - Params().GetConsensus().nPhase1LastBlock) / Params().GetConsensus().nIntPhaseTotalBlocks;
         switch(nIntPhase) {
             case 0: nIntPoWReward = 8 * COIN;
                     break;
@@ -1797,14 +1799,14 @@ CAmount GetPoWBlockPayment(const int& nHeight, CAmount nFees)
 CAmount GetMasternodePayment(bool fMasternode)
 {
     CAmount nIntMNReward;
-    int nIntPhase;
-    if (fMasternode && chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock && chainActive.Height() <= Params().GetConsensus().nPhase1TotalBlocks) {
+    int nIntPhase, nNextHeight = chainActive.Height() + 1;;
+    if (fMasternode && chainActive.Height() > Params().GetConsensus().nMasternodePaymentsStartBlock && nNextHeight <= Params().GetConsensus().nPhase1LastBlock) {
         nIntMNReward = 1 * COIN;
         LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
         return nIntMNReward;
     }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nPhase1TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase2TotalBlocks) {
-        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase1TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
+    else if (fMasternode && nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase2LastBlock) {
+        nIntPhase = (nNextHeight - Params().GetConsensus().nPhase1LastBlock) / Params().GetConsensus().nIntPhaseTotalBlocks;
         switch(nIntPhase) {
             case 0: nIntMNReward = 2 * COIN;
                     break;
@@ -1821,13 +1823,13 @@ CAmount GetMasternodePayment(bool fMasternode)
         LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
         return nIntMNReward;
     }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nPhase2TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
+    else if (fMasternode && nNextHeight > Params().GetConsensus().nPhase2LastBlock && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
         nIntMNReward = 8 * COIN;
         LogPrint("creation", "GetMasternodePayment() : create=%s MN Payment=%d\n", FormatMoney(nIntMNReward), nIntMNReward);
         return nIntMNReward;
     }
-    else if (fMasternode && chainActive.Height() > Params().GetConsensus().nPhase3TotalBlocks && chainActive.Height() <= Params().GetConsensus().nPhase4TotalBlocks) {
-        nIntPhase = (chainActive.Height() - Params().GetConsensus().nPhase3TotalBlocks) / Params().GetConsensus().nIntPhaseTotalBlocks;
+    else if (fMasternode && nNextHeight > Params().GetConsensus().nPhase3LastBlock && nNextHeight <= Params().GetConsensus().nPhase4LastBlock) {
+        nIntPhase = (nNextHeight - Params().GetConsensus().nPhase3LastBlock) / Params().GetConsensus().nIntPhaseTotalBlocks;
         switch(nIntPhase) {
             case 0: nIntMNReward = 7 * COIN;
                     break;
@@ -2581,6 +2583,17 @@ static int64_t nTimeIndex = 0;
 static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
 
+bool IsFundRewardValid(const CTransaction& txNew, CAmount fundReward) {
+    std::string strDevAddress = "5Bxtg7JFWzJLE7Gyyr2DAPZHch87BRBSFE";
+    CCreditsAddress intAddress(strDevAddress.c_str());
+    CTxDestination devDestination = intAddress.Get();
+    CScript devScriptPubKey = GetScriptForDestination(devDestination);
+
+    if ((txNew.vout[2].scriptPubKey == devScriptPubKey && txNew.vout[2].nValue == fundReward) || (txNew.vout[1].scriptPubKey == devScriptPubKey && txNew.vout[1].nValue == fundReward))
+        return true;
+    return false;
+}
+
 bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pindex, CCoinsViewCache& view, bool fJustCheck, const bool fWriteNames)
 {
     const CChainParams& chainparams = Params();
@@ -2841,9 +2854,14 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     }
 
     CAmount fundReward = 0 * COIN;
+    int nNextHeight = chainActive.Height() + 1;
 
-    if (chainActive.Height() > Params().GetConsensus().nHardForkTwo && chainActive.Height() <= Params().GetConsensus().nPhase3TotalBlocks) {
-    fundReward = 0.5 * COIN;
+    if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
+        fundReward = 0.5 * COIN;
+
+        if (!IsFundRewardValid(block.vtx[0], fundReward)) {
+        return state.DoS(0, error("ConnectBlock(CRDS): didn't pay the Development Fund"), REJECT_INVALID, "bad-cb-amount");
+        }
     }
 
     CAmount nExpectedBlockValue = GetMasternodePayment(fMasternodePaid) + GetPoWBlockPayment(pindex->pprev->nHeight, nFees) + fundReward;

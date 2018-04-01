@@ -1,8 +1,8 @@
-# **Credits (CRDS) v1.2.0.0**
+﻿# **Credits (CRDS) v1.2.0.0**
 
 ![CRDS logo](https://github.com/Credits-CRDS/Credits/blob/master/src/qt/res/icons/light/about.png)
 
-**Copyright (c) 2017 Credits Developers**
+**Copyright (c) 2017-2018 Credits Developers**
 
 What is Credits?
 ----------------
@@ -53,14 +53,14 @@ Magic Bytes = 0x1f 0x22 0x05 0x2f
 
  Year |           Blocks        |   PoW   | Masternodes  | Development Fund |  Total Generated  |
 ------|-------------------------|---------|--------------|------------------|-------------------|
- 2017 |           0 - 350,000   | 10 CRDS |    1 CRDS    |      0 CRDS      |     11 CRDS       |
- 2018 |     350,001 - 475,000   |  8 CRDS |    2 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
- 2018 |     475,001 - 600,000   |  7 CRDS |    3 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
- 2019 |     600,001 - 725,000   |  6 CRDS |    4 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
- 2019 |     725,001 - 850,000   |  5 CRDS |    5 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
- 2020 |     850,001 - 975,000   |  4 CRDS |    6 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
- 2020 |    975,001 - 1,100,000  |  3 CRDS |    7 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
- 2021 |  1,100,001 - 1,375,000  |  2 CRDS |    8 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2017 |           0 - 375,000   | 10 CRDS |    1 CRDS    |      0 CRDS      |     11 CRDS       |
+ 2018 |     375,001 - 500,000   |  8 CRDS |    2 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2018 |     500,001 - 625,000   |  7 CRDS |    3 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2019 |     625,001 - 750,000   |  6 CRDS |    4 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2019 |     750,001 - 875,000   |  5 CRDS |    5 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2020 |    875,001 - 1,000,000  |  4 CRDS |    6 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2020 |  1,000,001 - 1,125,000  |  3 CRDS |    7 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
+ 2021 |  1,125,001 - 1,375,000  |  2 CRDS |    8 CRDS    |      0.5 CRDS    |     10.5 CRDS     |
  2022 |  1,375,001 - 1,500,000  |  2 CRDS |    7 CRDS    |      0 CRDS      |      9 CRDS     |
  2022 |  1,500,001 - 1,625,000  |  2 CRDS |    6 CRDS    |      0 CRDS      |      8 CRDS     |
  2023 |  1,625,001 - 1,750,000  |  2 CRDS |    5 CRDS    |      0 CRDS      |      7 CRDS     |
