@@ -328,7 +328,7 @@ public:
   consensus.nPhase1LastBlock = 30000;
 	consensus.nPhase2LastBlock = 60000;
 	consensus.nPhase3LastBlock = 80000;
-	consensus.nPhase4LastBlock = 110000;
+	consensus.nPhase4LastBlock = 105000;
     }
 };
 static CTestNetParams testNetParams;

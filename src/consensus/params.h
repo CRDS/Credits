@@ -56,10 +56,10 @@ struct Params {
     int nMajorityWindow;
 
     int nIntPhaseTotalBlocks;
-    int nPhase1TotalBlocks;
-    int nPhase2TotalBlocks;
-    int nPhase3TotalBlocks;
-    int nPhase4TotalBlocks;
+    int nPhase1LastBlock;
+    int nPhase2LastBlock;
+    int nPhase3LastBlock;
+    int nPhase4LastBlock;
 	
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargetting period,
