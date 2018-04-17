@@ -1,8 +1,8 @@
-// Copyright (c) 2009-2017 Satoshi Nakamoto
-// Copyright (c) 2009-2017 The Bitcoin Developers
-// Copyright (c) 2014-2017 The Dash Core Developers
-// Copyright (c) 2016-2017 Duality Blockchain Solutions Developers
-// Copyright (c) 2017 Credits Developers
+// Copyright (c) 2009-2018 Satoshi Nakamoto
+// Copyright (c) 2009-2018 The Bitcoin Developers
+// Copyright (c) 2014-2018 The Dash Core Developers
+// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
+// Copyright (c) 2017-2018 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -13,6 +13,8 @@
 #include "script/script.h"
 #include "script/sign.h"
 #include "script/standard.h"
+#include "main.h"
+#include "chainparams.h"
 
 #include <boost/foreach.hpp>
 
@@ -63,6 +65,18 @@ isminetype IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
             return ISMINE_SPENDABLE;
         break;
     case TX_SCRIPTHASH:
+    {
+        if (chainActive.Height() >= Params().GetConsensus().nHardForkTwo) {
+          CScriptID scriptID = CScriptID(uint160(vSolutions[0]));
+          CScript subscript;
+          if (keystore.GetCScript(scriptID, subscript)) {
+            isminetype ret = IsMine(keystore, subscript);
+            if (ret == ISMINE_SPENDABLE)
+              return ret;
+          }
+        }
+        break;
+    }
     case TX_MULTISIG:
     {
         // Only consider transactions "mine" if we own ALL the

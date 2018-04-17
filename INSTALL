@@ -5,7 +5,7 @@ Use the autogen script to prepare the build environment.
     ./autogen.sh
     ./configure
     make
- 
+
 Precompiled binaries are available at github, see
 https://github.com/CRDS/Credits/releases
 
