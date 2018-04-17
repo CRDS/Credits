@@ -773,13 +773,13 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     }
     result.push_back(Pair("masternode", masternodeObj));
     result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nMasternodePaymentsStartBlock));
-    result.push_back(Pair("masternode_payments_enforced", true));
+    result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
 
     int nNextHeight = chainActive.Height() + 1;
 
     if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
         UniValue fundRewardObj(UniValue::VOBJ);
-        std::string strDevAddress = "5Bxtg7JFWzJLE7Gyyr2DAPZHch87BRBSFE";
+        std::string strDevAddress = "53NTdWeAxEfVjXufpBqU2YKopyZYmN9P1V";
         CCreditsAddress intAddress(strDevAddress.c_str());
         CTxDestination devDestination = intAddress.Get();
         CScript devScriptPubKey = GetScriptForDestination(devDestination);

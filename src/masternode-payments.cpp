@@ -317,7 +317,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
         txNew.vout.resize(2);
         txNew.vout[0].nValue = PoWPayment;
 
-        std::string strDevAddress = "5Bxtg7JFWzJLE7Gyyr2DAPZHch87BRBSFE";
+        std::string strDevAddress = "53NTdWeAxEfVjXufpBqU2YKopyZYmN9P1V";
         CCreditsAddress intAddress(strDevAddress.c_str());
         CTxDestination devDestination = intAddress.Get();
         CScript devScriptPubKey = GetScriptForDestination(devDestination);
@@ -344,7 +344,7 @@ void CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, CAmount nFe
             txNew.vout[1].scriptPubKey = payee;
             txNew.vout[1].nValue = MNPayment;
 
-            std::string strDevAddress = "5Bxtg7JFWzJLE7Gyyr2DAPZHch87BRBSFE";
+            std::string strDevAddress = "53NTdWeAxEfVjXufpBqU2YKopyZYmN9P1V";
             CCreditsAddress intAddress(strDevAddress.c_str());
             CTxDestination devDestination = intAddress.Get();
             CScript devScriptPubKey = GetScriptForDestination(devDestination);
