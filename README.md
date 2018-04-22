@@ -19,7 +19,7 @@ What is Credits?
 * Total Coins (until 2 PoW / 2 MN reward): 18,987,500* (~6 Years)
 * Min TX Fee: 0.0001 CRDS
 
-*Until block 350,000 all transaction fees get burned.
+*Until block 375,000 all transaction fees get burned.
 
 Credits uses peer-to-peer technology to operate securly with no central authority (decentralisation): managing transactions and issuing currency (CRDS) are carried out collectively by the Credits network. Credits is the name of open source software which enables the use of the currency CRDS.
 
