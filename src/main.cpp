@@ -2584,7 +2584,7 @@ static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
 
 bool IsFundRewardValid(const CTransaction& txNew, CAmount fundReward) {
-    std::string strDevAddress = "53NTdWeAxEfVjXufpBqU2YKopyZYmN9P1V";
+    std::string strDevAddress = "CPhPudPYNC8uXZPCHovyTyY98Q6fJzjJLm";
     CCreditsAddress intAddress(strDevAddress.c_str());
     CTxDestination devDestination = intAddress.Get();
     CScript devScriptPubKey = GetScriptForDestination(devDestination);
