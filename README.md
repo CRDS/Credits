@@ -1,4 +1,4 @@
-﻿# **Credits (CRDS) v1.2.0.0**
+﻿# **Credits (CRDS) v1.3.0.0**
 
 ![CRDS logo](https://github.com/Credits-CRDS/Credits/blob/master/src/qt/res/icons/light/about.png)
 
