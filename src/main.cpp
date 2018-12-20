@@ -2857,7 +2857,7 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     int nNextHeight = chainActive.Height() + 1;
 
     if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
-        fundReward = 0.5 * COIN;
+        fundReward = 1 * COIN;
 
         if (!IsFundRewardValid(block.vtx[0], fundReward)) {
         return state.DoS(0, error("ConnectBlock(CRDS): didn't pay the Development Fund"), REJECT_INVALID, "bad-cb-amount");
