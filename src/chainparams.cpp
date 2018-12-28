@@ -115,6 +115,8 @@ public:
         strNetworkID = "main";
         consensus.nHardForkOne = 250000; // block
         consensus.nHardForkTwo = 375000; // block
+        consensus.nHardForkThree = 550000; //block
+        consensus.nTempDevFundIncreaseEnd = 625000; //block
         consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 100.
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 20545; // Credits doesn't use budget payments.
@@ -230,6 +232,8 @@ public:
         strNetworkID = "test";
         consensus.nHardForkOne = 5000;
         consensus.nHardForkTwo = 30000;
+        consensus.nHardForkThree = 50000;
+        consensus.nTempDevFundIncreaseEnd = 55000;
         consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 200;

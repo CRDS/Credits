@@ -2584,7 +2584,14 @@ static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
 
 bool IsFundRewardValid(const CTransaction& txNew, CAmount fundReward) {
-    std::string strDevAddress = "CPhPudPYNC8uXZPCHovyTyY98Q6fJzjJLm";
+    int nNextHeight = chainActive.Height() + 1;
+    std::string strDevAddress = "CPhPudPYNC8uXZPCHovyTyY98Q6fJzjJLm"; //New Dev Fund address
+
+    //Use old Dev Fund address before block 550001
+    if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nHardForkThree) {
+        std::string strDevAddress = "53NTdWeAxEfVjXufpBqU2YKopyZYmN9P1V";
+    }
+    
     CCreditsAddress intAddress(strDevAddress.c_str());
     CTxDestination devDestination = intAddress.Get();
     CScript devScriptPubKey = GetScriptForDestination(devDestination);
@@ -2856,8 +2863,27 @@ bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockIndex* pin
     CAmount fundReward = 0 * COIN;
     int nNextHeight = chainActive.Height() + 1;
 
-    if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
+    // 0.5 CRDS reward to Dev fund from 625001 until block 1375000
+    if (nNextHeight > Params().GetConsensus().nTempDevFundIncreaseEnd && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
+        fundReward = 0.5 * COIN;
+
+        if (!IsFundRewardValid(block.vtx[0], fundReward)) {
+        return state.DoS(0, error("ConnectBlock(CRDS): didn't pay the Development Fund"), REJECT_INVALID, "bad-cb-amount");
+        }
+    }
+
+    // Temporal increase 1 CRDS reward to Dev fund from 550001 until block 625000
+    if (nNextHeight > Params().GetConsensus().nHardForkThree && nNextHeight <= Params().GetConsensus().nTempDevFundIncreaseEnd) {
         fundReward = 1 * COIN;
+
+        if (!IsFundRewardValid(block.vtx[0], fundReward)) {
+        return state.DoS(0, error("ConnectBlock(CRDS): didn't pay the Development Fund"), REJECT_INVALID, "bad-cb-amount");
+        }
+    }
+    
+    // 0.5 CRDS reward to old Dev fund from 375001 until block 550000
+    if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nHardForkThree) {
+        fundReward = 0.5 * COIN;
 
         if (!IsFundRewardValid(block.vtx[0], fundReward)) {
         return state.DoS(0, error("ConnectBlock(CRDS): didn't pay the Development Fund"), REJECT_INVALID, "bad-cb-amount");
