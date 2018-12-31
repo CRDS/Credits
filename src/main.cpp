@@ -2584,14 +2584,19 @@ static int64_t nTimeCallbacks = 0;
 static int64_t nTimeTotal = 0;
 
 bool IsFundRewardValid(const CTransaction& txNew, CAmount fundReward) {
-    int nNextHeight = chainActive.Height() + 1;
-    std::string strDevAddress = "CPhPudPYNC8uXZPCHovyTyY98Q6fJzjJLm"; //New Dev Fund address
 
-    //Use old Dev Fund address before block 550001
-    if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nHardForkThree) {
-        std::string strDevAddress = "53NTdWeAxEfVjXufpBqU2YKopyZYmN9P1V";
-    }
+    std::string strDevAddress;
+    int nNextHeight = chainActive.Height() + 1;
     
+    //Use new dev Fund address from block 550001 to 1375000
+    if (nNextHeight > Params().GetConsensus().nHardForkThree && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
+        strDevAddress = "CPhPudPYNC8uXZPCHovyTyY98Q6fJzjJLm";
+    }
+    //Use old Dev Fund address until block 550000
+    if (nNextHeight > Params().GetConsensus().nHardForkTwo && nNextHeight <= Params().GetConsensus().nHardForkThree) {
+        strDevAddress = "53NTdWeAxEfVjXufpBqU2YKopyZYmN9P1V";
+    }
+
     CCreditsAddress intAddress(strDevAddress.c_str());
     CTxDestination devDestination = intAddress.Get();
     CScript devScriptPubKey = GetScriptForDestination(devDestination);
