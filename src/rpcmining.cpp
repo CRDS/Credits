@@ -777,9 +777,39 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
 
     int nNextHeight = chainActive.Height() + 1;
 
-    if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
+    // 0.5 CRDS reward to Dev fund from 625001 until block 1375000
+    if (nNextHeight > Params().GetConsensus().nTempDevFundIncreaseEnd && nNextHeight <= Params().GetConsensus().nPhase3LastBlock) {
         UniValue fundRewardObj(UniValue::VOBJ);
-        std::string strDevAddress = "53NTdWeAxEfVjXufpBqU2YKopyZYmN9P1V";
+        std::string strDevAddress = "CPhPudPYNC8uXZPCHovyTyY98Q6fJzjJLm";
+        CCreditsAddress intAddress(strDevAddress.c_str());
+        CTxDestination devDestination = intAddress.Get();
+        CScript devScriptPubKey = GetScriptForDestination(devDestination);
+
+        fundRewardObj.push_back(Pair("payee", strDevAddress.c_str()));
+        fundRewardObj.push_back(Pair("script", HexStr(devScriptPubKey.begin(), devScriptPubKey.end())));
+        fundRewardObj.push_back(Pair("amount", 0.5 * COIN));
+
+        result.push_back(Pair("fundreward", fundRewardObj));
+    }
+
+    // 1 CRDS reward to Dev fund from 550001 until block 625000
+    if (nNextHeight > Params().GetConsensus().nHardForkThree && nNextHeight <= Params().GetConsensus().nTempDevFundIncreaseEnd) {
+        UniValue fundRewardObj(UniValue::VOBJ);
+        std::string strDevAddress = "CPhPudPYNC8uXZPCHovyTyY98Q6fJzjJLm";
+        CCreditsAddress intAddress(strDevAddress.c_str());
+        CTxDestination devDestination = intAddress.Get();
+        CScript devScriptPubKey = GetScriptForDestination(devDestination);
+
+        fundRewardObj.push_back(Pair("payee", strDevAddress.c_str()));
+        fundRewardObj.push_back(Pair("script", HexStr(devScriptPubKey.begin(), devScriptPubKey.end())));
+        fundRewardObj.push_back(Pair("amount", 1 * COIN));
+
+        result.push_back(Pair("fundreward", fundRewardObj));
+    }
+    // 0.5 CRDS reward to old Dev fund from 375001 until block 550000
+    if (nNextHeight > Params().GetConsensus().nPhase1LastBlock && nNextHeight <= Params().GetConsensus().nHardForkThree) {
+        UniValue fundRewardObj(UniValue::VOBJ);
+        std::string strDevAddress = "53NTdWeAxEfVjXufpBqU2YKopyZYmN9P1V"; //old Dev fund address
         CCreditsAddress intAddress(strDevAddress.c_str());
         CTxDestination devDestination = intAddress.Get();
         CScript devScriptPubKey = GetScriptForDestination(devDestination);
