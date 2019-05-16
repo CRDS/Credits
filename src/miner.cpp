@@ -123,7 +123,7 @@ int64_t UpdateTime(CBlockHeader* pblock, const Consensus::Params& consensusParam
 
 void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash1)
 {
-    
+
     //
     // Pre-build hash buffers
     //
@@ -531,15 +531,15 @@ void static CreditsMiner(const CChainParams& chainparams)
 
     boost::shared_ptr<CReserveScript> coinbaseScript;
     GetMainSignals().ScriptForMining(coinbaseScript);
-	
+
 	#ifdef __AVX2__
-	
+
 	void *Ctx;
-	
+
 	WolfArgon2dAllocateCtx(&Ctx);
-	
+
 	#endif
-	
+
     try {
         // Throw an error if no script was provided.  This can happen
         // due to some internal error but also if the keypool is empty.
@@ -571,7 +571,7 @@ void static CreditsMiner(const CChainParams& chainparams)
             CBlockIndex* pindexPrev = chainActive.Tip();
             std::unique_ptr<CBlockTemplate> pblocktemplate;
             if(!pindexPrev) break;
-            
+
 #ifdef ENABLE_WALLET
             pblocktemplate = std::unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
 #else
@@ -587,7 +587,7 @@ void static CreditsMiner(const CChainParams& chainparams)
 
             LogPrintf("CreditsMiner -- Running miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
                 ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
-            
+
             //
             // Search
             //
@@ -601,12 +601,12 @@ void static CreditsMiner(const CChainParams& chainparams)
                 uint256 hash;
                 while (true)
                 {
-					#ifdef __AVX2__
+					          #ifdef __AVX2__
                     hash = pblock->GetHashWithCtx(Ctx);
                     #else
                     hash = pblock->GetHash();
                     #endif
-                    
+
                     if (UintToArith256(hash) <= hashTarget)
                     {
                         // Found a solution
@@ -630,7 +630,7 @@ void static CreditsMiner(const CChainParams& chainparams)
                     if ((pblock->nNonce & 0xFF) == 0)
                         break;
                 }
-                
+
                 // Meter hashes/seconds
                 static int64_t nHashCounter = 0;
                 static int64_t nLogTime = 0;
@@ -644,7 +644,7 @@ void static CreditsMiner(const CChainParams& chainparams)
                     nHashCounter += nHashesDone;
                 if (GetTimeMillis() - nHPSTimerStart > 4000)
                 {
-                    static CCriticalSection cs;        
+                    static CCriticalSection cs;
                     {
                         LOCK(cs);
                         if (GetTimeMillis() - nHPSTimerStart > 4000)
@@ -688,7 +688,7 @@ void static CreditsMiner(const CChainParams& chainparams)
     catch (const boost::thread_interrupted&)
     {
         LogPrintf("CreditsMiner -- terminated\n");
-        
+
         #ifdef __AVX2__
         WolfArgon2dFreeCtx(Ctx);
         #endif
@@ -702,7 +702,7 @@ void static CreditsMiner(const CChainParams& chainparams)
         #endif
         return;
     }
-    
+
     #ifdef __AVX2__
     WolfArgon2dFreeCtx(Ctx);
     #endif
