@@ -1,6 +1,6 @@
 # **Credits (CRDS) v1.3.0.0**
 
-![CRDS logo](https://github.com/Credits-CRDS/Credits/blob/master/src/qt/res/icons/light/about.png) [![Build Status](https://travis-ci.org/CRDS/Credits.svg?branch=andrewtookay-travis-ci)](https://travis-ci.org/CRDS/Credits)
+![CRDS logo](https://github.com/Credits-CRDS/Credits/blob/master/src/qt/res/icons/light/about.png) [![Build Status](https://travis-ci.org/CRDS/Credits.svg?branch=master)](https://travis-ci.org/CRDS/Credits)
 
 **Copyright (c) 2017-2019 Credits Developers**
 
