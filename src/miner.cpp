@@ -1,8 +1,8 @@
-// Copyright (c) 2009-2018 Satoshi Nakamoto
-// Copyright (c) 2009-2018 The Bitcoin Developers
-// Copyright (c) 2014-2018 The Dash Core Developers
-// Copyright (c) 2016-2018 Duality Blockchain Solutions Developers
-// Copyright (c) 2017-2018 Credits Developers
+// Copyright (c) 2009-2019 Satoshi Nakamoto
+// Copyright (c) 2009-2019 The Bitcoin Developers
+// Copyright (c) 2014-2019 The Dash Core Developers
+// Copyright (c) 2016-2019 Duality Blockchain Solutions Developers
+// Copyright (c) 2017-2019 Credits Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -564,11 +564,8 @@ void static CreditsMiner(const CChainParams& chainparams)
             std::unique_ptr<CBlockTemplate> pblocktemplate;
             if(!pindexPrev) break;
 
-#ifdef ENABLE_WALLET
             pblocktemplate = std::unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams, coinbaseScript->reserveScript));
-#else
-            pblocktemplate = std::unique_ptr<CBlockTemplate> (CreateNewBlock(chainparams));
-#endif
+
             if (!pblocktemplate.get())
             {
                 LogPrintf("CreditsMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");

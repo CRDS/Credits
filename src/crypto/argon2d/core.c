@@ -4,7 +4,7 @@
  * Copyright 2015
  * Daniel Dinu, Dmitry Khovratovich, Jean-Philippe Aumasson, and Samuel Neves
  *
- * You may use this work under the terms of a Creative Commons CC0 1.0 
+ * You may use this work under the terms of a Creative Commons CC0 1.0
  * License/Waiver or the Apache Public License 2.0, at your option. The terms of
  * these licenses can be found at:
  *
@@ -58,7 +58,7 @@ void copy_block(block *dst, const block *src) {
 }
 
 void xor_block(block *dst, const block *src) {
-    int i;
+  int i;
     for (i = 0; i < ARGON2_QWORDS_IN_BLOCK; ++i) {
         dst->v[i] ^= src->v[i];
     }
@@ -530,7 +530,7 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
     store32(&value, context->t_cost);
     blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
-    store32(&value, ARGON2_VERSION_NUMBER);        
+    store32(&value, ARGON2_VERSION_NUMBER);
     blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 
     store32(&value, (uint32_t)type);
@@ -538,7 +538,7 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
 
     store32(&value, context->pwdlen);
     blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
-		
+
     if (context->pwd != NULL) {
         blake2b_update(&BlakeHash, (const uint8_t *)context->pwd,
                        context->pwdlen);
@@ -548,7 +548,7 @@ void initial_hash(uint8_t *blockhash, argon2_context *context,
             context->pwdlen = 0;
         }
     }
-		
+
     store32(&value, context->saltlen);
     blake2b_update(&BlakeHash, (const uint8_t *)&value, sizeof(value));
 

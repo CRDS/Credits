@@ -2,11 +2,11 @@ dnl require autoconf 2.60 (AS_ECHO/AS_ECHO_N)
 AC_PREREQ([2.60])
 define(_CLIENT_VERSION_MAJOR, 1)
 define(_CLIENT_VERSION_MINOR, 3)
-define(_CLIENT_VERSION_REVISION, 0)
+define(_CLIENT_VERSION_REVISION, 1)
 define(_CLIENT_VERSION_BUILD, 0)
 define(_CLIENT_VERSION_IS_RELEASE, true)
-define(_COPYRIGHT_YEAR, 2017)
-AC_INIT([Credits],[_CLIENT_VERSION_MAJOR._CLIENT_VERSION_MINOR._CLIENT_VERSION_REVISION],[https://github.com/Credits-CRDS/Credits/issues],[credits])
+define(_COPYRIGHT_YEAR, 2019)
+AC_INIT([Credits],[_CLIENT_VERSION_MAJOR._CLIENT_VERSION_MINOR._CLIENT_VERSION_REVISION],[https://github.com/CRDS/Credits/issues],[credits])
 AC_CONFIG_SRCDIR([src/main.cpp])
 AC_CONFIG_HEADERS([src/config/credits-config.h])
 AC_CONFIG_AUX_DIR([build-aux])
@@ -54,7 +54,7 @@ AX_CXX_COMPILE_STDCXX([11], [ext], [mandatory], [nodefault])
 
 dnl Check if -latomic is required for <std::atomic>
 CHECK_ATOMIC
- 
+
 dnl Unless the user specified OBJCXX, force it to be the same as CXX. This ensures
 dnl that we get the same -std flags for both.
 m4_ifdef([AC_PROG_OBJCXX],[
@@ -178,16 +178,22 @@ AC_ARG_ENABLE([zmq],
   [use_zmq=yes])
 
 AC_ARG_ENABLE([ssse3],
-  [AC_HELP_STRING([--enable-ssse3],
+  [AS_HELP_STRING([--enable-ssse3],
   [enable SSE3 optimizations (defaults is no)])],
   [have_ssse3=${enableval}],
   [have_ssse3=no])
 
 AC_ARG_ENABLE([avx2],
-  [AC_HELP_STRING([--enable-avx2],
+  [AS_HELP_STRING([--enable-avx2],
   [enable AVX2 optimizations (defaults is no)])],
   [have_avx2=${enableval}],
   [have_avx2=no])
+
+AC_ARG_ENABLE([avx512f],
+  [AS_HELP_STRING([--enable-avx512f],
+  [enable AVX512F optimizations (defaults is no)])],
+  [have_avx512f=${enableval}],
+  [have_avx512f=no])
 
 AC_ARG_WITH([protoc-bindir],[AS_HELP_STRING([--with-protoc-bindir=BIN_DIR],[specify protoc bin path])], [protoc_bin_path=$withval], [])
 
@@ -570,6 +576,10 @@ fi
 
 if test "$have_avx2" = "yes"; then
     AX_CHECK_COMPILE_FLAG([-mavx2],[CFLAGS="$CFLAGS -mavx2" && CXXFLAGS="$CXXFLAGS -mavx2" && CPPFLAGS="$CPPFLAGS -mavx2"])
+fi
+
+if test "$have_avx512f" = "yes"; then
+    AX_CHECK_COMPILE_FLAG([-mavx512f],[CFLAGS="$CFLAGS -mavx512f" && CPPFLAGS="$CPPFLAGS -mavx512f"])
 fi
 
 AX_CHECK_COMPILE_FLAG([-msse2],[CFLAGS="$CFLAGS -msse2"])

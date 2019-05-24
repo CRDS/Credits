@@ -1,4 +1,4 @@
-# **Credits (CRDS) v1.3.0.0**
+# **Credits (CRDS) v1.3.1.0**
 
 ![CRDS logo](https://github.com/Credits-CRDS/Credits/blob/master/src/qt/res/icons/light/about.png) [![Build Status](https://travis-ci.org/CRDS/Credits.svg?branch=master)](https://travis-ci.org/CRDS/Credits)
 
@@ -331,6 +331,24 @@ CPU's with AVX2 support:
     AMD
         Carrizo processor, Q2 2015
         Ryzen processor, Q1 2017
+
+AVX512F Mining Optimisations
+-------------------------
+For increased performance when mining, AVX512F optimisations can be enabled.
+
+At configure time:
+
+    --enable-avx512f
+
+CPU's with AVX512F support:
+
+    Intel
+        Xeon Phi x200/Knights Landing processor, 2016
+        Knights Mill processor, 2017
+        Skylake-SP processor, 2017
+        Skylake-X processor, 2017
+        Cannonlake processor, expected in 2018
+        Ice Lake processor, expected in 2018
 
 Example Build Command
 --------------------
