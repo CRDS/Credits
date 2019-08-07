@@ -344,6 +344,10 @@ class CRegTestParams : public CChainParams {
 public:
     CRegTestParams() {
         strNetworkID = "regtest";
+        consensus.nHardForkOne = 5000;
+        consensus.nHardForkTwo = 30000;
+        consensus.nHardForkThree = 50000;
+        consensus.nTempDevFundIncreaseEnd = 55000;
         consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 1000;
