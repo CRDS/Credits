@@ -349,7 +349,7 @@ public:
 		consensus.nHardForkOne = 5000;
         consensus.nHardForkTwo = 30000;
         consensus.nHardForkThree = 50000;
-		consensus.nHardForkThree = 60000;
+		consensus.nHardForkFour = 60000;
         consensus.nTempDevFundIncreaseEnd = 55000;
         consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
