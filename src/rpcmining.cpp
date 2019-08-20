@@ -775,7 +775,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nMasternodePaymentsStartBlock));
     
     // Masternodes must be paid with every block after block nHardForkTwo up to nHardForkFour which caused chain to fork
-    if (nHeight <= consensusParams.nHardForkFour) {
+    if ((pindexPrev->nHeight+1) <= consensusParams.nHardForkFour) {
         result.push_back(Pair("masternode_payments_enforced", true));
     }
     
