@@ -116,6 +116,7 @@ public:
         consensus.nHardForkOne = 250000; // block
         consensus.nHardForkTwo = 375000; // block
         consensus.nHardForkThree = 550000; //block
+		consensus.nHardForkFour = 665000; //block
         consensus.nTempDevFundIncreaseEnd = 625000; //block
         consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 100.
         consensus.nInstantSendKeepLock = 24;
@@ -233,6 +234,7 @@ public:
         consensus.nHardForkOne = 5000;
         consensus.nHardForkTwo = 30000;
         consensus.nHardForkThree = 50000;
+		consensus.nHardForkFour = 60000;
         consensus.nTempDevFundIncreaseEnd = 55000;
         consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
@@ -344,6 +346,11 @@ class CRegTestParams : public CChainParams {
 public:
     CRegTestParams() {
         strNetworkID = "regtest";
+		consensus.nHardForkOne = 5000;
+        consensus.nHardForkTwo = 30000;
+        consensus.nHardForkThree = 50000;
+		consensus.nHardForkFour = 60000;
+        consensus.nTempDevFundIncreaseEnd = 55000;
         consensus.nMasternodePaymentsStartBlock = 0;
         consensus.nInstantSendKeepLock = 24;
         consensus.nBudgetPaymentsStartBlock = 1000;

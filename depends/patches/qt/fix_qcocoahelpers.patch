@@ -1,0 +1,28 @@
+index bbb3793..74371d5 100644
+new/qtbase/src/plugins/platforms/cocoa/qcocoahelpers.h
+@@ -80,7 +80,7 @@ QColor qt_mac_toQColor(CGColorRef color);
+ // Creates a mutable shape, it's the caller's responsibility to release.
+ HIMutableShapeRef qt_mac_QRegionToHIMutableShape(const QRegion &region);
+ 
+void qt_mac_drawCGImage(CGContextRef inContext, const CGRect *inBounds, CGImageRef inImage);
+ 
+ NSDragOperation qt_mac_mapDropAction(Qt::DropAction action);
+ NSDragOperation qt_mac_mapDropActions(Qt::DropActions actions);
+index cd73148..3f8429e 100644
+new/qtbase/src/plugins/platforms/cocoa/qcocoahelpers.mm
+@@ -544,15 +544,8 @@ NSRect qt_mac_flipRect(const QRect &rect)
+     return NSMakeRect(rect.x(), flippedY, rect.width(), rect.height());
+ }
+ 
+void qt_mac_drawCGImage(CGContextRef inContext, const CGRect *inBounds, CGImageRef inImage)
+ {
+     CGContextSaveGState( inContext );
+     CGContextTranslateCTM (inContext, 0, inBounds->origin.y + CGRectGetMaxY(*inBounds));
+     CGContextScaleCTM(inContext, 1, -1);
+@@ -560,10 +553,6 @@ OSStatus qt_mac_drawCGImage(CGContextRef inContext, const CGRect *inBounds, CGIm
+     CGContextDrawImage(inContext, *inBounds, inImage);
+ 
+     CGContextRestoreGState(inContext);
+ }
+ 
+ Qt::MouseButton cocoaButton2QtButton(NSInteger buttonNum)
