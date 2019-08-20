@@ -176,10 +176,22 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
         return true;
         }
 
-        // Masternodes must be paid with every block after block nHardForkTwo.
-        LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
-        return false;
-    }
+		if (nBlockHeight <= consensusParams.nHardForkFour) {
+		// Masternodes must be paid with every block after block nHardForkTwo up to nHardForkFour which caused chain to fork
+		LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+		return false;
+		}
+	
+		// If Spork 8 is set then Masternode payment is enforced.
+		if(sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)) {
+            LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+            return false;
+        }
+		
+		// Else if the chain can't reach a consensus on which Masternode to pay to block will not have any Masternode reward and warning is logged.
+		LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
+		return true;
+		}
 
     // superblocks started
     // SEE IF THIS IS A VALID SUPERBLOCK
@@ -209,14 +221,26 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
     }
 
     if (nBlockHeight <= consensusParams.nHardForkTwo) {
-    LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
-    return true;
+		LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
+		return true;
     }
 
-    // Masternodes must be paid with every block after block nHardForkTwo.
-    LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
-    return false;
-}
+	if (nBlockHeight <= consensusParams.nHardForkFour) {
+    // Masternodes must be paid with every block after block nHardForkTwo up to nHardForkFour which caused chain to fork
+		LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+		return false;
+	}
+	
+	// If Spork 8 is set then Masternode payment is enforced.
+	if(sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)) {
+            LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+            return false;
+    }
+		
+	// Else if the chain can't reach a consensus on which Masternode to pay to block will not have any Masternode reward and warning is logged.
+	LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
+    return true;
+	}
 
 void FillBlockPayments(CMutableTransaction& txNew, int nBlockHeight, CAmount blockReward, CTxOut& txoutMasternodeRet, std::vector<CTxOut>& voutSuperblockRet)
 {
