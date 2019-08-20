@@ -779,9 +779,10 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
         result.push_back(Pair("masternode_payments_enforced", true));
     }
     
-    // If Spork 8 is set then Masternode payment is enforced.
-    result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
-    
+    // Else use Spork 8 to determine whether or not the Masternode payment is enforced.
+    else {
+        result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
+    }
     
     int nNextHeight = chainActive.Height() + 1;
 
