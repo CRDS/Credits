@@ -773,8 +773,16 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     }
     result.push_back(Pair("masternode", masternodeObj));
     result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > Params().GetConsensus().nMasternodePaymentsStartBlock));
-    result.push_back(Pair("masternode_payments_enforced", true));
-
+    
+	// Masternodes must be paid with every block after block nHardForkTwo up to nHardForkFour which caused chain to fork
+	if (nBlockHeight <= consensusParams.nHardForkFour) {
+    	result.push_back(Pair("masternode_payments_enforced", true);
+	}
+	
+	// If Spork 8 is set then Masternode payment is enforced.
+	result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
+	
+		
     int nNextHeight = chainActive.Height() + 1;
 
     // 0.5 CRDS reward to Dev fund from 625001 until block 1375000

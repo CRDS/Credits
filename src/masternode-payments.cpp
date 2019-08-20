@@ -225,9 +225,9 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, CAmount bloc
 		return true;
     }
 
-	if (nBlockHeight <= consensusParams.nHardForkFour) {
     // Masternodes must be paid with every block after block nHardForkTwo up to nHardForkFour which caused chain to fork
-		LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+	if (nBlockHeight <= consensusParams.nHardForkFour) {
+    	LogPrintf("IsBlockPayeeValid -- ERROR: Invalid Masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
 		return false;
 	}
 	
