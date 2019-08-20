@@ -776,7 +776,7 @@ UniValue getblocktemplate(const UniValue& params, bool fHelp)
     
 	// Masternodes must be paid with every block after block nHardForkTwo up to nHardForkFour which caused chain to fork
 	if (nBlockHeight <= consensusParams.nHardForkFour) {
-    	result.push_back(Pair("masternode_payments_enforced", true);
+    	result.push_back(Pair("masternode_payments_enforced", true));
 	}
 	
 	// If Spork 8 is set then Masternode payment is enforced.
