@@ -116,7 +116,7 @@ public:
         consensus.nHardForkOne = 250000; // block
         consensus.nHardForkTwo = 375000; // block
         consensus.nHardForkThree = 550000; //block
-		consensus.nHardForkFour = 675000; //block
+		consensus.nHardForkFour = 665000; //block
         consensus.nTempDevFundIncreaseEnd = 625000; //block
         consensus.nMasternodePaymentsStartBlock = 100; // Masternode Payments begin on block 100.
         consensus.nInstantSendKeepLock = 24;
